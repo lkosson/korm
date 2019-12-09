@@ -10,7 +10,7 @@ namespace Kosson.KRUD.RecordLoader
 {
 	class LoaderBuilder
 	{
-		private IMetaBuilder metabuilder;
+		private IMetaBuilder metaBuilder;
 		private MethodInfo miGetItemByName;
 		private MethodInfo miGetItemByIndex;
 		private MethodInfo miConvert;
@@ -18,9 +18,9 @@ namespace Kosson.KRUD.RecordLoader
 		private MethodInfo miGetType;
 		private List<IMetaRecordField[]> fieldMapping;
 
-		public LoaderBuilder()
+		public LoaderBuilder(IMetaBuilder metaBuilder)
 		{
-			metabuilder = KORMContext.Current.MetaBuilder;
+			this.metaBuilder = metaBuilder;
 			miGetItemByName = typeof(IRow).GetMethod("get_Item", new[] { typeof(string) });
 			miGetItemByIndex = typeof(IIndexBasedRow).GetMethod("get_Item", new[] { typeof(int) });
 			miConvert = typeof(IConverter).GetMethod("Convert", new[] { typeof(object), typeof(Type) });
@@ -62,7 +62,7 @@ namespace Kosson.KRUD.RecordLoader
 
 		private void Build(ILGenerator il, Type type, string prefix, Stack<IMetaRecordField> path, LocalBuilder local)
 		{
-			var meta = metabuilder.Get(type);
+			var meta = metaBuilder.Get(type);
 
 			var filter = meta.IsTable || meta.Fields.Where(f => f.IsFromDB).Any();
 

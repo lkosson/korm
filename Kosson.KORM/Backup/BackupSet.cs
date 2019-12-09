@@ -14,14 +14,18 @@ namespace Kosson.KRUD
 	{
 		private IBackupWriter writer;
 		private IMetaBuilder metaBuilder;
+		private IPropertyBinder propertyBinder;
+		private IConverter converter;
 		private HashSet<Type> tablesCompleted;
 		private HashSet<Type> tablesInProgress;
 		private Dictionary<Type, HashSet<long>> recordsCompleted;
 
-		public BackupSet(IBackupWriter writer, IMetaBuilder metaBuilder)
+		public BackupSet(IBackupWriter writer, IMetaBuilder metaBuilder, IPropertyBinder propertyBinder, IConverter converter)
 		{
 			this.writer = writer;
 			this.metaBuilder = metaBuilder;
+			this.propertyBinder = propertyBinder;
+			this.converter = converter;
 			tablesCompleted = new HashSet<Type>();
 			tablesInProgress = new HashSet<Type>();
 			recordsCompleted = new Dictionary<Type, HashSet<long>>();
@@ -153,10 +157,11 @@ namespace Kosson.KRUD
 				}
 
 				var fieldType = field.Type;
+				var rawValue = propertyBinder.Get(record, inlinePrefix + field.Name);
 				if (field.IsRecordRef)
 				{
 					fieldType = fieldType.GetGenericArguments()[0];
-					var fieldRef = record.GetProperty<IRecordRef>(inlinePrefix + field.Name);
+					var fieldRef = converter.Convert<IRecordRef>(rawValue);
 					// fieldRef (RecordRef) can be null if inlinePrefix-pointed field is null
 					if (fieldRef == null || fieldRef.ID == 0) continue;
 
@@ -164,7 +169,7 @@ namespace Kosson.KRUD
 				}
 				else
 				{
-					foreignRecord = record.GetProperty<IRecord>(inlinePrefix + field.Name);
+					foreignRecord = converter.Convert<IRecord>(rawValue);
 				}
 
 				if (foreignRecord == null) continue;

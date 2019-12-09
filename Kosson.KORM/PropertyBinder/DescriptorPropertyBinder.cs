@@ -16,6 +16,13 @@ namespace Kosson.Kore.PropertyBinder
 	{
 		private ConcurrentDictionary<Type, PropertyDescriptorCollection> cache = new ConcurrentDictionary<Type, PropertyDescriptorCollection>();
 
+		private IConverter converter;
+
+		public DescriptorPropertyBinder(IConverter converter)
+		{
+			this.converter = converter;
+		}
+
 		private void AccessTarget(ref object target, ref string expression)
 		{
 			int dot;
@@ -54,14 +61,13 @@ namespace Kosson.Kore.PropertyBinder
 		{
 			AccessTarget(ref target, ref expression);
 			var property = GetProperty(target, expression);
-			var convertedvalue = KORMContext.Current.Converter.Convert(value, property.PropertyType);
+			var convertedvalue = converter.Convert(value, property.PropertyType);
 			property.SetValue(target, convertedvalue);
 		}
 
 		Func<TInput, TOutput> IPropertyBinder.BuildGetter<TInput, TOutput>(string expression)
 		{
-			var acc = new BinderAccessor<TInput, TOutput>(expression);
-			return acc.Get;
+			return new BinderAccessor<TInput, TOutput>(this, converter, expression).Get;
 		}
 	}
 }

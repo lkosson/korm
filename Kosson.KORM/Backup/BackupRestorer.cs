@@ -15,6 +15,7 @@ namespace Kosson.KRUD
 		private IMetaBuilder metaBuilder;
 		private IBackupReader reader;
 		private IORM orm;
+		private IPropertyBinder propertyBinder;
 		private Dictionary<string, TableState> tableStates;
 		private Action<IRecord> storeRecordDelegate;
 		private Action<IRecord> insertRecordPKDelegate;
@@ -22,11 +23,12 @@ namespace Kosson.KRUD
 		private Type insertRecordPKDelegateType;
 		private bool supportsPKInsert;
 
-		public BackupRestorer(IBackupReader reader, IORM orm)
+		public BackupRestorer(IBackupReader reader, IORM orm, IPropertyBinder propertyBinder)
 		{
 			metaBuilder = KORMContext.Current.MetaBuilder;
 			this.reader = reader;
 			this.orm = orm;
+			this.propertyBinder = propertyBinder;
 			tableStates = new Dictionary<string, TableState>();
 			supportsPKInsert = KORMContext.Current.DB.CommandBuilder.SupportsPrimaryKeyInsert;
 		}
@@ -136,7 +138,7 @@ namespace Kosson.KRUD
 						targetType = targetType.GetGenericArguments()[0];
 						var newId = GetTableState(targetType).IDMappings[value.ID];
 						value.ID = newId;
-						target.SetProperty(field.Name, value);
+						propertyBinder.Set(target, field.Name, value);
 					}
 					else
 					{

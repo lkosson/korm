@@ -9,14 +9,18 @@ namespace Kosson.KORM.Scratch
 	{
 		static void Main(string[] args)
 		{
+			var converter = new Kore.Converter.DefaultConverter();
+			var propertyBinder = new Kore.PropertyBinder.ReflectionPropertyBinder();
 			var metaBuilder = new KRUD.Meta.ReflectionMetaBuilder();
+			var recordLoader = new KRUD.RecordLoader.DynamicRecordLoader(metaBuilder);
+			var factory = new Kore.Factory.DynamicMethodFactory();
 			var db = new KRUD.MSSQL.SQLDB(null, "server=(local);database=kosson;integrated security=true");
-			var orm = new KRUD.ORM.DBORM(db, metaBuilder);
-			var backupProvider = new KRUD.BackupProvider(orm, metaBuilder);
-			Run(db, orm, metaBuilder, backupProvider);
+			var orm = new KRUD.ORM.DBORM(db, metaBuilder, converter, recordLoader, factory);
+			var backupProvider = new KRUD.BackupProvider(orm, metaBuilder, propertyBinder, converter);
+			Run(db, orm, metaBuilder, backupProvider, propertyBinder, converter, recordLoader, factory);
 		}
 
-		private static void Run(IDB db, IORM orm, IMetaBuilder metaBuilder, IBackupProvider backupProvider)
+		private static void Run(IDB db, IORM orm, IMetaBuilder metaBuilder, IBackupProvider backupProvider, IPropertyBinder propertyBinder, IConverter converter, IRecordLoader recordLoader, IFactory factory)
 		{
 			db.CreateDatabase();
 
@@ -29,7 +33,7 @@ namespace Kosson.KORM.Scratch
 				UserDetails = new UserDetails()
 				{
 					PasswordHash = "00-11",
-					Group = 80
+					Group = 3
 				}
 			};
 
@@ -57,13 +61,6 @@ namespace Kosson.KORM.Scratch
 
 			orm.Delete(ux);
 
-			var who = orm.Execute<Who>();
-			var r = who("sa");
-
-			var who2 = orm.Execute<WhoByRec>();
-			r = who2(new SPWhoParameters() { Login = "sa" });
-
-
 			//using (var fs = new FileStream("backup.xml", FileMode.Open))
 			//using (var br = new XMLBackupReader(fs))
 			//{
@@ -71,13 +68,13 @@ namespace Kosson.KORM.Scratch
 			//}
 
 			using (var fs = new FileStream("backup.xml", FileMode.Create))
-			using (var bw = new KRUD.XMLBackupWriter(metaBuilder, fs))
+			using (var bw = new KRUD.XMLBackupWriter(metaBuilder, propertyBinder, converter, fs))
 			{
 				var bs = backupProvider.CreateBackupSet(bw);
 				bs.AddRecords<Membership>();
 			}
 
-			KRUD.DatabaseBackupWriter.Run(metaBuilder, "sqlite", "data source=backup.sqlite3;version=3", new[] { typeof(User), typeof(Role), typeof(Membership) });
+			KRUD.DatabaseBackupWriter.Run(metaBuilder, propertyBinder, converter, recordLoader, factory, "sqlite", "data source=backup.sqlite3;version=3", new[] { typeof(User), typeof(Role), typeof(Membership) });
 
 			//var profiler = Context.Current.Get<IProfiler>();
 			var sw = StatStopwatch.StartNew();

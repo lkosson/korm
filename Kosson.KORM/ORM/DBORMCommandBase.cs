@@ -16,6 +16,7 @@ namespace Kosson.KRUD.ORM
 		private static string[] parametersNameCache = new[] { "P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7" };
 
 		private IDB db;
+		protected IMetaBuilder metaBuilder;
 		private List<object> parameters;
 		protected virtual bool UseFullFieldNames { get { return true; } }
 		protected IEnumerable<object> Parameters { get { return parameters ?? Enumerable.Empty<object>(); } }
@@ -25,6 +26,7 @@ namespace Kosson.KRUD.ORM
 		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder)
 		{
 			this.db = db;
+			this.metaBuilder = metaBuilder;
 			if (meta == null) meta = metaBuilder.Get(typeof(TRecord));
 		}
 

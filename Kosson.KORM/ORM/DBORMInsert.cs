@@ -12,9 +12,12 @@ namespace Kosson.KRUD.ORM
 {
 	class DBORMInsert<TRecord> : DBORMCommandBase<TRecord, IDBInsert>, IORMInsert<TRecord> where TRecord : IRecord
 	{
-		public DBORMInsert(IDB db, IMetaBuilder metaBuilder)
+		private IConverter converter;
+
+		public DBORMInsert(IDB db, IMetaBuilder metaBuilder, IConverter converter)
 			: base(db, metaBuilder)
 		{
+			this.converter = converter;
 		}
 
 		protected override IDBInsert BuildCommand(IDBCommandBuilder cb)
@@ -81,13 +84,13 @@ namespace Kosson.KRUD.ORM
 					if (cmdGetLastID == null)
 					{
 						var row = DB.ExecuteQuery(cmdInsert, 1).Single();
-						if (!manualid) record.ID = row[0].ConvertTo<long>();
+						if (!manualid) record.ID = converter.Convert<long>(row[0]);
 					}
 					else
 					{
 						DB.ExecuteNonQuery(cmdInsert);
 						var row = DB.ExecuteQuery(cmdGetLastID, 1).Single();
-						if (!manualid) record.ID = row[0].ConvertTo<long>();
+						if (!manualid) record.ID = converter.Convert<long>(row[0]);
 					}
 
 					count++;
@@ -120,13 +123,13 @@ namespace Kosson.KRUD.ORM
 					if (cmdGetLastID == null)
 					{
 						var row = await DB.ExecuteQueryFirstAsync(cmdInsert);
-						if (!manualid) record.ID = row[0].ConvertTo<long>();
+						if (!manualid) record.ID = converter.Convert<long>(row[0]);
 					}
 					else
 					{
 						await DB.ExecuteNonQueryAsync(cmdInsert);
 						var row = await DB.ExecuteQueryFirstAsync(cmdGetLastID);
-						if (!manualid) record.ID = row[0].ConvertTo<long>();
+						if (!manualid) record.ID = converter.Convert<long>(row[0]);
 					}
 
 					count++;

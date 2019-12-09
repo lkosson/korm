@@ -22,7 +22,7 @@ namespace Kosson.KRUD.MSSQL
 		/// <typeparam name="T">Type of records to create.</typeparam>
 		/// <param name="xml">XML string to parse.</param>
 		/// <returns>Array of records based on parsed string.</returns>
-		public static IReadOnlyCollection<T> Parse<T>(string xml) where T : class, new()
+		public static IReadOnlyCollection<T> Parse<T>(string xml, IConverter converter, IRecordLoader recordLoader, IFactory factory) where T : class, new()
 		{
 			var prev = CultureInfo.CurrentCulture;
 			try
@@ -30,7 +30,7 @@ namespace Kosson.KRUD.MSSQL
 				// for decimal parsing in IConverter
 				Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 				var rows = Parse(xml);
-				return rows.Load<T>();
+				return rows.Load<T>(converter, recordLoader, factory);
 			}
 			finally
 			{

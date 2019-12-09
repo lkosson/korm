@@ -23,7 +23,7 @@ namespace Kosson.Interfaces
 #if LAZY
 		public static IEnumerable<T> Load<T>(this IEnumerable<IRow> rows) where T : class, new()
 #else
-		public static IReadOnlyCollection<T> Load<T>(this IEnumerable<IRow> rows) where T : class, new()
+		public static IReadOnlyCollection<T> Load<T>(this IEnumerable<IRow> rows, IConverter converter, IRecordLoader recordLoader, IFactory factory) where T : class, new()
 #endif
 		{
 			var template = rows.FirstOrDefault();
@@ -38,7 +38,7 @@ namespace Kosson.Interfaces
 			else
 				records = new List<T>();
 #endif
-			var helper = new LoaderHelper<T>(template);
+			var helper = new LoaderHelper<T>(template, converter, recordLoader, factory);
 			foreach (var row in rows)
 			{
 				var record = helper.constructor();
@@ -110,11 +110,11 @@ namespace Kosson.Interfaces
 			public Func<T> constructor;
 			private LoaderByIndexDelegate<T> loader;
 
-			public LoaderHelper(IRow template)
+			public LoaderHelper(IRow template, IConverter converter, IRecordLoader recordLoader, IFactory factory)
 			{
-				converter = KORMContext.Current.Converter;
-				constructor = (Func<T>)KORMContext.Current.Factory.GetConstructor(typeof(T));
-				loader = KORMContext.Current.RecordLoader.GetLoader<T>(out var fieldMapping);
+				this.converter = converter;
+				constructor = (Func<T>)factory.GetConstructor(typeof(T));
+				loader = recordLoader.GetLoader<T>(out var fieldMapping);
 				mappingRow = new MetaMappingRow(template, fieldMapping);
 			}
 

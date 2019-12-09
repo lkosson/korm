@@ -12,9 +12,16 @@ namespace Kosson.KRUD.ORM
 {
 	class DBQuerySelect<TRecord> : DBORMCommandBase<TRecord, IDBSelect>, IORMSelect<TRecord> where TRecord : class, IRecord, new()
 	{
-		public DBQuerySelect(IDB db, IMetaBuilder metaBuilder) 
+		private IConverter converter;
+		private IRecordLoader recordLoader;
+		private IFactory factory;
+
+		public DBQuerySelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IRecordLoader recordLoader, IFactory factory) 
 			: base(db, metaBuilder)
 		{
+			this.converter = converter;
+			this.recordLoader = recordLoader;
+			this.factory = factory;
 		}
 
 		protected override IDBSelect BuildCommand(IDBCommandBuilder cb)
@@ -31,8 +38,6 @@ namespace Kosson.KRUD.ORM
 		private void PrepareTemplate(IDBCommandBuilder cb, IDBSelect template, IMetaRecord meta, string tableAliasForColumns, string tableAliasForJoins, string fieldPrefix, Stack<long> descentPath)
 		{
 			// keep order in sync with ReaderRecordLoaderBuilder
-			var metaBuilder = KORMContext.Current.MetaBuilder;
-
 			foreach (var field in meta.Fields)
 			{
 				if (!field.IsFromDB) continue;
@@ -90,14 +95,14 @@ namespace Kosson.KRUD.ORM
 		{
 			var sql = command.ToString();
 			var rows = DB.ExecuteQuery(sql, Parameters);
-			return rows.Load<TRecord>();
+			return rows.Load<TRecord>(converter, recordLoader, factory);
 		}
 
 		public async Task<IReadOnlyCollection<TRecord>> ExecuteAsync()
 		{
 			var sql = command.ToString();
 			var rows = await DB.ExecuteQueryAsync(sql, Parameters);
-			return rows.Load<TRecord>();
+			return rows.Load<TRecord>(converter, recordLoader, factory);
 		}
 
 		public IORMReader<TRecord> ExecuteReader()

@@ -12,6 +12,7 @@ namespace Kosson.KRUD.RecordLoader
 	/// </summary>
 	public class DynamicRecordLoader : IRecordLoader, IDisposable
 	{
+		private LoaderBuilder LoaderBuilder;
 		private ReaderWriterLockSlim rwlock;
 		private Dictionary<Type, Delegate> byNameCache;
 		private Dictionary<Type, Tuple<Delegate, IMetaRecordField[][]>> byIndexCache;
@@ -19,11 +20,12 @@ namespace Kosson.KRUD.RecordLoader
 		/// <summary>
 		/// Creates a new DynamicRecordLoader instance.
 		/// </summary>
-		public DynamicRecordLoader()
+		public DynamicRecordLoader(IMetaBuilder metaBuilder)
 		{
 			byNameCache = new Dictionary<Type, Delegate>();
 			byIndexCache = new Dictionary<Type, Tuple<Delegate, IMetaRecordField[][]>>();
 			rwlock = new ReaderWriterLockSlim();
+			LoaderBuilder = new LoaderBuilder(metaBuilder);
 		}
 
 		/// <inheritdoc/>
@@ -57,7 +59,7 @@ namespace Kosson.KRUD.RecordLoader
 				// na wypadek jakby w międzyczasie został zbudowany
 				if (byNameCache.TryGetValue(type, out loader)) return (LoaderByNameDelegate<T>)loader;
 
-				var newloader = new LoaderBuilder().BuildByName<T>();
+				var newloader = LoaderBuilder.BuildByName<T>();
 
 				rwlock.EnterWriteLock();
 				try
@@ -107,7 +109,7 @@ namespace Kosson.KRUD.RecordLoader
 				}
 
 				var fieldMappingList = new List<IMetaRecordField[]>();
-				var newloader = new LoaderBuilder().BuildByIndex<T>(fieldMappingList);
+				var newloader = LoaderBuilder.BuildByIndex<T>(fieldMappingList);
 				fieldMapping = fieldMappingList.ToArray();
 
 				rwlock.EnterWriteLock();

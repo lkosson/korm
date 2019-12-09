@@ -15,21 +15,25 @@ namespace Kosson.KRUD
 	{
 		private IORM orm;
 		private IMetaBuilder metaBuilder;
+		private IPropertyBinder propertyBinder;
+		private IConverter converter;
 
-		public BackupProvider(IORM orm, IMetaBuilder metaBuilder)
+		public BackupProvider(IORM orm, IMetaBuilder metaBuilder, IPropertyBinder propertyBinder, IConverter converter)
 		{
 			this.orm = orm;
 			this.metaBuilder = metaBuilder;
+			this.propertyBinder = propertyBinder;
+			this.converter = converter;
 		}
 
 		IBackupSet IBackupProvider.CreateBackupSet(IBackupWriter writer)
 		{
-			return new BackupSet(writer, metaBuilder);
+			return new BackupSet(writer, metaBuilder, propertyBinder, converter);
 		}
 
 		void IBackupProvider.Restore(IBackupReader reader)
 		{
-			new BackupRestorer(reader, orm).Restore();
+			new BackupRestorer(reader, orm, propertyBinder).Restore();
 		}
 
 		void IBackupProvider.ClearTables(IEnumerable<Type> types)

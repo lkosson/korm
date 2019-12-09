@@ -45,13 +45,6 @@ namespace Kosson.Interfaces
 		/// <typeparam name="TRecord">Type of records to delete.</typeparam>
 		/// <returns>Command to delete records in backing database table.</returns>
 		IORMDelete<TRecord> Delete<TRecord>() where TRecord : IRecord;
-
-		/// <summary>
-		/// Creates delegate for calling database stored procedures based on the delegate metadata.
-		/// </summary>
-		/// <typeparam name="TDelegate">Signature of stored procedure.</typeparam>
-		/// <returns>Delegate providing entry point to database stored procedure.</returns>
-		TDelegate Execute<TDelegate>() where TDelegate : class;
 	}
 
 	/// <summary>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Kosson.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,15 +10,20 @@ namespace Kosson.Kore.PropertyBinder
 	class BinderAccessor<TInput, TOutput>
 	{
 		private string expression;
+		private IPropertyBinder propertyBinder;
+		private IConverter converter;
 
-		public BinderAccessor(string expression)
+		public BinderAccessor(IPropertyBinder propertyBinder, IConverter converter, string expression)
 		{
 			this.expression = expression;
+			this.propertyBinder = propertyBinder;
+			this.converter = converter;
 		}
 
 		public TOutput Get(TInput input)
 		{
-			return input.GetProperty<TOutput>(expression);
+			var rawvalue = propertyBinder.Get(input, expression);
+			return converter.Convert<TOutput>(rawvalue);
 		}
 	}
 }

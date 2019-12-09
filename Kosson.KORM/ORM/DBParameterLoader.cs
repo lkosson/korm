@@ -19,8 +19,8 @@ namespace Kosson.KRUD.ORM
 
 		static DBParameterLoader()
 		{
-			miLoadParameter = typeof(DBParameterLoader).GetMethod("LoadParameter", BindingFlags.NonPublic | BindingFlags.Static);
-			miVerifyStringParameter = typeof(DBParameterLoader).GetMethod("VerifyStringParameter", BindingFlags.NonPublic | BindingFlags.Static);
+			miLoadParameter = typeof(DBParameterLoader).GetMethod(nameof(LoadParameter), BindingFlags.NonPublic | BindingFlags.Static);
+			miVerifyStringParameter = typeof(DBParameterLoader).GetMethod(nameof(VerifyStringParameter), BindingFlags.NonPublic | BindingFlags.Static);
 			delegates = new Dictionary<Type, object>();
 		}
 
@@ -39,22 +39,17 @@ namespace Kosson.KRUD.ORM
 			}
 		}
 
-		private static string VerifyStringParameter(object value, string name, int maxlen, bool trim)
+		private static string VerifyStringParameter(string value, string name, int maxlen, bool trim)
 		{
 			if (value == null) return null;
-			string sval;
-			if (value is string) 
-				sval = (string)value;
-			else
-				sval = value.ConvertTo<string>();
-			if (sval.Length > maxlen)
+			if (value.Length > maxlen)
 			{
 				if (trim)
-					sval = sval.Substring(0, maxlen);
+					value = value.Substring(0, maxlen);
 				else
-					throw new KRUDDataLengthException(name, maxlen, sval);
+					throw new KRUDDataLengthException(name, maxlen, value);
 			}
-			return sval;
+			return value;
 		}
 
 		internal static TDelegate GetOrBuildLoader<TDelegate>(IMetaRecord meta, bool untyped)

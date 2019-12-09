@@ -12,53 +12,6 @@ namespace System
 	public static class ObjectExtensions
 	{
 		/// <summary>
-		/// Converts an object to a given type.
-		/// </summary>
-		/// <typeparam name="T">Type to convert to.</typeparam>
-		/// <param name="value">Object to convert.</param>
-		/// <returns>Object of a given type created from given value.</returns>
-		public static T ConvertTo<T>(this object value)
-		{
-			return KORMContext.Current.Converter.Convert<T>(value);
-		}
-
-		/// <summary>
-		/// Parses string to a given type.
-		/// </summary>
-		/// <typeparam name="T">Type to parse string to.</typeparam>
-		/// <param name="value">String to parse.</param>
-		/// <param name="defvalue">Default value to use when string is empty.</param>
-		/// <returns>Parsed value of a given type.</returns>
-		public static T ParseAs<T>(this string value, T defvalue)
-		{
-			if (String.IsNullOrEmpty(value)) return defvalue;
-			return ConvertTo<T>(value);
-		}
-
-		/// <summary>
-		/// Gets value of an object property determined by given text expression.
-		/// </summary>
-		/// <typeparam name="T">Type of value to return.</typeparam>
-		/// <param name="target">Object to retrieve property value from.</param>
-		/// <param name="expression">Expression determining property to retrieve.</param>
-		/// <returns>Value of the property of the object.</returns>
-		public static T GetProperty<T>(this object target, string expression)
-		{
-			return KORMContext.Current.PropertyBinder.Get(target, expression).ConvertTo<T>();
-		}
-
-		/// <summary>
-		/// Sets value of an object property determined by given text expression.
-		/// </summary>
-		/// <param name="target">Object to set property value on.</param>
-		/// <param name="expression">Expression determining property to change.</param>
-		/// <param name="value">New value of a property.</param>
-		public static void SetProperty(this object target, string expression, object value)
-		{
-			KORMContext.Current.PropertyBinder.Set(target, expression, value);
-		}
-
-		/// <summary>
 		/// Changes a generic type argument of a given delegate to a specific type.
 		/// </summary>
 		/// <typeparam name="TDelegate">Type of delegate to change.</typeparam>
