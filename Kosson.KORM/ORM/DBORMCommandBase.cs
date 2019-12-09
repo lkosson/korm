@@ -22,15 +22,10 @@ namespace Kosson.KRUD.ORM
 
 		public IDB DB { get { return db; } }
 
-		public DBORMCommandBase(IDB db)
+		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder)
 		{
 			this.db = db;
-			if (meta == null) PrepareMeta();
-		}
-
-		private static void PrepareMeta()
-		{
-			meta = typeof(TRecord).Meta();
+			if (meta == null) meta = metaBuilder.Get(typeof(TRecord));
 		}
 
 		public IDBExpression Parameter(object value)
@@ -81,8 +76,8 @@ namespace Kosson.KRUD.ORM
 
 		protected abstract TCommand BuildCommand(IDBCommandBuilder cb);
 
-		public DBORMCommandBase(IDB db)
-			: base(db)
+		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder)
+			: base(db, metaBuilder)
 		{
 			var cb = db.CommandBuilder;
 

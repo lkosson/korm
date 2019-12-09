@@ -17,27 +17,25 @@ namespace Kosson.KRUD
 		private LRU<string, int> lastQueries;
 		private Stopwatch queryTimer = Stopwatch.StartNew();
 		private int nextTraceId = 1;
-		private ILogger log;
-		public bool TraceEnabled { get { return log.IsEnabled(LogLevel.Critical); } }
-		public bool TraceInformationEnabled { get { return log.IsEnabled(LogLevel.Information); } }
-		public bool TraceDebugEnabled { get { return log.IsEnabled(LogLevel.Debug); } }
+		private ILogger logger;
+		public bool TraceEnabled { get { return logger != null && logger.IsEnabled(LogLevel.Critical); } }
+		public bool TraceInformationEnabled { get { return logger != null && logger.IsEnabled(LogLevel.Information); } }
+		public bool TraceDebugEnabled { get { return logger != null && logger.IsEnabled(LogLevel.Debug); } }
 
-		public Logging()
+		public Logging(ILogger logger)
 		{
-			log = KORMContext.Current.Logger;
-			var lastQueriesCountString = KORMContext.Current.Configuration["log-db-queries"];
-			var lastQueriesCount = String.IsNullOrEmpty(lastQueriesCountString) ? 100 : lastQueriesCountString.ConvertTo<int>();
-			if (lastQueriesCount > 0) lastQueries = new LRU<string, int>(lastQueriesCount);
+			this.logger = logger;
+			lastQueries = new LRU<string, int>(100);
 		}
 
 		private void Trace(LogLevel level, int id, string msg)
 		{
-			log.Log(level, new EventId(id), msg);
+			logger.Log(level, new EventId(id), msg);
 		}
 
 		public void Trace(LogLevel level, string msg)
 		{
-			log.Log(level, msg);
+			logger.Log(level, msg);
 		}
 
 		public TraceToken Start(string msg)
@@ -80,7 +78,7 @@ namespace Kosson.KRUD
 
 		private void TraceQueryParameters(LogLevel level, TraceToken token, DbCommand command)
 		{
-			if (!log.IsEnabled(level)) return;
+			if (!logger.IsEnabled(level)) return;
 			foreach (DbParameter parameter in command.Parameters)
 			{
 				string val;
@@ -114,10 +112,10 @@ namespace Kosson.KRUD
 		{
 			if (!TraceEnabled) return;
 			var exceptionLevel = exc is KRUDInvalidStructureException ? LogLevel.Warning : LogLevel.Error;
-			if (!log.IsEnabled(exceptionLevel)) return;
+			if (!logger.IsEnabled(exceptionLevel)) return;
 			Trace(exceptionLevel, token.id, exc.Message);
 			// On Information and Debug LogLevels queries are already logged at start
-			if (cmd != null && !log.IsEnabled(LogLevel.Information))
+			if (cmd != null && !logger.IsEnabled(LogLevel.Information))
 			{
 				Trace(exceptionLevel, token.id, cmd.CommandText);
 				TraceQueryParameters(exceptionLevel, token, cmd);

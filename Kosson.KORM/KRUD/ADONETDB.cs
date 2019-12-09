@@ -1,4 +1,5 @@
 ﻿using Kosson.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -82,12 +83,12 @@ namespace Kosson.KRUD
 		/// <summary>
 		/// Creates new instance of ADONETDB.
 		/// </summary>
-		public ADONETDB()
+		public ADONETDB(ILogger logger, string connectionString)
 		{
-			IsolationLevel = System.Data.IsolationLevel.Unspecified;
-			ConnectionString = KORMContext.Current.Configuration["db-connectionstring"];
+			IsolationLevel = IsolationLevel.Unspecified;
+			ConnectionString = connectionString;
 			commandBuilder = CreateCommandBuilder();
-			if (log == null) log = new Logging();
+			if (log == null) log = new Logging(logger);
 		}
 
 		private IDisposable AcquireLock()

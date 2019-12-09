@@ -11,7 +11,7 @@ namespace Kosson.KRUD.ORM
 {
 	class ExecuteProxyBase
 	{
-		protected static IReadOnlyList<IRow> Execute(string dbname, Dictionary<string, object> parameters)
+		protected static IReadOnlyList<IRow> Execute(IMetaBuilder metaBuilder, string dbname, Dictionary<string, object> parameters)
 		{
 			var db = KORMContext.Current.DB;
 
@@ -25,7 +25,8 @@ namespace Kosson.KRUD.ORM
 					if (type != null && !type.GetTypeInfo().IsValueType && !type.FullName.StartsWith("System.") && !type.FullName.StartsWith("Microsoft."))
 					{
 						DbParameter[] ignored = null;
-						DBParameterLoader.Run(db, cmd, value, ref ignored);
+						var meta = metaBuilder.Get(type);
+						DBParameterLoader.Run(db, meta, cmd, value, ref ignored);
 					}
 					else
 					{
@@ -51,15 +52,17 @@ namespace Kosson.KRUD.ORM
 			var loader = KORMContext.Current.RecordLoader;
 			var factory = KORMContext.Current.Factory;
 			var converter = KORMContext.Current.Converter;
+			var metaBuilder = KORMContext.Current.MetaBuilder;
 			var result = (TElement)factory.Create(typeof(TElement));
-			var renamedrow = new DBNameRenamingRow<TElement>(row);
+			var meta = metaBuilder.Get(typeof(TElement));
+			var renamedrow = new DBNameRenamingRow<TElement>(meta, row);
 			loader.GetLoader<TElement>()(result, renamedrow, converter, factory);
 			return result;
 		}
 
-		protected static TElement[] WrapResultArray<TElement>(IReadOnlyList<IRow> rows) where TElement : class, new()
+		protected static TElement[] WrapResultArray<TElement>(IMetaRecord meta, IReadOnlyList<IRow> rows) where TElement : class, new()
 		{
-			return rows.Select(row => new DBNameRenamingRow<TElement>(row)).Load<TElement>().ToArray();
+			return rows.Select(row => new DBNameRenamingRow<TElement>(meta, row)).Load<TElement>().ToArray();
 		}
 	}
 }

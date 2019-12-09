@@ -14,15 +14,17 @@ namespace Kosson.KRUD
 	public class BackupProvider : IBackupProvider
 	{
 		private IORM orm;
+		private IMetaBuilder metaBuilder;
 
-		public BackupProvider(IORM orm)
+		public BackupProvider(IORM orm, IMetaBuilder metaBuilder)
 		{
 			this.orm = orm;
+			this.metaBuilder = metaBuilder;
 		}
 
 		IBackupSet IBackupProvider.CreateBackupSet(IBackupWriter writer)
 		{
-			return new BackupSet(writer);
+			return new BackupSet(writer, metaBuilder);
 		}
 
 		void IBackupProvider.Restore(IBackupReader reader)
@@ -32,7 +34,7 @@ namespace Kosson.KRUD
 
 		void IBackupProvider.ClearTables(IEnumerable<Type> types)
 		{
-			new BackupClearer(orm, types).Clear();
+			new BackupClearer(orm, metaBuilder, types).Clear();
 		}
 	}
 }

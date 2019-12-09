@@ -12,13 +12,15 @@ namespace Kosson.KRUD
 	class BackupClearer
 	{
 		private IORM orm;
+		private IMetaBuilder metaBuilder;
 		private IEnumerable<Type> types;
 		private HashSet<string> tablesCleared;
 		private HashSet<string> tablesInProgress;
 
-		public BackupClearer(IORM orm, IEnumerable<Type> types)
+		public BackupClearer(IORM orm, IMetaBuilder metaBuilder, IEnumerable<Type> types)
 		{
 			this.orm = orm;
+			this.metaBuilder = metaBuilder;
 			this.types = types;
 			tablesCleared = new HashSet<string>();
 			tablesInProgress = new HashSet<string>();
@@ -31,7 +33,7 @@ namespace Kosson.KRUD
 
 		private void Clear(Type type)
 		{
-			var meta = type.Meta();
+			var meta = metaBuilder.Get(type);
 			var table = meta.DBName;
 			if (tablesCleared.Contains(table)) return;
 			if (tablesInProgress.Contains(table))
@@ -58,7 +60,7 @@ namespace Kosson.KRUD
 
 		private void ClearIfReferences(Type typeToClear, Type typeForMeta, Type typeToReference)
 		{
-			var meta = typeForMeta.Meta();
+			var meta = metaBuilder.Get(typeForMeta);
 
 			foreach (var field in meta.Fields)
 			{
@@ -93,7 +95,7 @@ namespace Kosson.KRUD
 		private void NullTable<T>()
 			where T : IRecord
 		{
-			var meta = typeof(T).Meta();
+			var meta = metaBuilder.Get(typeof(T));
 			var update = orm.Update<T>();
 			BuildNullCommand<T>(update, meta);
 			update.Execute();

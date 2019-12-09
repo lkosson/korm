@@ -19,10 +19,10 @@ namespace Kosson.KRUD
 		/// <param name="provider">Backup provider to use.</param>
 		/// <param name="file">Name of XML file to create.</param>
 		/// <param name="tables">Tables to include in backup. Tables referenced by foreign keys are also included.</param>
-		public static void ToXML(this IBackupProvider provider, string file, params Type[] tables)
+		public static void ToXML(this IBackupProvider provider, IMetaBuilder metaBuilder, string file, params Type[] tables)
 		{
 			using (var fs = new FileStream(file, FileMode.Create))
-			using (var xml = new XMLBackupWriter(fs))
+			using (var xml = new XMLBackupWriter(metaBuilder, fs))
 			{
 				var backupset = provider.CreateBackupSet(xml);
 				foreach (var table in tables) backupset.AddTable(table);

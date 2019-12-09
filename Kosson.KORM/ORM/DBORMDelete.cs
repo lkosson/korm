@@ -13,7 +13,8 @@ namespace Kosson.KRUD.ORM
 	{
 		protected override bool UseFullFieldNames { get { return false; } }
 
-		public DBORMDelete(IDB db) : base(db)
+		public DBORMDelete(IDB db, IMetaBuilder metaBuilder) 
+			: base(db, metaBuilder)
 		{
 		}
 

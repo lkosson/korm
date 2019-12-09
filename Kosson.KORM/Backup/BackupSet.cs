@@ -13,13 +13,15 @@ namespace Kosson.KRUD
 	class BackupSet : IBackupSet
 	{
 		private IBackupWriter writer;
+		private IMetaBuilder metaBuilder;
 		private HashSet<Type> tablesCompleted;
 		private HashSet<Type> tablesInProgress;
 		private Dictionary<Type, HashSet<long>> recordsCompleted;
 
-		public BackupSet(IBackupWriter writer)
+		public BackupSet(IBackupWriter writer, IMetaBuilder metaBuilder)
 		{
 			this.writer = writer;
+			this.metaBuilder = metaBuilder;
 			tablesCompleted = new HashSet<Type>();
 			tablesInProgress = new HashSet<Type>();
 			recordsCompleted = new Dictionary<Type, HashSet<long>>();
@@ -65,7 +67,7 @@ namespace Kosson.KRUD
 		private IEnumerable<IMetaRecordField> AddForeignRecords(Type type)
 		{
 			var leftoverForeigns = new List<IMetaRecordField>();
-			var meta = type.Meta();
+			var meta = metaBuilder.Get(type);
 			AddForeignRecords(meta, leftoverForeigns);
 			return leftoverForeigns;
 		}

@@ -15,14 +15,16 @@ namespace Kosson.KRUD
 	/// </summary>
 	public class XMLBackupWriter : IBackupWriter
 	{
+		private IMetaBuilder metaBuilder;
 		private XmlWriter xw;
 
 		/// <summary>
 		/// Creates a new backup serializer writing XML to provided stream.
 		/// </summary>
 		/// <param name="stream">Steram to write XML to.</param>
-		public XMLBackupWriter(Stream stream)
+		public XMLBackupWriter(IMetaBuilder metaBuilder, Stream stream)
 		{
+			this.metaBuilder = metaBuilder;
 			var xws = new XmlWriterSettings
 			{
 				Indent = true,
@@ -41,10 +43,10 @@ namespace Kosson.KRUD
 		/// </summary>
 		/// <param name="file">Name of XML file to create.</param>
 		/// <param name="tables">Types of records to include in backup.</param>
-		public static void Run(string file, IEnumerable<Type> tables)
+		public static void Run(IMetaBuilder metaBuilder, string file, IEnumerable<Type> tables)
 		{
 			using (var fs = new FileStream(file, FileMode.Create))
-			using (var bw = new XMLBackupWriter(fs))
+			using (var bw = new XMLBackupWriter(metaBuilder, fs))
 			{
 				var bs = KORMContext.Current.BackupProvider.CreateBackupSet(bw);
 				foreach (var table in tables) bs.AddTable(table);
@@ -62,7 +64,7 @@ namespace Kosson.KRUD
 
 		private void WriteFields(object target)
 		{
-			var meta = target.GetType().Meta();
+			var meta = metaBuilder.Get(target.GetType());
 			var converter = KORMContext.Current.Converter;
 			foreach (var field in meta.Fields)
 			{

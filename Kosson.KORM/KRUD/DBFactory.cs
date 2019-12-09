@@ -12,18 +12,15 @@ namespace Kosson.KRUD
 	/// <inheritdoc/>
 	public class DBFactory : IDBFactory
 	{
-		private Dictionary<string, Func<IDB>> providers;
+		private Dictionary<string, Func<string, IDB>> providers;
 
 		/// <summary>
 		/// Creates a new DBFactory instance.
 		/// </summary>
 		public DBFactory()
 		{
-			providers = new Dictionary<string, Func<IDB>>();
-			providers["empty"] = () => new EmptyDB();
-			providers["firebird"] = () => new FirebirdDB();
-			//providers["sqlce"] = () => new SQLCEDB();
-			providers["oracle"] = () => new OracleDB();
+			providers = new Dictionary<string, Func<string, IDB>>();
+			providers["empty"] = connectionString => new EmptyDB();
 		}
 
 		void IDBFactory.RegisterProvider(IDBProvider provider)
@@ -31,16 +28,11 @@ namespace Kosson.KRUD
 			providers[provider.Name] = provider.Create;
 		}
 
-		IDB IDBFactory.Create(string providerName, bool addToContext)
+		IDB IDBFactory.Create(string providerName, string connectionString)
 		{
-			return CreateIDB(providerName);
-		}
-
-		private IDB CreateIDB(string provider)
-		{
-			Func<IDB> factory;
-			if (providers.TryGetValue(provider, out factory)) return factory();
-			throw new InvalidOperationException("KRUD DB provider " + provider + " not found.");
+			Func<string, IDB> factory;
+			if (providers.TryGetValue(providerName, out factory)) return factory(connectionString);
+			throw new InvalidOperationException("KRUD DB provider " + providerName + " not found.");
 		}
 	}
 }

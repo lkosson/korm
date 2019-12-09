@@ -12,8 +12,8 @@ namespace Kosson.KRUD.ORM
 {
 	class DBORMInsert<TRecord> : DBORMCommandBase<TRecord, IDBInsert>, IORMInsert<TRecord> where TRecord : IRecord
 	{
-		public DBORMInsert(IDB db)
-			: base(db)
+		public DBORMInsert(IDB db, IMetaBuilder metaBuilder)
+			: base(db, metaBuilder)
 		{
 		}
 
@@ -76,7 +76,7 @@ namespace Kosson.KRUD.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
-					DBParameterLoader<TRecord>.Run(DB, cmdInsert, record, ref parameters);
+					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record, ref parameters);
 
 					if (cmdGetLastID == null)
 					{
@@ -115,7 +115,7 @@ namespace Kosson.KRUD.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
-					DBParameterLoader<TRecord>.Run(DB, cmdInsert, record, ref parameters);
+					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record, ref parameters);
 
 					if (cmdGetLastID == null)
 					{

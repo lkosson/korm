@@ -160,10 +160,10 @@ namespace Kosson.KRUD
 			storeRecordDelegate(record);
 		}
 
-		private static void StoreRecord<T>(IRecord record)
+		private void StoreRecord<T>(IRecord record)
 			where T : IRecord
 		{
-			((T)record).Store();
+			orm.Store((T)record);
 		}
 
 		private void InsertRecordPK(Type type, IRecord record)
@@ -206,10 +206,16 @@ namespace Kosson.KRUD
 
 			private void FindNextID(Type type)
 			{
-				var record = (IRecord)KORMContext.Current.Factory.Create(type);
-				record.CallWithGenericArgument(type, RecordExtensions.Store);
+				new Action(FindNextID<Record>).ChangeDelegateGenericArgument(type)();
+			}
+
+			private void FindNextID<TRecord>()
+				where TRecord : class, IRecord, new()
+			{
+				var record = (IRecord)KORMContext.Current.Factory.Create<TRecord>();
+				orm.Store(record);
 				MaxWrittenID = record.ID;
-				record.CallWithGenericArgument(type, RecordExtensions.Delete);
+				orm.Delete(record);
 			}
 
 			private void FindMaxID(Type type)

@@ -15,16 +15,18 @@ namespace Kosson.KRUD
 	{
 		private IDB targetDB;
 		private IORM targetORM;
+		private IMetaBuilder metaBuilder;
 		private BackupRestorer restorer;
 
 		/// <summary>
 		/// Creates a new backup writer storing records in a specified database.
 		/// </summary>
 		/// <param name="targetDB">Database provider to use for storing records.</param>
-		public DatabaseBackupWriter(IDB targetDB)
+		public DatabaseBackupWriter(IDB targetDB, IMetaBuilder metaBuilder)
 		{
 			this.targetDB = targetDB;
-			targetORM = new ORM.DBORM(targetDB);
+			this.metaBuilder = metaBuilder;
+			targetORM = new DBORM(targetDB, metaBuilder);
 			restorer = new BackupRestorer(null, targetORM);
 		}
 
@@ -35,16 +37,15 @@ namespace Kosson.KRUD
 		/// <param name="provider">Database provider for destination database.</param>
 		/// <param name="connectionString">Connectionstring to use for destination database.</param>
 		/// <param name="tables">Tables to include in the process.</param>
-		public static void Run(string provider, string connectionString, IEnumerable<Type> tables)
+		public static void Run(IMetaBuilder metaBuilder, string provider, string connectionString, IEnumerable<Type> tables)
 		{
-			var db = KORMContext.Current.DBFactory.Create(provider);
-			db.ConnectionString = connectionString;
+			var db = KORMContext.Current.DBFactory.Create(provider, connectionString);
 			db.CreateDatabase();
 			db.BeginTransaction();
-			new DBTableCreator(db).Create(tables);
-			using (var dw = new DatabaseBackupWriter(db))
+			new DBTableCreator(db, metaBuilder).Create(tables);
+			using (var dw = new DatabaseBackupWriter(db, metaBuilder))
 			{
-				new BackupClearer(dw.targetORM, tables).Clear();
+				new BackupClearer(dw.targetORM, metaBuilder, tables).Clear();
 				var bs = KORMContext.Current.BackupProvider.CreateBackupSet(dw);
 				foreach (var table in tables) bs.AddTable(table);
 			}

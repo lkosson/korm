@@ -17,7 +17,8 @@ namespace Kosson.Interfaces
 		/// <summary>
 		/// Creates a new instance of the provider
 		/// </summary>
+		/// <param name="connectionString">Connection string for database provider.</param>
 		/// <returns>A new instance of database provider</returns>
-		IDB Create();
+		IDB Create(string connectionString);
 	}
 }

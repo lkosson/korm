@@ -9,15 +9,15 @@ namespace Kosson.KRUD.ORM
 {
 	class DBTableCreator
 	{
-		private IMetaBuilder mb;
+		private IMetaBuilder metaBuilder;
 		private IDB db;
 		private IDBCommandBuilder cb;
 		private Action<IDBCommand> executor;
 
-		public DBTableCreator(IDB db, Action<IDBCommand> customExecutor = null)
+		public DBTableCreator(IDB db, IMetaBuilder metaBuilder, Action<IDBCommand> customExecutor = null)
 		{
 			this.db = db;
-			mb = KORMContext.Current.MetaBuilder;
+			this.metaBuilder = metaBuilder;
 			cb = db.CommandBuilder;
 			executor = customExecutor ?? DefaultExecute;
 		}
@@ -38,7 +38,7 @@ namespace Kosson.KRUD.ORM
 
 		public void Create(IEnumerable<Type> types)
 		{
-			var metas = types.Select(t => mb.Get(t)).ToArray();
+			var metas = types.Select(t => metaBuilder.Get(t)).ToArray();
 
 			foreach (var meta in metas) CreateTable(meta);
 			foreach (var meta in metas) CreateColumns(meta);
@@ -134,7 +134,7 @@ namespace Kosson.KRUD.ORM
 
 		private void PrepareForeignKey(IDBForeignKey fk, IMetaRecordField field)
 		{
-			var remotemeta = mb.Get(field.Type);
+			var remotemeta = metaBuilder.Get(field.Type);
 			fk.ConstraintName(cb.Identifier("FK_" + field.Record.DBName + "_" + field.DBName + "_" + remotemeta.DBName));
 			fk.TargetTable(cb.Identifier(remotemeta.DBName));
 			fk.TargetColumn(cb.Identifier(remotemeta.PrimaryKey.DBName));

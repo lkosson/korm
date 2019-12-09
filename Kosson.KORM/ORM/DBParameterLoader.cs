@@ -57,20 +57,19 @@ namespace Kosson.KRUD.ORM
 			return sval;
 		}
 
-		internal static TDelegate GetOrBuildLoader<TDelegate>(Type recordType, bool untyped)
+		internal static TDelegate GetOrBuildLoader<TDelegate>(IMetaRecord meta, bool untyped)
 		{
 			object untypedDelegate;
-			if (delegates.TryGetValue(recordType, out untypedDelegate)) return (TDelegate)untypedDelegate;
-			untypedDelegate = BuildLoader(recordType, untyped);
-			delegates[recordType] = untypedDelegate;
+			if (delegates.TryGetValue(meta.Type, out untypedDelegate)) return (TDelegate)untypedDelegate;
+			untypedDelegate = BuildLoader(meta, untyped);
+			delegates[meta.Type] = untypedDelegate;
 			return (TDelegate)untypedDelegate;
 		}
 
-		private static object BuildLoader(Type recordType, bool untyped)
+		private static object BuildLoader(IMetaRecord meta, bool untyped)
 		{
-			var delegateArg = untyped ? typeof(object) : recordType;
+			var delegateArg = untyped ? typeof(object) : meta.Type;
 			var delegateType = typeof(ParameterLoader<>).MakeGenericType(delegateArg);
-			var meta = recordType.Meta();
 
 			var dm = new DynamicMethod("Load", null, new[] { typeof(IDB), typeof(DbCommand), delegateArg, typeof(DbParameter[]).MakeByRefType() }, true);
 			var il = dm.GetILGenerator();
@@ -197,9 +196,9 @@ namespace Kosson.KRUD.ORM
 			return count;
 		}
 
-		public static void Run(IDB db, DbCommand command, object record, ref DbParameter[] parameters)
+		public static void Run(IDB db, IMetaRecord meta, DbCommand command, object record, ref DbParameter[] parameters)
 		{
-			var loader = GetOrBuildLoader<ParameterLoader<object>>(record.GetType(), true);
+			var loader = GetOrBuildLoader<ParameterLoader<object>>(meta, true);
 			loader(db, command, record, ref parameters);
 		}
 
@@ -208,9 +207,9 @@ namespace Kosson.KRUD.ORM
 
 	class DBParameterLoader<TRecord> : DBParameterLoader where TRecord : IRecord
 	{
-		public static void Run(IDB db, DbCommand command, TRecord record, ref DbParameter[] parameters)
+		public static void Run(IDB db, IMetaRecord meta, DbCommand command, TRecord record, ref DbParameter[] parameters)
 		{
-			var loader = GetOrBuildLoader<ParameterLoader<TRecord>>(typeof(TRecord), false);
+			var loader = GetOrBuildLoader<ParameterLoader<TRecord>>(meta, false);
 			loader(db, command, record, ref parameters);
 		}
 	}

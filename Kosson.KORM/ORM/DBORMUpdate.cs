@@ -16,7 +16,8 @@ namespace Kosson.KRUD.ORM
 		protected override bool UseFullFieldNames { get { return false; } }
 		private string commandText;
 
-		public DBORMUpdate(IDB db) : base(db)
+		public DBORMUpdate(IDB db, IMetaBuilder metaBuilder) 
+			: base(db, metaBuilder)
 		{
 			commandText = command.ToString();
 			var cb = db.CommandBuilder;
@@ -112,7 +113,7 @@ namespace Kosson.KRUD.ORM
 
 					var rowVersion = record as IRecordWithRowVersion;
 					ApplyRowVersion(rowVersion, rowVersionParameter);
-					DBParameterLoader<TRecord>.Run(DB, cmdUpdate, record, ref parameters);
+					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record, ref parameters);
 					int lcount = DB.ExecuteNonQuery(cmdUpdate);
 					if (rowVersion != null && lcount == 0) throw new KRUDConcurrentModificationException(cmdUpdate);
 
@@ -146,7 +147,7 @@ namespace Kosson.KRUD.ORM
 
 					var rowVersion = record as IRecordWithRowVersion;
 					ApplyRowVersion(rowVersion, rowVersionParameter);
-					DBParameterLoader<TRecord>.Run(DB, cmdUpdate, record, ref parameters);
+					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record, ref parameters);
 					int lcount = await DB.ExecuteNonQueryAsync(cmdUpdate);
 					if (rowVersion != null && lcount == 0) throw new KRUDConcurrentModificationException(cmdUpdate);
 

@@ -21,8 +21,8 @@ namespace Kosson.Interfaces
 		/// New provider instance is added to current context with unique key.
 		/// </summary>
 		/// <param name="providerName">Provider name.</param>
-		/// <param name="addToContext">Determines whether created provider should be added to current context with unique key.</param>
+		/// <param name="connectionString">Connection string to pass to database driver.</param>
 		/// <returns>New provider instance.</returns>
-		IDB Create(string providerName, bool addToContext = true);
+		IDB Create(string providerName, string connectionString);
 	}
 }

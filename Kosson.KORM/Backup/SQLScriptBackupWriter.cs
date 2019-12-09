@@ -30,14 +30,13 @@ namespace Kosson.KRUD
 		/// </summary>
 		/// <param name="stream">Output stream to write SQL script to.</param>
 		/// <param name="targetDB">Database provider to use for SQL command construction.</param>
-		public SQLScriptBackupWriter(Stream stream, IDB targetDB = null)
+		public SQLScriptBackupWriter(IDB db, IMetaBuilder metaBuilder, Stream stream)
 		{
 			sw = new StreamWriter(stream, Encoding.UTF8, 65536, true);
 			tableStates = new Dictionary<Type, TableState>();
 			metaBuilder = KORMContext.Current.MetaBuilder;
-			db = targetDB ?? KORMContext.Current.DB;
 			cb = db.CommandBuilder;
-			tc = new ORM.DBTableCreator(db, WriteCreateTableCommand);
+			tc = new ORM.DBTableCreator(db, metaBuilder, WriteCreateTableCommand);
 			CreateStructure = true;
 			sw.WriteLine("BEGIN TRANSACTION");
 		}
@@ -77,7 +76,7 @@ namespace Kosson.KRUD
 			{
 				if (!field.IsForeignKey) continue;
 				if (tableStates.ContainsKey(field.ForeignType)) continue;
-				tc.CreateTable(field.ForeignType.Meta());
+				tc.CreateTable(metaBuilder.Get(field.ForeignType));
 			}
 			tc.Create(meta);
 		}

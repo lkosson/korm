@@ -12,7 +12,8 @@ namespace Kosson.KRUD.ORM
 {
 	class DBQuerySelect<TRecord> : DBORMCommandBase<TRecord, IDBSelect>, IORMSelect<TRecord> where TRecord : class, IRecord, new()
 	{
-		public DBQuerySelect(IDB db) : base(db)
+		public DBQuerySelect(IDB db, IMetaBuilder metaBuilder) 
+			: base(db, metaBuilder)
 		{
 		}
 

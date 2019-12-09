@@ -12,6 +12,12 @@ namespace Kosson.KRUD
 	{
 		public override string ConnectionString { get { return ""; } }
 
+		public EmptyDB()
+			: base(null, null)
+		{
+
+		}
+
 		protected override DbConnection CreateConnection()
 		{
 			return new Connection();

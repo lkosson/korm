@@ -11,15 +11,14 @@ namespace Kosson.KRUD
 	{
 		private static IMetaRecord meta;
 
-		public DBNameRenamingRow(IRow row)
+		public DBNameRenamingRow(IMetaRecord meta, IRow row)
 			: base(row, Rename)
 		{
+			DBNameRenamingRow<T>.meta = meta;
 		}
 
 		private static string Rename(string name)
 		{
-			if (meta == null) meta = typeof(T).Meta();
-
 			var field = meta.GetField(name);
 
 			if (field != null && field.DBName != null) return field.DBName;
