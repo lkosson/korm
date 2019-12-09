@@ -1,0 +1,34 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Kosson.Interfaces
+{
+	/// <summary>
+	/// Enumerator of result of a reader-based database command.
+	/// </summary>
+	/// <typeparam name="TRecord">Type of record returned by the query.</typeparam>
+	public interface IORMReader<TRecord> : IEnumerable<TRecord>, IDisposable where TRecord : IRecord
+	{
+		/// <summary>
+		/// Constructs a record from current row of a reader.
+		/// </summary>
+		/// <returns>Record filled from current reader position.</returns>
+		TRecord Read();
+
+		/// <summary>
+		/// Advances reader to a next row in result.
+		/// </summary>
+		/// <returns>True if advancing succeeded.</returns>
+		bool MoveNext();
+
+		/// <summary>
+		/// Asynchronous version of MoveNext.
+		/// Advances reader to a next row in result.
+		/// </summary>
+		/// <returns>True if advancing succeeded.</returns>
+		Task<bool> MoveNextAsync();
+	}
+}
