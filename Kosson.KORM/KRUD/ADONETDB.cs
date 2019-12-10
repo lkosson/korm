@@ -35,10 +35,6 @@ namespace Kosson.KRUD
 		/// </summary>
 		protected DbTransaction dbtran;
 
-		private bool nestedCommit;
-		private bool nestedRollback;
-		private bool topLevelResolve;
-
 		/// <inheritdoc/>
 		public virtual int? CommandTimeout { get; set; }
 
@@ -83,10 +79,10 @@ namespace Kosson.KRUD
 		/// <summary>
 		/// Creates new instance of ADONETDB.
 		/// </summary>
-		public ADONETDB(ILogger logger, string connectionString)
+		public ADONETDB(ILogger logger, KORMConfiguration configuration)
 		{
 			IsolationLevel = IsolationLevel.Unspecified;
-			ConnectionString = connectionString;
+			ConnectionString = configuration.ConnectionString;
 			commandBuilder = CreateCommandBuilder();
 			if (log == null) log = new Logging(logger);
 		}
@@ -163,19 +159,10 @@ namespace Kosson.KRUD
 		{
 			using (AcquireLock())
 			{
-				if (nestedRollback) throw new KRUDInvalidOperationException("Nested transaction has beed rolled back.");
-
-				if (KORMContext.Current.IsNested)
-				{
-					nestedCommit = true;
-					return;
-				}
-				if (dbtran == null) return;
+				if (dbtran == null) throw new KRUDInvalidOperationException("Transaction not started.");
 				dbtran.Commit();
 				dbtran.Dispose();
 				dbtran = null;
-				nestedCommit = false;
-				topLevelResolve = true;
 			}
 		}
 
@@ -183,20 +170,10 @@ namespace Kosson.KRUD
 		{
 			using (AcquireLock())
 			{
-				// don't check for nested commit here - allow complete rollback even if nested process committed
-
-				if (KORMContext.Current.IsNested)
-				{
-					nestedRollback = true;
-					return;
-				}
-				if (dbtran == null) return;
+				if (dbtran == null) throw new KRUDInvalidOperationException("Transaction not started.");
 				dbtran.Rollback();
 				dbtran.Dispose();
 				dbtran = null;
-				nestedCommit = false;
-				nestedRollback = false;
-				topLevelResolve = true;
 			}
 		}
 
@@ -234,11 +211,6 @@ namespace Kosson.KRUD
 					HandleException(exc, null);
 					throw;
 				}
-
-				if (!topLevelResolve) throw new KRUDInvalidOperationException("Top level transaction has to be either commited or rolled back.");
-				// needs to be after transaction disposal to avoid connection leak
-				if (nestedCommit) throw new KRUDInvalidOperationException("Transaction committed in nested context has to be commited in its owning context.");
-				if (nestedRollback) throw new KRUDInvalidOperationException("Transaction rolled back in nested context has to be rolled back in its owning context.");
 			}
 		}
 

@@ -12,8 +12,8 @@ namespace Kosson.KRUD.MSSQL
 {
 	public class SQLDB : ADONETDB
 	{
-		public SQLDB(ILogger logger, string connectionString)
-			: base(logger, connectionString)
+		public SQLDB(ILogger logger, KORMConfiguration configuration)
+			: base(logger, configuration)
 		{
 		}
 

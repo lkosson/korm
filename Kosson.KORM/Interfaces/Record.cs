@@ -158,13 +158,13 @@ namespace Kosson.Interfaces
 
 		object IConvertible.ToType(Type type, IFormatProvider provider)
 		{
-			if (typeof(IRecordRef).IsAssignableFrom(type))
-			{
-				var recordref = (IRecordRef)KORMContext.Current.Factory.Create(type);
-				// recordref is boxed struct
-				recordref.ID = ID;
-				return recordref;
-			}
+			//if (typeof(IRecordRef).IsAssignableFrom(type))
+			//{
+			//	var recordref = (IRecordRef)KORMContext.Current.Factory.Create(type);
+			//	// recordref is boxed struct
+			//	recordref.ID = ID;
+			//	return recordref;
+			//}
 			ThrowInvalidCast(type);
 			return null;
 		}

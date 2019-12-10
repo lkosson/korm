@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.29519.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kosson.KORM", "Kosson.KORM\Kosson.KORM.csproj", "{69E99C9C-978E-439B-95F6-3CD6B5C2B9C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kosson.KORM.MSSQL", "Kosson.KORM.MSSQL\Kosson.KORM.MSSQL.csproj", "{B6CFE60E-A873-4E67-860E-D7E2383DD0FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kosson.KORM.MSSQL", "Kosson.KORM.MSSQL\Kosson.KORM.MSSQL.csproj", "{B6CFE60E-A873-4E67-860E-D7E2383DD0FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kosson.KORM.Scratch", "Kosson.KORM.Scratch\Kosson.KORM.Scratch.csproj", "{2FE8CB3E-46CB-4CDC-A014-F2D69EFAB9EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kosson.KORM.Scratch", "Kosson.KORM.Scratch\Kosson.KORM.Scratch.csproj", "{2FE8CB3E-46CB-4CDC-A014-F2D69EFAB9EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
