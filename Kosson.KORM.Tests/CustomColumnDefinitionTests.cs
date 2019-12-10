@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
-using Kosson.Kontext;
 
 namespace Kosson.KRUD.Tests
 {
@@ -15,14 +14,13 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void ColumnDefinitionIsRespected()
 		{
-			var meta = typeof(Table).Meta();
-			var db = Context.Current.Get<IDB>();
-			var cb = db.CommandBuilder;
+			var meta = MetaBuilder.Get(typeof(Table));
+			var cb = DB.CommandBuilder;
 			var insert = cb.Insert();
 			insert.Table(cb.Identifier(meta.DBName));
 			insert.PrimaryKeyReturn(cb.Identifier(meta.PrimaryKey.DBName));
 			insert.Column(cb.Identifier(meta.GetField("Value2").DBName), cb.Const(123.456));
-			db.ExecuteNonQuery(insert.ToString());
+			DB.ExecuteNonQuery(insert.ToString());
 
 			var retrieved = orm.Select<Table>().WhereFieldEquals("Value1", 123).ExecuteFirst();
 			Assert.IsNotNull(retrieved);

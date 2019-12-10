@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kosson.KORM.MSSQL", "Kosson
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kosson.KORM.Scratch", "Kosson.KORM.Scratch\Kosson.KORM.Scratch.csproj", "{2FE8CB3E-46CB-4CDC-A014-F2D69EFAB9EE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kosson.KORM.Tests", "Kosson.KORM.Tests\Kosson.KORM.Tests.csproj", "{6B369EC0-DFED-4D9A-902C-8BEAA8DA8846}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2FE8CB3E-46CB-4CDC-A014-F2D69EFAB9EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FE8CB3E-46CB-4CDC-A014-F2D69EFAB9EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2FE8CB3E-46CB-4CDC-A014-F2D69EFAB9EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B369EC0-DFED-4D9A-902C-8BEAA8DA8846}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B369EC0-DFED-4D9A-902C-8BEAA8DA8846}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B369EC0-DFED-4D9A-902C-8BEAA8DA8846}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B369EC0-DFED-4D9A-902C-8BEAA8DA8846}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

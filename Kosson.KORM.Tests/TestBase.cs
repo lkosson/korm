@@ -1,7 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
-using Kosson.Kontext;
+using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Kosson.KRUD.Tests
 {
@@ -10,40 +11,32 @@ namespace Kosson.KRUD.Tests
 	{
 		protected abstract string Provider { get; }
 		protected virtual bool NeedsDatabase { get { return true; } }
-
-		private IContext ctxDefault;
+		//private IScope
+		protected IDB DB { get; private set; }
+		protected IORM ORM { get; private set; }
+		protected IMetaBuilder MetaBuilder { get; private set; }
 
 		[TestInitialize]
 		public virtual void Init()
 		{
-			string connectionString;
-			using (Context.Begin())
-			{
-				Context.Current.Add<IConfiguration>(new Kosson.Kore.Configuration.NETConfiguration());
-				connectionString = Context.Current.Configuration(Provider + "-connectionstring"); 
-			}
-			if (String.IsNullOrEmpty(connectionString)) Assert.Inconclusive("Connection string for " + Provider + " missing.");
-			ctxDefault = Context.Begin();
-			ctxDefault.Add<IConfiguration>(new Kosson.Kore.Configuration.MemoryConfiguration());
-			ctxDefault.Add<IConverter>(new Kosson.Kore.Converter.DefaultConverter());
-			ctxDefault.Add<IApplicationState>(new Kosson.Kore.ApplicationState.DefaultApplicationState());
-			ctxDefault.Add<IFactory>(new Kosson.Kore.Factory.DynamicMethodFactory());
-			ctxDefault.Add<IDBFactory>(new Kosson.KRUD.DBFactory());
+			var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+			services.AddKORMServices<KRUD.MSSQL.SQLDB>();
+			services.AddSingleton<ILogger, Microsoft.Extensions.Logging.Abstractions.NullLogger>();
 
-			ctxDefault.Configuration()["db-provider"] = Provider;
-			ctxDefault.Configuration()["db-connectionstring"] = connectionString;
+			var sp = services.BuildServiceProvider();
 
-			ctxDefault.Get<IDBFactory>().RegisterProvider(Kosson.KRUD.MSSQL.Provider.Instance);
-			ctxDefault.Get<IDBFactory>().RegisterProvider(Kosson.KRUD.PGSQL.Provider.Instance);
-			ctxDefault.Get<IDBFactory>().RegisterProvider(Kosson.KRUD.SQLite.Provider.Instance);
+			var scope = sp.CreateScope();
+			
+			var configuration = scope.ServiceProvider.GetRequiredService<KORMConfiguration>();
+			configuration.ConnectionString = "server=(local);database=kosson-tests;integrated security=true";
 
-			if (NeedsDatabase) ctxDefault.Get<IDB>().CreateDatabase();
+			//if (NeedsDatabase) ctxDefault.Get<IDB>().CreateDatabase();
 		}
 
 		[TestCleanup]
 		public void Cleanup()
 		{
-			ctxDefault.Dispose();
+			//ctxDefault.Dispose();
 		}
 	}
 }

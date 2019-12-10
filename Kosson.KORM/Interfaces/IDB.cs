@@ -39,6 +39,11 @@ namespace Kosson.Interfaces
 		bool IsTransactionOpen { get; }
 
 		/// <summary>
+		/// Determines whether current transaction has been opened implicitly by CreateCommand method.
+		/// </summary>
+		bool IsImplicitTransaction { get; }
+
+		/// <summary>
 		/// Checks whether database specified in provider configuration exists and creates it if it does not.
 		/// </summary>
 		void CreateDatabase();

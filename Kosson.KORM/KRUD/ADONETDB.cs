@@ -19,6 +19,7 @@ namespace Kosson.KRUD
 	{
 		private static Logging log;
 		private IDBCommandBuilder commandBuilder;
+		private bool isImplicit;
 
 		/// <summary>
 		/// Synchronization root for accessing ADO.NET objects.
@@ -49,6 +50,9 @@ namespace Kosson.KRUD
 
 		/// <inheritdoc/>
 		public virtual bool IsTransactionOpen { get { return dbtran != null; } }
+
+		/// <inheritdoc/>
+		public virtual bool IsImplicitTransaction { get { return isImplicit; } }
 
 		/// <summary>
 		/// Determines whether ADO.NET provider expects command preparation before execution.
@@ -137,6 +141,7 @@ namespace Kosson.KRUD
 #region Connection management
 		void IDB.BeginTransaction(IsolationLevel isolationLevel)
 		{
+			if (IsTransactionOpen) throw new KRUDInvalidOperationException("Transaction already open.");
 			IsolationLevel = isolationLevel;
 			Open(false);
 		}
@@ -151,7 +156,12 @@ namespace Kosson.KRUD
 			using (AcquireLock())
 			{
 				if (dbconn == null) dbconn = CreateConnection();
-				if (dbtran == null) dbtran = dbconn.BeginTransaction(IsolationLevel);
+				if (dbtran == null)
+				{
+					if (!isImplicit && IsImplicitTransaction) throw new KRUDInvalidOperationException("Implicit transaction already open.");
+					dbtran = dbconn.BeginTransaction(IsolationLevel);
+					this.isImplicit = isImplicit;
+				}
 			}
 		}
 
@@ -159,7 +169,8 @@ namespace Kosson.KRUD
 		{
 			using (AcquireLock())
 			{
-				if (dbtran == null) throw new KRUDInvalidOperationException("Transaction not started.");
+				if (!IsTransactionOpen) throw new KRUDInvalidOperationException("Transaction not started.");
+				if (IsImplicitTransaction) throw new KRUDInvalidOperationException("Implicit transaction cannot be committed.");
 				dbtran.Commit();
 				dbtran.Dispose();
 				dbtran = null;
@@ -170,7 +181,8 @@ namespace Kosson.KRUD
 		{
 			using (AcquireLock())
 			{
-				if (dbtran == null) throw new KRUDInvalidOperationException("Transaction not started.");
+				if (!IsTransactionOpen) throw new KRUDInvalidOperationException("Transaction not started.");
+				if (IsImplicitTransaction) throw new KRUDInvalidOperationException("Implicit transaction cannot be rolled back.");
 				dbtran.Rollback();
 				dbtran.Dispose();
 				dbtran = null;
