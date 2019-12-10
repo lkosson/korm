@@ -12,7 +12,6 @@ namespace Kosson.KRUD.ORM
 	class DBORMReader<TRecord> : IORMReader<TRecord>
 		 where TRecord : class, IRecord, new()
 	{
-		private static readonly ReaderRecordLoaderCache cache = new ReaderRecordLoaderCache();
 		private readonly IDB db;
 		private readonly string sql;
 		private readonly IEnumerable<object> parameters;
@@ -22,15 +21,15 @@ namespace Kosson.KRUD.ORM
 		private readonly IConverter converter;
 		private DbDataReader reader;
 
-		public DBORMReader(IDB db, string sql, IEnumerable<object> parameters)
+		public DBORMReader(IDB db, IFactory factory, IConverter converter, LoaderFromReaderByIndexDelegate<TRecord> loader, string sql, IEnumerable<object> parameters)
 		{
 			this.db = db;
 			this.sql = sql;
 			this.parameters = parameters;
-			this.factory = KORMContext.Current.Factory;
+			this.factory = factory;
 			this.constructor = (Func<TRecord>)factory.GetConstructor(typeof(TRecord));
-			this.converter = KORMContext.Current.Converter;
-			this.loader = cache.GetLoader<TRecord>();
+			this.converter = converter;
+			this.loader = loader;
 		}
 
 		public void PrepareReader()

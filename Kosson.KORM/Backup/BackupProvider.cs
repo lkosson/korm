@@ -28,7 +28,7 @@ namespace Kosson.KRUD
 
 		IBackupSet IBackupProvider.CreateBackupSet(IBackupWriter writer)
 		{
-			return new BackupSet(writer, metaBuilder, propertyBinder, converter);
+			return new BackupSet(orm, writer, metaBuilder, propertyBinder, converter);
 		}
 
 		void IBackupProvider.Restore(IBackupReader reader)

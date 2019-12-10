@@ -15,7 +15,13 @@ namespace Kosson.Kore.PropertyBinder
 	/// </summary>
 	public class ReflectionPropertyBinder : IPropertyBinder
 	{
+		private IConverter converter;
 		private ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>> cache = new ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>>();
+
+		public ReflectionPropertyBinder(IConverter converter)
+		{
+			this.converter = converter;
+		}
 
 		private void AccessTarget(ref object target, ref string expression)
 		{
@@ -82,7 +88,7 @@ namespace Kosson.Kore.PropertyBinder
 					throw new NullReferenceException("Null dereference when accesing \"" + orgExpr.Substring(0, orgExpr.Length - expression.Length - 1) + "\" on \"" + orgTarget + "\"");
 			}
 			var property = GetProperty(target, expression);
-			var convertedvalue = KORMContext.Current.Converter.Convert(value, property.PropertyType);
+			var convertedvalue = converter.Convert(value, property.PropertyType);
 			property.SetValue(target, convertedvalue);
 		}
 

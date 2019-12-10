@@ -174,7 +174,7 @@ namespace Kosson.Interfaces
 		/// <param name="records">Record to delete.</param>
 		public static void DeleteAll<TRecord>(this IORM orm, IEnumerable<TRecord> records) where TRecord : IRecord
 		{
-			var count = KORMContext.Current.ORM.Delete<TRecord>().Records(records);
+			var count = orm.Delete<TRecord>().Records(records);
 			if (count != records.Count()) throw new ORMDeleteFailedException();
 		}
 
@@ -186,8 +186,31 @@ namespace Kosson.Interfaces
 		/// <param name="records">Record to delete.</param>
 		public async static Task DeleteAllAsync<TRecord>(this IORM orm, IEnumerable<TRecord> records) where TRecord : IRecord
 		{
-			var count = await KORMContext.Current.ORM.Delete<TRecord>().RecordsAsync(records);
+			var count = await orm.Delete<TRecord>().RecordsAsync(records);
 			if (count != records.Count()) throw new ORMDeleteFailedException();
+		}
+
+		/// <summary>
+		/// Retrieves a record for a given record reference.
+		/// </summary>
+		/// <typeparam name="T">Type of record to retrieve.</typeparam>
+		/// <param name="recordref">Primary key (ID) reference to a record to retrieve.</param>
+		/// <returns>Record for a given record reference.</returns>
+		public static T Get<T>(this IORM orm, RecordRef<T> recordref) where T : class, IRecord, new()
+		{
+			return orm.Select<T>().ByID<T>(recordref.ID);
+		}
+
+		/// <summary>
+		/// Asynchronous version of Get.
+		/// Retrieves a record for a given record reference.
+		/// </summary>
+		/// <typeparam name="T">Type of record to retrieve.</typeparam>
+		/// <param name="recordref">Primary key (ID) reference to a record to retrieve.</param>
+		/// <returns>Task representing asynchronous operation returning record for a given record reference.</returns>
+		public static Task<T> GetAsync<T>(this IORM orm, RecordRef<T> recordref) where T : class, IRecord, new()
+		{
+			return orm.Select<T>().ByIDAsync<T>(recordref.ID);
 		}
 	}
 }

@@ -9,11 +9,13 @@ namespace Kosson.KRUD.ORM
 {
 	class ReaderRecordLoaderCache
 	{
+		private ReaderRecordLoaderBuilder builder;
 		private ReaderWriterLockSlim rwlock;
 		private Dictionary<Type, Delegate> cache;
 
-		public ReaderRecordLoaderCache()
+		public ReaderRecordLoaderCache(IMetaBuilder metaBuilder)
 		{
+			builder = new ReaderRecordLoaderBuilder(metaBuilder);
 			cache = new Dictionary<Type, Delegate>();
 			rwlock = new ReaderWriterLockSlim();
 		}
@@ -39,7 +41,7 @@ namespace Kosson.KRUD.ORM
 				// In case it got constructed by other thread
 				if (cache.TryGetValue(type, out loader)) return (LoaderFromReaderByIndexDelegate<T>)loader;
 
-				var newloader = new ReaderRecordLoaderBuilder<T>().Build();
+				var newloader = builder.Build<T>();
 
 				rwlock.EnterWriteLock();
 				try

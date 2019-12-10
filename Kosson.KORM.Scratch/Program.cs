@@ -10,10 +10,10 @@ namespace Kosson.KORM.Scratch
 		static void Main(string[] args)
 		{
 			var converter = new Kore.Converter.DefaultConverter();
-			var propertyBinder = new Kore.PropertyBinder.ReflectionPropertyBinder();
-			var metaBuilder = new KRUD.Meta.ReflectionMetaBuilder();
-			var recordLoader = new KRUD.RecordLoader.DynamicRecordLoader(metaBuilder);
 			var factory = new Kore.Factory.DynamicMethodFactory();
+			var propertyBinder = new Kore.PropertyBinder.ReflectionPropertyBinder(converter);
+			var metaBuilder = new KRUD.Meta.ReflectionMetaBuilder(factory);
+			var recordLoader = new KRUD.RecordLoader.DynamicRecordLoader(metaBuilder);
 			var db = new KRUD.MSSQL.SQLDB(null, "server=(local);database=kosson;integrated security=true");
 			var orm = new KRUD.ORM.DBORM(db, metaBuilder, converter, recordLoader, factory);
 			var backupProvider = new KRUD.BackupProvider(orm, metaBuilder, propertyBinder, converter);
@@ -50,14 +50,14 @@ namespace Kosson.KORM.Scratch
 
 			var ur = new RecordRef<User>(u.ID);
 
-			var ux = ur.Get();
+			var ux = orm.Get(ur);
 
 			//ip.Delete<User>().WhereFieldIsNull("Name").Execute();
 			//ip.Delete<User>().ById(u.ID);
 
 			orm.Update<User>().Set("Name", "admin2").ByID(u.ID);
 
-			ux = ur.Get();
+			ux = orm.Get(ur);
 
 			orm.Delete(ux);
 

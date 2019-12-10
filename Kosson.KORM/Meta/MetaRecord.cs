@@ -37,11 +37,7 @@ namespace Kosson.KRUD.Meta
 			}
 		}
 
-		public MetaRecord(Type record) : this(record, null)
-		{
-		}
-
-		public MetaRecord(Type record, IMetaRecordField inlineParent)
+		public MetaRecord(IFactory factory, Type record, IMetaRecordField inlineParent = null)
 		{
 			fields = new List<MetaRecordField>();
 			indices = new List<MetaRecordIndex>();
@@ -59,7 +55,7 @@ namespace Kosson.KRUD.Meta
 				DBPrefix = inlineParent.InlinePrefix;
 				InliningField = inlineParent;
 			}
-			ProcessType(record);
+			ProcessType(record, factory);
 		}
 
 		IMetaRecordField IMetaRecord.GetField(string name)
@@ -88,13 +84,13 @@ namespace Kosson.KRUD.Meta
 			return null;
 		}
 
-		private void ProcessType(Type record)
+		private void ProcessType(Type record, IFactory factory)
 		{
 			ProcessRecursive(record, ProcessTableAttribute);
 			ProcessRecursive(record, ProcessDBNameAttribute);
 
 			// Properties processing requires complete (incl. derived types) record metadata for prefix generation
-			ProcessRecursive(record, ProcessProperties);
+			ProcessRecursive(record, type => ProcessProperties(type, factory));
 
 			// Indices processing requires properties
 			ProcessRecursive(record, ProcessIndexAttributes);
@@ -170,20 +166,20 @@ namespace Kosson.KRUD.Meta
 			indices.Add(index);
 		}
 
-		private void ProcessProperties(Type record)
+		private void ProcessProperties(Type record, IFactory factory)
 		{
 			// Process DeclaredOnly to prefer properties in derived classes over properties from base classes when
 			// property is hidden in derived class.
 			var properties = record.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
 			foreach (var property in properties)
 			{
-				ProcessProperty(property);
+				ProcessProperty(property, factory);
 			}
 		}
 
-		private void ProcessProperty(PropertyInfo property)
+		private void ProcessProperty(PropertyInfo property, IFactory factory)
 		{
-			var field = new MetaRecordField(property, this);
+			var field = new MetaRecordField(property, this, factory);
 			var existing = GetField(field.Name);
 			if (existing == null)
 			{
@@ -192,7 +188,7 @@ namespace Kosson.KRUD.Meta
 			}
 			else
 			{
-				existing.Update(property, this);
+				existing.Update(property, factory);
 			}
 		}
 

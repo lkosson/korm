@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Kosson.KRUD.ORM
 {
-	class ReaderRecordLoaderBuilder<TRecord> where TRecord : IRecord
+	class ReaderRecordLoaderBuilder
 	{
 		private readonly IMetaBuilder metaBuilder;
 		private readonly MethodInfo miIsDBNull;
@@ -31,9 +31,9 @@ namespace Kosson.KRUD.ORM
 		private readonly MethodInfo miGetType;
 		private ILGenerator il;
 
-		public ReaderRecordLoaderBuilder()
+		public ReaderRecordLoaderBuilder(IMetaBuilder metaBuilder)
 		{
-			metaBuilder = KORMContext.Current.MetaBuilder;
+			this.metaBuilder = metaBuilder;
 			miIsDBNull = typeof(DbDataReader).GetMethod("IsDBNull");
 			miGetBoolean = typeof(DbDataReader).GetMethod("GetBoolean");
 			miGetByte = typeof(DbDataReader).GetMethod("GetByte");
@@ -52,7 +52,8 @@ namespace Kosson.KRUD.ORM
 			miGetType = typeof(Type).GetMethod("GetTypeFromHandle");
 		}
 
-		public LoaderFromReaderByIndexDelegate<TRecord> Build()
+		public LoaderFromReaderByIndexDelegate<TRecord> Build<TRecord>()
+			where TRecord : IRecord
 		{
 			var dm = new DynamicMethod("Load", null, new[] { typeof(TRecord), typeof(DbDataReader), typeof(IConverter), typeof(IFactory) }, true);
 			il = dm.GetILGenerator();

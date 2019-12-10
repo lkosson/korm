@@ -12,6 +12,7 @@ namespace Kosson.KRUD
 {
 	class BackupSet : IBackupSet
 	{
+		private IORM orm;
 		private IBackupWriter writer;
 		private IMetaBuilder metaBuilder;
 		private IPropertyBinder propertyBinder;
@@ -20,8 +21,9 @@ namespace Kosson.KRUD
 		private HashSet<Type> tablesInProgress;
 		private Dictionary<Type, HashSet<long>> recordsCompleted;
 
-		public BackupSet(IBackupWriter writer, IMetaBuilder metaBuilder, IPropertyBinder propertyBinder, IConverter converter)
+		public BackupSet(IORM orm, IBackupWriter writer, IMetaBuilder metaBuilder, IPropertyBinder propertyBinder, IConverter converter)
 		{
+			this.orm = orm;
 			this.writer = writer;
 			this.metaBuilder = metaBuilder;
 			this.propertyBinder = propertyBinder;
@@ -38,10 +40,10 @@ namespace Kosson.KRUD
 
 		}
 
-		private static IEnumerable GetRecords<T>()
+		private IEnumerable GetRecords<T>()
 			where T : class, IRecord, new()
 		{
-			return KORMContext.Current.ORM.Select<T>().Execute();
+			return orm.Select<T>().Execute();
 		}
 
 		public void AddTable(Type type)
@@ -133,7 +135,7 @@ namespace Kosson.KRUD
 		private IRecord GetRecordFromRef<T>(IRecordRef recordRef)
 			where T : class, IRecord, new()
 		{
-			return ((RecordRef<T>)recordRef).Get();
+			return orm.Get<T>((RecordRef<T>)recordRef);
 		}
 
 		private IRecord GetRecordFromRef(Type type, IRecordRef recordRef)

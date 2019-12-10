@@ -12,14 +12,16 @@ namespace Kosson.KRUD.Meta
 	/// </summary>
 	public class ReflectionMetaBuilder : IMetaBuilder
 	{
+		private IFactory factory;
 		private object syncroot;
 		private Dictionary<Type, IMetaRecord> cache;
 
 		/// <summary>
 		/// Creates new instance of ReflectionMetaBuilder.
 		/// </summary>
-		public ReflectionMetaBuilder()
+		public ReflectionMetaBuilder(IFactory factory)
 		{
+			this.factory = factory;
 			syncroot = new object();
 			cache = new Dictionary<Type, IMetaRecord>();
 		}
@@ -38,7 +40,7 @@ namespace Kosson.KRUD.Meta
 				if (cache.TryGetValue(type, out meta)) return meta;
 			}
 
-			var newmeta = new MetaRecord(type);
+			var newmeta = new MetaRecord(factory, type);
 
 			lock (syncroot)
 			{

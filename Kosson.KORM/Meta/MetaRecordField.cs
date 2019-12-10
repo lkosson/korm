@@ -44,20 +44,20 @@ namespace Kosson.KRUD.Meta
 		public string InlinePrefix { get; private set; }
 		public IMetaRecord InlineRecord { get; private set; }
 
-		public MetaRecordField(PropertyInfo property, IMetaRecord record)
+		public MetaRecordField(PropertyInfo property, IMetaRecord record, IFactory factory)
 		{
 			Record = record;
-			Update(property, record);
+			Update(property, factory);
 		}
 
-		internal void Update(PropertyInfo property, IMetaRecord record)
+		internal void Update(PropertyInfo property, IFactory factory)
 		{
 			ProcessProperty(property);
 			ProcessDBNameAttribute(property);
-			ProcessColumnAttribute(property);
+			ProcessColumnAttribute(property, factory);
 			ProcessForeignKeyAttribute(property);
 			ProcessSubqueryAttribute(property);
-			ProcessInlineAttribute(property);
+			ProcessInlineAttribute(property, factory);
 		}
 
 		private void ProcessProperty(PropertyInfo property)
@@ -81,7 +81,7 @@ namespace Kosson.KRUD.Meta
 				DBName = dbname.Name;
 		}
 
-		private void ProcessColumnAttribute(PropertyInfo property)
+		private void ProcessColumnAttribute(PropertyInfo property, IFactory factory)
 		{
 			var column = (ColumnAttribute)property.GetCustomAttribute(typeof(ColumnAttribute), false);
 			if (column == null) return;
@@ -99,7 +99,7 @@ namespace Kosson.KRUD.Meta
 			IsNotNull = column.IsNotNull;
 			if (column.HasDefaultValue)
 			{
-				var template = KORMContext.Current.Factory.Create(Record.Type);
+				var template = factory.Create(Record.Type);
 				DefaultValue = property.GetValue(template);
 			}
 		}
@@ -155,7 +155,7 @@ namespace Kosson.KRUD.Meta
 			SubqueryBuilder = subquery.Build;
 		}
 
-		private void ProcessInlineAttribute(PropertyInfo property)
+		private void ProcessInlineAttribute(PropertyInfo property, IFactory factory)
 		{
 			var inline = (InlineAttribute)property.GetCustomAttribute(typeof(InlineAttribute), false);
 			if (inline == null) return;
@@ -169,7 +169,7 @@ namespace Kosson.KRUD.Meta
 				InlinePrefix = inline.Prefix;
 			else
 				InlinePrefix = Record.DBPrefix + "_" + inline.Prefix;
-			InlineRecord = new MetaRecord(property.PropertyType, this);
+			InlineRecord = new MetaRecord(factory, property.PropertyType, this);
 		}
 
 		public override string ToString()

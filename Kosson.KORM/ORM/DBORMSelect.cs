@@ -15,13 +15,15 @@ namespace Kosson.KRUD.ORM
 		private IConverter converter;
 		private IRecordLoader recordLoader;
 		private IFactory factory;
+		private LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader;
 
-		public DBQuerySelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IRecordLoader recordLoader, IFactory factory) 
+		public DBQuerySelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IRecordLoader recordLoader, IFactory factory, LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader) 
 			: base(db, metaBuilder)
 		{
 			this.converter = converter;
 			this.recordLoader = recordLoader;
 			this.factory = factory;
+			this.loaderFromReader = loaderFromReader;
 		}
 
 		protected override IDBSelect BuildCommand(IDBCommandBuilder cb)
@@ -108,7 +110,7 @@ namespace Kosson.KRUD.ORM
 		public IORMReader<TRecord> ExecuteReader()
 		{
 			var sql = command.ToString();
-			var reader = new DBORMReader<TRecord>(DB, sql, Parameters);
+			var reader = new DBORMReader<TRecord>(DB, factory, converter, loaderFromReader, sql, Parameters);
 			reader.PrepareReader();
 			return reader;
 		}
@@ -116,7 +118,7 @@ namespace Kosson.KRUD.ORM
 		public async Task<IORMReader<TRecord>> ExecuteReaderAsync()
 		{
 			var sql = command.ToString();
-			var reader = new DBORMReader<TRecord>(DB, sql, Parameters);
+			var reader = new DBORMReader<TRecord>(DB, factory, converter, loaderFromReader, sql, Parameters);
 			await reader.PrepareReaderAsync();
 			return reader;
 		}
