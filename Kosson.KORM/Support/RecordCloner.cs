@@ -18,8 +18,13 @@ namespace Kosson.KORM.Support
 
 		T IRecordCloner.Clone<T>(T source)
 		{
+			return (T)CloneImpl(source);
+		}
+
+		private object CloneImpl(object source)
+		{
 			if (source == null) return null;
-			var clone = factory.Create<T>();
+			var clone = factory.Create(source.GetType());
 			var fields = metaBuilder.Get(source.GetType()).Fields;
 			foreach (var field in fields)
 			{

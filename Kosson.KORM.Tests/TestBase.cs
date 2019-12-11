@@ -23,7 +23,7 @@ namespace Kosson.KRUD.Tests
 		{
 			var services = new ServiceCollection();
 			services.AddKORMServices<KRUD.MSSQL.SQLDB>();
-			services.AddSingleton<ILogger, Microsoft.Extensions.Logging.Abstractions.NullLogger>();
+			services.AddSingleton<ILogger>(Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
 
 			serviceProvider = services.BuildServiceProvider();
 			scope = serviceProvider.CreateScope();

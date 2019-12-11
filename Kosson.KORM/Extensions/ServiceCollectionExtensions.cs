@@ -17,6 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddSingleton<IMetaBuilder, Kosson.KRUD.Meta.ReflectionMetaBuilder>();
 			services.AddSingleton<IRecordLoader, Kosson.KRUD.RecordLoader.DynamicRecordLoader>();
 			services.AddSingleton<IBackupProvider, Kosson.KRUD.BackupProvider>();
+			services.AddSingleton<IRecordCloner, Kosson.KORM.Support.RecordCloner>();
 			services.AddScoped<IORM, Kosson.KRUD.ORM.DBORM>();
 			services.AddScoped<IDB, TDB>();
 				/*

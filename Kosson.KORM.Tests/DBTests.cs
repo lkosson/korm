@@ -76,10 +76,10 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		public void MultipleBeginTransactionComplete()
+		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		public void MultipleBeginTransactionFails()
 		{
 			Assert.IsFalse(DB.IsTransactionOpen);
-			DB.BeginTransaction();
 			DB.BeginTransaction();
 			DB.BeginTransaction();
 			Assert.IsTrue(DB.IsTransactionOpen);
@@ -88,35 +88,53 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void CommitCompletes()
 		{
+			DB.BeginTransaction();
 			DB.Commit();
 		}
 
 		[TestMethod]
 		public void RollbackCompletes()
 		{
+			DB.BeginTransaction();
 			DB.Rollback();
 		}
 
 		[TestMethod]
-		public void MultipleCommitsComplete()
+		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		public void CommitWithoutTransactionFails()
 		{
-			Assert.IsFalse(DB.IsTransactionOpen);
 			DB.Commit();
-			Assert.IsFalse(DB.IsTransactionOpen);
-			DB.Commit();
-			DB.Commit();
-			Assert.IsFalse(DB.IsTransactionOpen);
 		}
 
 		[TestMethod]
-		public void MultipleRollbacksComplete()
+		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		public void RollbackWithoutTransactionFails()
+		{
+			DB.Rollback();
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		public void MultipleCommitsFails()
 		{
 			Assert.IsFalse(DB.IsTransactionOpen);
+			DB.BeginTransaction();
+			Assert.IsTrue(DB.IsTransactionOpen);
+			DB.Commit();
+			Assert.IsFalse(DB.IsTransactionOpen);
+			DB.Commit();
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		public void MultipleRollbacksFails()
+		{
+			Assert.IsFalse(DB.IsTransactionOpen);
+			DB.BeginTransaction();
+			Assert.IsTrue(DB.IsTransactionOpen);
 			DB.Rollback();
 			Assert.IsFalse(DB.IsTransactionOpen);
 			DB.Rollback();
-			DB.Rollback();
-			Assert.IsFalse(DB.IsTransactionOpen);
 		}
 
 		[TestMethod]

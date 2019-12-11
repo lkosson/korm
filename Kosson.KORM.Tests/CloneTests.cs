@@ -22,6 +22,7 @@ namespace Kosson.KRUD.Tests
 			return Enumerable.Empty<Type>();
 		}
 
+		[TestInitialize]
 		public override void Init()
 		{
 			base.Init();
