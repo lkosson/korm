@@ -17,8 +17,8 @@ namespace Kosson.KRUD.Tests
 		public void CustomQuerySelect()
 		{
 			var record = new MainTestTable();
-			record.Insert();
-			var all = orm.Select<Table>().Execute();
+			ORM.Insert(record);
+			var all = ORM.Select<Table>().Execute();
 			Assert.IsNotNull(all);
 			var first = all.First();
 			Assert.AreNotEqual(0, first.ID);

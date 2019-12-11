@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
-using Kosson.Kontext;
 using System.Threading.Tasks;
 
 namespace Kosson.KRUD.Tests
@@ -20,10 +19,10 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			Assert.AreEqual(0, record.Value);
-			record.Insert();
+			ORM.Insert(record);
 			record.Value = INTMARKER;
-			await record.UpdateAsync();
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			await ORM.UpdateAsync(record);
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.AreEqual(INTMARKER, retrieved.Value);
 		}
 
@@ -32,10 +31,10 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			Assert.AreEqual(0, record.Value);
-			record.Insert();
+			ORM.Insert(record);
 			record.Value = INTMARKER;
-			record.Update();
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			ORM.Update(record);
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.AreEqual(INTMARKER, retrieved.Value);
 		}
 
@@ -44,12 +43,12 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			Assert.AreEqual(0, record.Value);
-			record.Insert();
+			ORM.Insert(record);
 			record.Value = INTMARKER;
-			record.Update();
+			ORM.Update(record);
 			record.Value = 0;
-			record.Update();
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			ORM.Update(record);
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.AreEqual(0, retrieved.Value);
 		}
 
@@ -62,10 +61,10 @@ namespace Kosson.KRUD.Tests
 					new MainTestTable(),
 					new MainTestTable()
 				};
-			records.StoreAll();
+			ORM.StoreAll(records);
 			foreach (var record in records) record.Value = INTMARKER;
-			records.StoreAll();
-			var retrieved = orm.Select<MainTestTable>().WhereFieldEquals("Value", INTMARKER).Execute();
+			ORM.StoreAll(records);
+			var retrieved = ORM.Select<MainTestTable>().WhereFieldEquals("Value", INTMARKER).Execute();
 			Assert.AreEqual(3, retrieved.Count());
 		}
 
@@ -74,9 +73,9 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			Assert.AreEqual(0, record.Value);
-			record.Insert();
-			orm.Update<MainTestTable>().Set("Value", INTMARKER).ByID(record.ID);
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			ORM.Insert(record);
+			ORM.Update<MainTestTable>().Set("Value", INTMARKER).ByID(record.ID);
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.AreEqual(INTMARKER, retrieved.Value);
 		}
 
@@ -85,11 +84,11 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			Assert.AreEqual(0, record.Value);
-			record.Store();
+			ORM.Store(record);
 			Assert.AreNotEqual(0, record.ID);
 			record.Value = INTMARKER;
-			record.Store();
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			ORM.Store(record);
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.AreEqual(INTMARKER, retrieved.Value);
 		}
 
@@ -98,10 +97,10 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			Assert.AreEqual(0, record.Value);
-			record.Insert();
-			var count = orm.Update<MainTestTable>().Set("Value", INTMARKER).WhereFieldEquals("Value", 0).Execute();
+			ORM.Insert(record);
+			var count = ORM.Update<MainTestTable>().Set("Value", INTMARKER).WhereFieldEquals("Value", 0).Execute();
 			Assert.AreEqual(1, count);
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.AreEqual(INTMARKER, retrieved.Value);
 		}
 
@@ -110,10 +109,10 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			Assert.AreEqual(0, record.ReadOnly);
-			record.Insert();
+			ORM.Insert(record);
 			record.ReadOnly = INTMARKER;
-			record.Update();
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			ORM.Update(record);
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.AreEqual(0, retrieved.Value);
 		}
 
@@ -122,12 +121,12 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			Assert.AreEqual(0, record.ReadOnly);
-			record.Insert();
+			ORM.Insert(record);
 
-			var count = orm.Update<MainTestTable>().Set("ReadOnly", INTMARKER).Execute();
+			var count = ORM.Update<MainTestTable>().Set("ReadOnly", INTMARKER).Execute();
 			Assert.AreEqual(1, count);
 
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.AreEqual(INTMARKER, retrieved.ReadOnly);
 		}
 	}

@@ -16,7 +16,7 @@ namespace Kosson.KRUD.Tests
 		public void ForeignKeyAcceptsNulls()
 		{
 			var record = new Table1();
-			record.Insert();
+			ORM.Insert(record);
 		}
 
 		[TestMethod]
@@ -24,7 +24,7 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new Table1();
 			record.FKRef = 0;
-			record.Insert();
+			ORM.Insert(record);
 		}
 
 		[TestMethod]
@@ -32,7 +32,7 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new Table1();
 			record.FKRef = null;
-			record.Insert();
+			ORM.Insert(record);
 		}
 
 		[TestMethod]
@@ -40,11 +40,11 @@ namespace Kosson.KRUD.Tests
 		{
 			var record1 = new Table1();
 			var record2 = new Table2();
-			record2.Insert();
+			ORM.Insert(record2);
 			record1.FKCascade = record2;
-			record1.Insert();
-			record2.Delete();
-			var retrieved = orm.Select<Table1>().ByID(record1.ID);
+			ORM.Insert(record1);
+			ORM.Delete(record2);
+			var retrieved = ORM.Select<Table1>().ByID(record1.ID);
 			Assert.IsNull(retrieved);
 		}
 
@@ -54,10 +54,10 @@ namespace Kosson.KRUD.Tests
 		{
 			var record1 = new Table1();
 			var record2 = new Table2();
-			record2.Insert();
+			ORM.Insert(record2);
 			record1.FKNone = record2;
-			record1.Insert();
-			record2.Delete();
+			ORM.Insert(record1);
+			ORM.Delete(record2);
 		}
 
 		[TestMethod]
@@ -66,7 +66,7 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new Table1();
 			record.FKRef = -123;
-			record.Insert();
+			ORM.Insert(record);
 		}
 
 		[TestMethod]
@@ -74,9 +74,9 @@ namespace Kosson.KRUD.Tests
 		{
 			var record1 = new Table1();
 			var record2 = new Table2();
-			record2.Insert();
+			ORM.Insert(record2);
 			record1.FKRef = record2.ID;
-			record1.Insert();
+			ORM.Insert(record1);
 		}
 
 		[TestMethod]
@@ -85,10 +85,10 @@ namespace Kosson.KRUD.Tests
 			var record1 = new Table1();
 			var record2 = new Table2();
 			record2.Value = INTMARKER;
-			record2.Insert();
+			ORM.Insert(record2);
 			record1.FKCascade = record2;
-			record1.Insert();
-			var retrieved = orm.Select<Table1>().ByID(record1.ID);
+			ORM.Insert(record1);
+			var retrieved = ORM.Select<Table1>().ByID(record1.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.IsNotNull(retrieved.FKCascade);
 			Assert.IsNull(retrieved.FKNone);
@@ -100,8 +100,8 @@ namespace Kosson.KRUD.Tests
 		public void ForeignKeyRetrievesNull()
 		{
 			var record1 = new Table1();
-			record1.Insert();
-			var retrieved = orm.Select<Table1>().ByID(record1.ID);
+			ORM.Insert(record1);
+			var retrieved = ORM.Select<Table1>().ByID(record1.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.IsNull(retrieved.FKCascade);
 			Assert.IsNull(retrieved.FKNone);
@@ -113,10 +113,10 @@ namespace Kosson.KRUD.Tests
 			var record1 = new Table1();
 			var record2 = new Table2();
 			record2.Value = INTMARKER;
-			record2.Insert();
+			ORM.Insert(record2);
 			record1.FKRef = record2.ID;
-			record1.Insert();
-			var retrieved = orm.Select<Table1>().ByID(record1.ID);
+			ORM.Insert(record1);
+			var retrieved = ORM.Select<Table1>().ByID(record1.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.IsNotNull(retrieved.FKRef);
 			Assert.AreEqual(record2.ID, retrieved.FKRef.ID);

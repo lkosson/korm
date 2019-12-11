@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
-using Kosson.Kontext;
 
 namespace Kosson.KRUD.Tests
 {
@@ -17,13 +16,13 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void IndexIsCreated()
 		{
-			orm.CreateTables(new[] { typeof(TableWithIndex) });
+			ORM.CreateTables(new[] { typeof(TableWithIndex) });
 		}
 
 		[TestMethod]
 		public void CoveringIndexIsCreated()
 		{
-			orm.CreateTables(new[] { typeof(TableWithCoveringIndex) });
+			ORM.CreateTables(new[] { typeof(TableWithCoveringIndex) });
 		}
 
 		[Table]

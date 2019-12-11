@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
-using Kosson.Kontext;
 
 namespace Kosson.KRUD.Tests
 {

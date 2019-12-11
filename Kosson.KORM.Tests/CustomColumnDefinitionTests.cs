@@ -22,7 +22,7 @@ namespace Kosson.KRUD.Tests
 			insert.Column(cb.Identifier(meta.GetField("Value2").DBName), cb.Const(123.456));
 			DB.ExecuteNonQuery(insert.ToString());
 
-			var retrieved = orm.Select<Table>().WhereFieldEquals("Value1", 123).ExecuteFirst();
+			var retrieved = ORM.Select<Table>().WhereFieldEquals("Value1", 123).ExecuteFirst();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(123, retrieved.Value2);
 		}

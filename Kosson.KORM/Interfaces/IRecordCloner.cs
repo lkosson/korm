@@ -7,6 +7,6 @@ namespace Kosson.Interfaces
 {
 	public interface IRecordCloner
 	{
-		object Clone(object source);
+		T Clone<T>(T source) where T : class, new();
 	}
 }

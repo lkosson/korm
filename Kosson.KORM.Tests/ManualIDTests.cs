@@ -17,9 +17,9 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new Table();
 			record.ID = INTMARKER;
-			record.Insert();
+			ORM.Insert(record);
 			Assert.AreEqual(INTMARKER, record.ID);
-			var retrieved = orm.Select<Table>().ByID(INTMARKER);
+			var retrieved = ORM.Select<Table>().ByID(INTMARKER);
 			Assert.IsNotNull(retrieved);
 		}
 

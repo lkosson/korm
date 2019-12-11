@@ -20,8 +20,8 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new T();
 			record.Value = value;
-			record.Insert();
-			var retrieved = orm.Select<T>().ByID(record.ID);
+			ORM.Insert(record);
+			var retrieved = ORM.Select<T>().ByID(record.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(record.ID, retrieved.ID);
 			Assert.IsNotNull(retrieved.Value);

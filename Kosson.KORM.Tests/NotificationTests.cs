@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
-using Kosson.Kontext;
 
 namespace Kosson.KRUD.Tests
 {
@@ -19,7 +18,7 @@ namespace Kosson.KRUD.Tests
 			var record = new Table();
 			Assert.IsFalse(record.OnInsertCalled);
 			Assert.IsFalse(record.OnInsertedCalled);
-			record.Insert();
+			ORM.Insert(record);
 			Assert.IsTrue(record.OnInsertCalled);
 			Assert.IsTrue(record.OnInsertedCalled);
 		}
@@ -30,7 +29,7 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new Table();
 			record.NotifyBeforeResult = RecordNotifyResult.Break;
-			record.Insert();
+			ORM.Insert(record);
 		}
 
 		[TestMethod]
@@ -40,7 +39,7 @@ namespace Kosson.KRUD.Tests
 			record.NotifyBeforeResult = RecordNotifyResult.Break;
 			Assert.IsFalse(record.OnInsertCalled);
 			Assert.IsFalse(record.OnInsertedCalled);
-			int count = Context.Current.Get<IORM>().Insert<Table>().Records(new[] { record });
+			int count = ORM.Insert<Table>().Records(new[] { record });
 			Assert.IsTrue(record.OnInsertCalled);
 			Assert.IsFalse(record.OnInsertedCalled);
 			Assert.AreEqual(0, count);
@@ -54,7 +53,7 @@ namespace Kosson.KRUD.Tests
 			record.NotifyAfterResult = RecordNotifyResult.Break;
 			Assert.IsFalse(record.OnInsertCalled);
 			Assert.IsFalse(record.OnInsertedCalled);
-			int count = Context.Current.Get<IORM>().Insert<Table>().Records(new[] { record, record });
+			int count = ORM.Insert<Table>().Records(new[] { record, record });
 			Assert.IsTrue(record.OnInsertCalled);
 			Assert.IsTrue(record.OnInsertedCalled);
 			Assert.AreEqual(1, count);
@@ -66,10 +65,10 @@ namespace Kosson.KRUD.Tests
 		public void UpdateNotificationsCalled()
 		{
 			var record = new Table();
-			record.Insert();
+			ORM.Insert(record);
 			Assert.IsFalse(record.OnUpdateCalled);
 			Assert.IsFalse(record.OnUpdatedCalled);
-			record.Update();
+			ORM.Update(record);
 			Assert.IsTrue(record.OnUpdateCalled);
 			Assert.IsTrue(record.OnUpdatedCalled);
 		}
@@ -79,22 +78,22 @@ namespace Kosson.KRUD.Tests
 		public void UpdateBeforeNotificationsResultThrowsException()
 		{
 			var record = new Table();
-			record.Insert();
+			ORM.Insert(record);
 			record.NotifyBeforeResult = RecordNotifyResult.Break;
-			record.Update();
+			ORM.Update(record);
 		}
 
 		[TestMethod]
 		public void UpdateBeforeNotificationsResultRespected()
 		{
 			var record = new Table();
-			record.Insert();
+			ORM.Insert(record);
 			record.NotifyBeforeResult = RecordNotifyResult.Break;
 			Assert.IsFalse(record.OnUpdateCalled);
 			Assert.IsFalse(record.OnUpdatedCalled);
 			record.Value = INTMARKER;
-			var count = Context.Current.Get<IORM>().Update<Table>().Records(new[] { record });
-			var retrieved = orm.Select<Table>().ByID(record.ID);
+			var count = ORM.Update<Table>().Records(new[] { record });
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
 			Assert.IsTrue(record.OnUpdateCalled);
 			Assert.IsFalse(record.OnUpdatedCalled);
 			Assert.AreEqual(0, count);
@@ -106,11 +105,11 @@ namespace Kosson.KRUD.Tests
 		public void UpdateAfterNotificationsResultRespected()
 		{
 			var record = new Table();
-			record.Insert();
+			ORM.Insert(record);
 			record.NotifyAfterResult = RecordNotifyResult.Break;
 			Assert.IsFalse(record.OnUpdateCalled);
 			Assert.IsFalse(record.OnUpdatedCalled);
-			int count = Context.Current.Get<IORM>().Update<Table>().Records(new[] { record, record });
+			int count = ORM.Update<Table>().Records(new[] { record, record });
 			Assert.IsTrue(record.OnUpdateCalled);
 			Assert.IsTrue(record.OnUpdatedCalled);
 			Assert.AreEqual(1, count);
@@ -121,10 +120,10 @@ namespace Kosson.KRUD.Tests
 		public void DeleteNotificationsCalled()
 		{
 			var record = new Table();
-			record.Insert();
+			ORM.Insert(record);
 			Assert.IsFalse(record.OnDeleteCalled);
 			Assert.IsFalse(record.OnDeletedCalled);
-			record.Delete();
+			ORM.Delete(record);
 			Assert.IsTrue(record.OnDeleteCalled);
 			Assert.IsTrue(record.OnDeletedCalled);
 		}
@@ -134,21 +133,21 @@ namespace Kosson.KRUD.Tests
 		public void DeleteBeforeNotificationsResultThrowsException()
 		{
 			var record = new Table();
-			record.Insert();
+			ORM.Insert(record);
 			record.NotifyBeforeResult = RecordNotifyResult.Break;
-			record.Delete();
+			ORM.Delete(record);
 		}
 
 		[TestMethod]
 		public void DeleteBeforeNotificationsResultRespected()
 		{
 			var record = new Table();
-			record.Insert();
+			ORM.Insert(record);
 			record.NotifyBeforeResult = RecordNotifyResult.Break;
 			Assert.IsFalse(record.OnDeleteCalled);
 			Assert.IsFalse(record.OnDeletedCalled);
-			var count = Context.Current.Get<IORM>().Delete<Table>().Records(new[] { record });
-			var retrieved = orm.Select<Table>().ByID(record.ID);
+			var count = ORM.Delete<Table>().Records(new[] { record });
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
 			Assert.IsTrue(record.OnDeleteCalled);
 			Assert.IsFalse(record.OnDeletedCalled);
 			Assert.AreEqual(0, count);
@@ -159,12 +158,12 @@ namespace Kosson.KRUD.Tests
 		public void DeleteAfterNotificationsResultRespected()
 		{
 			var record = new Table();
-			record.Insert();
+			ORM.Insert(record);
 			record.NotifyAfterResult = RecordNotifyResult.Break;
 			Assert.IsFalse(record.OnDeleteCalled);
 			Assert.IsFalse(record.OnDeletedCalled);
-			var count = Context.Current.Get<IORM>().Delete<Table>().Records(new[] { record });
-			var retrieved = orm.Select<Table>().ByID(record.ID);
+			var count = ORM.Delete<Table>().Records(new[] { record });
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
 			Assert.IsTrue(record.OnDeleteCalled);
 			Assert.IsTrue(record.OnDeletedCalled);
 			Assert.AreEqual(1, count);
@@ -176,10 +175,10 @@ namespace Kosson.KRUD.Tests
 		public void SelectNotificationCalled()
 		{
 			var record = new Table();
-			record.Insert();
+			ORM.Insert(record);
 			Assert.IsFalse(record.OnSelectCalled);
 			Assert.IsFalse(record.OnSelectedCalled);
-			record = orm.Select<Table>().ByID(record.ID);
+			record = ORM.Select<Table>().ByID(record.ID);
 			Assert.IsTrue(record.OnSelectCalled);
 			Assert.IsTrue(record.OnSelectedCalled);
 		}

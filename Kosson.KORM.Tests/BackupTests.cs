@@ -5,18 +5,20 @@ using Kosson.Interfaces;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kosson.KRUD.Tests
 {
 	[TestClass]
 	public abstract partial class BackupTests : ORMTestsBase
 	{
+		protected IBackupProvider BackupProvider { get; private set; }
+
 		[TestInitialize]
 		public override void Init()
 		{
 			base.Init();
-			Context.Current.Add<IPropertyBinder>(new Kosson.Kore.PropertyBinder.ReflectionPropertyBinder());
-			Context.Current.Add<IBackupProvider>(new Kosson.KRUD.BackupProvider());
+			BackupProvider = ServiceProvider.GetRequiredService<IBackupProvider>();
 		}
 
 		protected override System.Collections.Generic.IEnumerable<Type> Tables()
@@ -31,9 +33,8 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void BackupCompletes()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var writer = new MockBackupWriter();
-			using (var set = provider.CreateBackupSet(writer))
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 			}
 		}
@@ -41,11 +42,10 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RecordsAreBackedUp()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var writer = new MockBackupWriter();
 			var r1 = new MainTestTable { ID = MainTestTable.DEFAULTVALUE };
 			var r2 = new TableReferenced { ID = MainTestTable.DEFAULTVALUE };
-			using (var set = provider.CreateBackupSet(writer))
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddRecords(new Record[] { r1, r2 });
 			}
@@ -56,13 +56,12 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void TablesAreBackedUp()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var writer = new MockBackupWriter();
-			new MainTestTable().Store();
-			new MainTestTable().Store();
-			new TableReferenced().Store();
-			new TableReferenced().Store();
-			using (var set = provider.CreateBackupSet(writer))
+			ORM.Store(new MainTestTable());
+			ORM.Store(new MainTestTable());
+			ORM.Store(new TableReferenced());
+			ORM.Store(new TableReferenced());
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddTable(typeof(MainTestTable));
 				set.AddTable(typeof(TableReferenced));
@@ -74,17 +73,16 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void ReferencedRecordsAreIncluded()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var writer = new MockBackupWriter();
 			var r1 = new TableReferenced();
 			var r2 = new TableReferenced();
-			r1.Store();
-			r2.Store();
+			ORM.Store(r1);
+			ORM.Store(r2);
 			var r3 = new TableReferencing { FKNone = r1 };
 			var r4 = new TableReferencing { FKRef = r1 };
-			r3.Store();
-			r4.Store();
-			using (var set = provider.CreateBackupSet(writer))
+			ORM.Store(r3);
+			ORM.Store(r4);
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddTable(typeof(TableReferencing));
 			}
@@ -97,16 +95,15 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void CyclicReferencedRecordsAreIncluded()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var writer = new MockBackupWriter();
 			var r1 = new TableCyclic1();
 			var r2 = new TableCyclic1();
-			r1.Store();
-			r2.Store();
+			ORM.Store(r1);
+			ORM.Store(r2);
 			var r3 = new TableCyclic2();
 			var r4 = new TableCyclic2(); 
-			r3.Store();
-			r4.Store();
+			ORM.Store(r3);
+			ORM.Store(r4);
 
 			r1.Other = r3;
 			r1.Self = r2;
@@ -115,12 +112,12 @@ namespace Kosson.KRUD.Tests
 			r3.Other = r2;
 			r4.Other = r1;
 
-			r1.Store();
-			r2.Store();
-			r3.Store();
-			r4.Store();
+			ORM.Store(r1);
+			ORM.Store(r2);
+			ORM.Store(r3);
+			ORM.Store(r4);
 
-			using (var set = provider.CreateBackupSet(writer))
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddTable(typeof(TableCyclic1));
 			}
@@ -133,51 +130,48 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void TableIsCleared()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
-			new MainTestTable().Store();
-			new MainTestTable().Store();
-			provider.ClearTables(new[] { typeof(MainTestTable) });
-			var res = Context.Current.Get<IORM>().Select<MainTestTable>().Execute();
+			ORM.Store(new MainTestTable());
+			ORM.Store(new MainTestTable());
+			BackupProvider.ClearTables(new[] { typeof(MainTestTable) });
+			var res = ORM.Select<MainTestTable>().Execute();
 			Assert.AreEqual(0, res.Count);
 		}
 
 		[TestMethod]
 		public void ReferencingTableIsCleared()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var r1 = new TableReferenced();
 			var r2 = new TableReferenced();
-			r1.Store();
-			r2.Store();
+			ORM.Store(r1);
+			ORM.Store(r2);
 			var r3 = new TableReferencing();
 			r3.FKNone = r1;
-			r3.Store();
+			ORM.Store(r3);
 
-			provider.ClearTables(new[] { typeof(TableReferenced), typeof(TableReferencing) });
-			var res = Context.Current.Get<IORM>().Select<TableReferencing>().Execute();
+			BackupProvider.ClearTables(new[] { typeof(TableReferenced), typeof(TableReferencing) });
+			var res = ORM.Select<TableReferencing>().Execute();
 			Assert.AreEqual(0, res.Count);
 		}
 
 		[TestMethod]
 		public void RecordsAreRestored()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var writer = new MockBackupWriter();
 			var r1 = new MainTestTable { Value = MainTestTable.DEFAULTVALUE };
 			var r2 = new TableReferenced { Value = MainTestTable.DEFAULTVALUE };
-			r1.Store();
-			r2.Store();
-			using (var set = provider.CreateBackupSet(writer))
+			ORM.Store(r1);
+			ORM.Store(r2);
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddRecords(new Record[] { r1, r2 });
 			}
 
-			provider.ClearTables(new[] { typeof(MainTestTable), typeof(TableReferenced) });
+			BackupProvider.ClearTables(new[] { typeof(MainTestTable), typeof(TableReferenced) });
 
 			var reader = writer.CreateReader();
-			provider.Restore(reader);
-			var res1 = Context.Current.Get<IORM>().Select<MainTestTable>().Execute();
-			var res2 = Context.Current.Get<IORM>().Select<TableReferenced>().Execute();
+			BackupProvider.Restore(reader);
+			var res1 = ORM.Select<MainTestTable>().Execute();
+			var res2 = ORM.Select<TableReferenced>().Execute();
 			Assert.AreEqual(1, res1.Count);
 			Assert.AreEqual(1, res2.Count);
 			Assert.AreEqual(r1.Value, res1.First().Value);
@@ -187,24 +181,23 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void TablesAreRestored()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var writer = new MockBackupWriter();
-			new MainTestTable().Store();
-			new MainTestTable().Store();
-			new TableReferenced().Store();
-			new TableReferenced().Store();
-			using (var set = provider.CreateBackupSet(writer))
+			ORM.Store(new MainTestTable());
+			ORM.Store(new MainTestTable());
+			ORM.Store(new TableReferenced());
+			ORM.Store(new TableReferenced());
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddTable(typeof(MainTestTable));
 				set.AddTable(typeof(TableReferenced));
 			}
 
-			provider.ClearTables(new[] { typeof(MainTestTable), typeof(TableReferenced) });
+			BackupProvider.ClearTables(new[] { typeof(MainTestTable), typeof(TableReferenced) });
 
 			var reader = writer.CreateReader();
-			provider.Restore(reader);
-			var res1 = Context.Current.Get<IORM>().Select<MainTestTable>().Execute();
-			var res2 = Context.Current.Get<IORM>().Select<TableReferenced>().Execute();
+			BackupProvider.Restore(reader);
+			var res1 = ORM.Select<MainTestTable>().Execute();
+			var res2 = ORM.Select<TableReferenced>().Execute();
 			Assert.AreEqual(2, res1.Count);
 			Assert.AreEqual(2, res2.Count);
 		}
@@ -212,28 +205,27 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void ReferencedRecordsAreRestored()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var writer = new MockBackupWriter();
 			var r1 = new TableReferenced();
 			var r2 = new TableReferenced();
-			r1.Store();
-			r2.Store();
+			ORM.Store(r1);
+			ORM.Store(r2);
 			var r3 = new TableReferencing { FKNone = r1 };
 			var r4 = new TableReferencing { FKRef = r1 };
-			r3.Store();
-			r4.Store();
-			using (var set = provider.CreateBackupSet(writer))
+			ORM.Store(r3);
+			ORM.Store(r4);
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddTable(typeof(TableReferencing));
 			}
 
-			provider.ClearTables(new[] { typeof(TableReferencing), typeof(TableReferenced) });
+			BackupProvider.ClearTables(new[] { typeof(TableReferencing), typeof(TableReferenced) });
 
 			var reader = writer.CreateReader();
-			provider.Restore(reader);
+			BackupProvider.Restore(reader);
 
-			var res1 = Context.Current.Get<IORM>().Select<TableReferencing>().Execute();
-			var res2 = Context.Current.Get<IORM>().Select<TableReferenced>().Execute();
+			var res1 = ORM.Select<TableReferencing>().Execute();
+			var res2 = ORM.Select<TableReferenced>().Execute();
 			Assert.AreEqual(2, res1.Count);
 			Assert.AreEqual(2, res2.Count);
 			Assert.IsTrue(res2.Any(r => res1.Any(rx => rx.FKNone.ID == r.ID)));
@@ -243,16 +235,15 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void CyclicReferencedRecordsAreRestored()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var writer = new MockBackupWriter();
 			var r1 = new TableCyclic1();
 			var r2 = new TableCyclic1();
-			r1.Store();
-			r2.Store();
+			ORM.Store(r1);
+			ORM.Store(r2);
 			var r3 = new TableCyclic2();
 			var r4 = new TableCyclic2();
-			r3.Store();
-			r4.Store();
+			ORM.Store(r3);
+			ORM.Store(r4);
 
 			r1.Other = r3;
 			r1.Self = r2;
@@ -265,23 +256,23 @@ namespace Kosson.KRUD.Tests
 			r4.Other = r1;
 			r4.Value = INTMARKER + 3;
 
-			r1.Store();
-			r2.Store();
-			r3.Store();
-			r4.Store();
+			ORM.Store(r1);
+			ORM.Store(r2);
+			ORM.Store(r3);
+			ORM.Store(r4);
 
-			using (var set = provider.CreateBackupSet(writer))
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddTable(typeof(TableCyclic1));
 			}
 
-			provider.ClearTables(new[] { typeof(TableCyclic1), typeof(TableCyclic2) });
+			BackupProvider.ClearTables(new[] { typeof(TableCyclic1), typeof(TableCyclic2) });
 
 			var reader = writer.CreateReader();
-			provider.Restore(reader);
+			BackupProvider.Restore(reader);
 
-			var res1 = Context.Current.Get<IORM>().Select<TableCyclic1>().Execute();
-			var res2 = Context.Current.Get<IORM>().Select<TableCyclic2>().Execute();
+			var res1 = ORM.Select<TableCyclic1>().Execute();
+			var res2 = ORM.Select<TableCyclic2>().Execute();
 
 			Assert.AreEqual(2, res1.Count);
 			Assert.AreEqual(2, res2.Count);
@@ -302,17 +293,16 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void CyclicReferencedRecordsAreRestoredXML()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var ms = new MemoryStream();
-			var writer = new XMLBackupWriter(ms);
+			var writer = ActivatorUtilities.CreateInstance<XMLBackupWriter>(ServiceProvider, ms);
 			var r1 = new TableCyclic1();
 			var r2 = new TableCyclic1();
-			r1.Store();
-			r2.Store();
+			ORM.Store(r1);
+			ORM.Store(r2);
 			var r3 = new TableCyclic2();
 			var r4 = new TableCyclic2();
-			r3.Store();
-			r4.Store();
+			ORM.Store(r3);
+			ORM.Store(r4);
 
 			r1.Other = r3;
 			r1.Self = r2;
@@ -325,24 +315,24 @@ namespace Kosson.KRUD.Tests
 			r4.Other = r1;
 			r4.Value = INTMARKER + 3;
 
-			r1.Store();
-			r2.Store();
-			r3.Store();
-			r4.Store();
+			ORM.Store(r1);
+			ORM.Store(r2);
+			ORM.Store(r3);
+			ORM.Store(r4);
 
-			using (var set = provider.CreateBackupSet(writer))
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddTable(typeof(TableCyclic1));
 			}
 
-			provider.ClearTables(new[] { typeof(TableCyclic1), typeof(TableCyclic2) });
+			BackupProvider.ClearTables(new[] { typeof(TableCyclic1), typeof(TableCyclic2) });
 
 			ms.Position = 0;
 			var reader = new XMLBackupReader(ms);
-			provider.Restore(reader);
+			BackupProvider.Restore(reader);
 
-			var res1 = Context.Current.Get<IORM>().Select<TableCyclic1>().Execute();
-			var res2 = Context.Current.Get<IORM>().Select<TableCyclic2>().Execute();
+			var res1 = ORM.Select<TableCyclic1>().Execute();
+			var res2 = ORM.Select<TableCyclic2>().Execute();
 
 			Assert.AreEqual(2, res1.Count);
 			Assert.AreEqual(2, res2.Count);
@@ -363,20 +353,19 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void DuplicatedIDsAreReplaced()
 		{
-			var provider = Context.Current.Get<IBackupProvider>();
 			var writer = new MockBackupWriter();
 
 			var r = new MainTestTable();
-			r.Store();
+			ORM.Store(r);
 
-			using (var set = provider.CreateBackupSet(writer))
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddRecords(new Record[] { r });
 			}
 
 			var reader = writer.CreateReader();
-			provider.Restore(reader);
-			var res = Context.Current.Get<IORM>().Select<MainTestTable>().Execute();
+			BackupProvider.Restore(reader);
+			var res = ORM.Select<MainTestTable>().Execute();
 
 			Assert.AreEqual(2, res.Count);
 			Assert.IsNotNull(res.ByID(r.ID));
@@ -386,8 +375,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void PrimaryKeyIsRestoredWhereSupported()
 		{
-			if (!Context.Current.Get<IDB>().CommandBuilder.SupportsPrimaryKeyInsert) Assert.Inconclusive("Database does not support specifying primary key value.");
-			var provider = Context.Current.Get<IBackupProvider>();
+			if (!DB.CommandBuilder.SupportsPrimaryKeyInsert) Assert.Inconclusive("Database does not support specifying primary key value.");
 			var writer = new MockBackupWriter();
 
 			var r1 = new MainTestTable() { ID = 101, Value = 1 };
@@ -396,16 +384,16 @@ namespace Kosson.KRUD.Tests
 			var r4 = new MainTestTable() { ID = 104, Value = 4 };
 			var r5 = new MainTestTable() { ID = 105, Value = 5 };
 
-			using (var set = provider.CreateBackupSet(writer))
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddRecords(new Record[] { r2, r3, r4, r1, r5 });
 			}
 
-			provider.ClearTables(new[] { typeof(MainTestTable) });
+			BackupProvider.ClearTables(new[] { typeof(MainTestTable) });
 
 			var reader = writer.CreateReader();
-			provider.Restore(reader);
-			var res = Context.Current.Get<IORM>().Select<MainTestTable>().Execute();
+			BackupProvider.Restore(reader);
+			var res = ORM.Select<MainTestTable>().Execute();
 			Assert.AreEqual(5, res.Count);
 			Assert.IsNotNull(res.ByID(101));
 			Assert.IsNotNull(res.ByID(102));
@@ -422,8 +410,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void PrimaryKeyLowerThanCurrentIsRestoredWhereSupported()
 		{
-			if (!Context.Current.Get<IDB>().CommandBuilder.SupportsPrimaryKeyInsert) Assert.Inconclusive("Database does not support specifying primary key value.");
-			var provider = Context.Current.Get<IBackupProvider>();
+			if (!DB.CommandBuilder.SupportsPrimaryKeyInsert) Assert.Inconclusive("Database does not support specifying primary key value.");
 			var writer = new MockBackupWriter();
 
 			var r1 = new MainTestTable() { Value = 1 };
@@ -432,18 +419,18 @@ namespace Kosson.KRUD.Tests
 			var r4 = new MainTestTable() { Value = 4 };
 			var r5 = new MainTestTable() { Value = 5 };
 
-			orm.Insert<MainTestTable>().Records(new MainTestTable[] { r2, r3, r4, r1, r5 });
+			ORM.Insert<MainTestTable>().Records(new MainTestTable[] { r2, r3, r4, r1, r5 });
 
-			using (var set = provider.CreateBackupSet(writer))
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddTable(typeof(MainTestTable));
 			}
 
-			provider.ClearTables(new[] { typeof(MainTestTable) });
+			BackupProvider.ClearTables(new[] { typeof(MainTestTable) });
 
 			var reader = writer.CreateReader();
-			provider.Restore(reader);
-			var res = Context.Current.Get<IORM>().Select<MainTestTable>().Execute();
+			BackupProvider.Restore(reader);
+			var res = ORM.Select<MainTestTable>().Execute();
 			Assert.AreEqual(5, res.Count);
 			Assert.IsNotNull(res.ByID(r1.ID));
 			Assert.IsNotNull(res.ByID(r2.ID));
@@ -460,31 +447,30 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void PrimaryKeyAndForeignKeyIsRestoredWhereSupported()
 		{
-			if (!Context.Current.Get<IDB>().CommandBuilder.SupportsPrimaryKeyInsert) Assert.Inconclusive("Database does not support specifying primary key value.");
-			var provider = Context.Current.Get<IBackupProvider>();
+			if (!DB.CommandBuilder.SupportsPrimaryKeyInsert) Assert.Inconclusive("Database does not support specifying primary key value.");
 			var writer = new MockBackupWriter();
 
 			// force IDs to start from greater than 1
-			new TableReferenced().Store();
-			new TableReferenced().Store();
-			new TableReferenced().Store();
-			new TableReferencing().Store();
+			ORM.Store(new TableReferenced());
+			ORM.Store(new TableReferenced());
+			ORM.Store(new TableReferenced());
+			ORM.Store(new TableReferencing());
 
 			var r1 = new TableReferenced { Value = MainTestTable.DEFAULTVALUE };
-			r1.Store();
+			ORM.Store(r1);
 			var r2 = new TableReferencing { FKCascade = r1 };
-			r2.Store();
-			using (var set = provider.CreateBackupSet(writer))
+			ORM.Store(r2);
+			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 				set.AddRecords(new Record[] { r1, r2 });
 			}
 
-			provider.ClearTables(new[] { typeof(TableReferencing), typeof(TableReferenced) });
+			BackupProvider.ClearTables(new[] { typeof(TableReferencing), typeof(TableReferenced) });
 
 			var reader = writer.CreateReader();
-			provider.Restore(reader);
-			var res1 = Context.Current.Get<IORM>().Select<TableReferenced>().Execute().FirstOrDefault();
-			var res2 = Context.Current.Get<IORM>().Select<TableReferencing>().Execute().FirstOrDefault();
+			BackupProvider.Restore(reader);
+			var res1 = ORM.Select<TableReferenced>().Execute().FirstOrDefault();
+			var res2 = ORM.Select<TableReferencing>().Execute().FirstOrDefault();
 			Assert.IsNotNull(res1);
 			Assert.IsNotNull(res2);
 			Assert.AreEqual(r1.ID, res1.ID);
@@ -544,6 +530,7 @@ namespace Kosson.KRUD.Tests
 
 		class MockBackupWriter : IBackupWriter
 		{
+			private IRecordCloner recordCloner;
 			public List<Record> Records { get; private set; }
 
 			public MockBackupWriter()
@@ -553,7 +540,7 @@ namespace Kosson.KRUD.Tests
 
 			public void WriteRecord(IRecord record)
 			{
-				Records.Add(((Record)record).Clone());
+				Records.Add(recordCloner.Clone((Record)record));
 			}
 
 			public IBackupReader CreateReader()

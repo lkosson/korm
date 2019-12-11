@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kosson.KRUD.Tests
 {
@@ -11,32 +12,38 @@ namespace Kosson.KRUD.Tests
 	{
 		protected abstract string Provider { get; }
 		protected virtual bool NeedsDatabase { get { return true; } }
-		//private IScope
+		private IServiceScope scope;
+		private IServiceProvider serviceProvider;
 		protected IDB DB { get; private set; }
-		protected IORM ORM { get; private set; }
 		protected IMetaBuilder MetaBuilder { get; private set; }
+		protected IServiceProvider ServiceProvider { get; private set; }
 
 		[TestInitialize]
 		public virtual void Init()
 		{
-			var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+			var services = new ServiceCollection();
 			services.AddKORMServices<KRUD.MSSQL.SQLDB>();
 			services.AddSingleton<ILogger, Microsoft.Extensions.Logging.Abstractions.NullLogger>();
 
-			var sp = services.BuildServiceProvider();
+			serviceProvider = services.BuildServiceProvider();
+			scope = serviceProvider.CreateScope();
 
-			var scope = sp.CreateScope();
-			
-			var configuration = scope.ServiceProvider.GetRequiredService<KORMConfiguration>();
+			ServiceProvider = scope.ServiceProvider;
+
+			var configuration = ServiceProvider.GetRequiredService<KORMConfiguration>();
 			configuration.ConnectionString = "server=(local);database=kosson-tests;integrated security=true";
 
-			//if (NeedsDatabase) ctxDefault.Get<IDB>().CreateDatabase();
+			DB = ServiceProvider.GetRequiredService<IDB>();
+			MetaBuilder = ServiceProvider.GetRequiredService<IMetaBuilder>();
+
+			if (NeedsDatabase) DB.CreateDatabase();
 		}
 
 		[TestCleanup]
 		public void Cleanup()
 		{
-			//ctxDefault.Dispose();
+			scope.Dispose();
+			((IDisposable)serviceProvider).Dispose();
 		}
 	}
 }

@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
-using Kosson.Kontext;
 
 namespace Kosson.KRUD.Tests
 {
@@ -19,17 +18,17 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new RowVersionTable();
 			record.Value = INTMARKER;
-			record.Store();
+			ORM.Store(record);
 
-			record = orm.Select<RowVersionTable>().ByID(record.ID);
+			record = ORM.Select<RowVersionTable>().ByID(record.ID);
 			Assert.IsNotNull(record);
 			record.Value++;
-			record.Store();
+			ORM.Store(record);
 
-			record = orm.Select<RowVersionTable>().ByID(record.ID);
+			record = ORM.Select<RowVersionTable>().ByID(record.ID);
 			Assert.IsNotNull(record);
 			record.Value++;
-			record.Store();
+			ORM.Store(record);
 
 			Assert.AreEqual(INTMARKER + 2, record.Value);
 		}
@@ -39,17 +38,17 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new RowVersionTable();
 			record.Value = INTMARKER;
-			record.Store();
+			ORM.Store(record);
 
-			var record1 = orm.Select<RowVersionTable>().ByID(record.ID);
+			var record1 = ORM.Select<RowVersionTable>().ByID(record.ID);
 			Assert.IsNotNull(record1);
 			record1.Value++;
-			record1.Store();
+			ORM.Store(record1);
 
-			var record2 = orm.Select<RowVersionTable>().ByID(record.ID);
+			var record2 = ORM.Select<RowVersionTable>().ByID(record.ID);
 			Assert.IsNotNull(record2);
 			record2.Value++;
-			record2.Store();
+			ORM.Store(record2);
 
 			Assert.IsTrue(record1.RowVersion > 0);
 			Assert.IsTrue(record2.RowVersion > 0);
@@ -62,14 +61,14 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new RowVersionTable();
 			record.Value = INTMARKER;
-			record.Store();
+			ORM.Store(record);
 
-			record = orm.Select<RowVersionTable>().ByID(record.ID);
+			record = ORM.Select<RowVersionTable>().ByID(record.ID);
 			Assert.IsNotNull(record);
 			record.Value++;
-			record.Store();
-			record.Store();
-			record.Store();
+			ORM.Store(record);
+			ORM.Store(record);
+			ORM.Store(record);
 		}
 
 		[TestMethod]
@@ -78,19 +77,19 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new RowVersionTable();
 			record.Value = INTMARKER;
-			record.Store();
+			ORM.Store(record);
 
-			var record1 = orm.Select<RowVersionTable>().ByID(record.ID);
+			var record1 = ORM.Select<RowVersionTable>().ByID(record.ID);
 			Assert.IsNotNull(record1);
 
-			var record2 = orm.Select<RowVersionTable>().ByID(record.ID);
+			var record2 = ORM.Select<RowVersionTable>().ByID(record.ID);
 			Assert.IsNotNull(record2);
 
 			record1.Value++;
 			record2.Value--;
 
-			record1.Store();
-			record2.Store();
+			ORM.Store(record1);
+			ORM.Store(record2);
 		}
 
 		[TestMethod]
@@ -98,23 +97,23 @@ namespace Kosson.KRUD.Tests
 		{
 			var record1 = new RowVersionTable();
 			record1.Value = INTMARKER;
-			record1.Store();
+			ORM.Store(record1);
 
 			var record2 = new RowVersionTable();
 			record2.Value = INTMARKER + 1;
-			record2.Store();
+			ORM.Store(record2);
 
-			record1 = orm.Select<RowVersionTable>().ByID(record1.ID);
+			record1 = ORM.Select<RowVersionTable>().ByID(record1.ID);
 			Assert.IsNotNull(record1);
 
-			record2 = orm.Select<RowVersionTable>().ByID(record2.ID);
+			record2 = ORM.Select<RowVersionTable>().ByID(record2.ID);
 			Assert.IsNotNull(record2);
 
 			record1.Value++;
 			record2.Value--;
 
-			record1.Store();
-			record2.Store();
+			ORM.Store(record1);
+			ORM.Store(record2);
 		}
 
 		[TestMethod]
@@ -123,15 +122,15 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new RowVersionTable();
 			record.Value = INTMARKER;
-			record.Store();
+			ORM.Store(record);
 
-			var record1 = orm.Select<RowVersionTable>().ByID(record.ID);
+			var record1 = ORM.Select<RowVersionTable>().ByID(record.ID);
 			Assert.IsNotNull(record1);
 
 			record1.Value++;
-			record1.Store();
+			ORM.Store(record1);
 
-			record.Delete();
+			ORM.Delete(record);
 		}
 	}
 

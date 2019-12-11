@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
-using Kosson.Kontext;
 
 namespace Kosson.KRUD.Tests
 {
@@ -20,8 +19,8 @@ namespace Kosson.KRUD.Tests
 			var record = new Table();
 			record.Value = INTMARKER + 1;
 			record.Value2 = INTMARKER;
-			record.Insert();
-			var retrieved = orm.Select<Table>().ByID(record.ID);
+			ORM.Insert(record);
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(INTMARKER, retrieved.Value2);
 		}
@@ -30,13 +29,13 @@ namespace Kosson.KRUD.Tests
 		public void DerivedSeparateStoreRetrieve()
 		{
 			var recordBase = new MainTestTable();
-			recordBase.Insert();
+			ORM.Insert(recordBase);
 
 			var record = new Table();
 			record.Value = INTMARKER;
-			record.Insert();
+			ORM.Insert(record);
 
-			var retrieved = orm.Select<Table>().Execute();
+			var retrieved = ORM.Select<Table>().Execute();
 			Assert.AreEqual(1, retrieved.Count);
 			Assert.AreEqual(INTMARKER, retrieved.First().Value);
 		}
@@ -46,12 +45,12 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new DerivedHidingField();
 			record.Value2 = DayOfWeek.Friday;
-			record.Insert();
+			ORM.Insert(record);
 
 			var recordAsBase = record as Table;
 			Assert.AreEqual(0, recordAsBase.Value2);
 
-			var retrieved = orm.Select<DerivedHidingField>().ByID(record.ID);
+			var retrieved = ORM.Select<DerivedHidingField>().ByID(record.ID);
 			var retrievedAsBase = retrieved as Table;
 
 			Assert.IsNotNull(retrieved);
@@ -66,16 +65,16 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new DerivedHidingField();
 			record.Value2 = DayOfWeek.Friday;
-			record.Insert();
+			ORM.Insert(record);
 
-			var retrievedBase = orm.Select<Table>().ByID(record.ID);
+			var retrievedBase = ORM.Select<Table>().ByID(record.ID);
 			Assert.IsNotNull(retrievedBase);
 			Assert.AreEqual((int)DayOfWeek.Friday, retrievedBase.Value2);
 
 			retrievedBase.Value2 = (int)DayOfWeek.Tuesday;
-			retrievedBase.Store();
+			ORM.Store(retrievedBase);
 
-			var retrievedDerived = orm.Select<DerivedHidingField>().ByID(record.ID);
+			var retrievedDerived = ORM.Select<DerivedHidingField>().ByID(record.ID);
 			Assert.IsNotNull(retrievedDerived);
 			Assert.AreEqual(DayOfWeek.Tuesday, retrievedDerived.Value2);
 		}
@@ -85,10 +84,10 @@ namespace Kosson.KRUD.Tests
 		{
 			Table /* note type change */ record = new DerivedHidingField();
 			record.Value2 = INTMARKER;
-			record.Insert();
+			ORM.Insert(record);
 
-			var retrievedBase = orm.Select<Table>().ByID(record.ID);
-			var retrievedDerived = orm.Select<DerivedHidingField>().ByID(record.ID);
+			var retrievedBase = ORM.Select<Table>().ByID(record.ID);
+			var retrievedDerived = ORM.Select<DerivedHidingField>().ByID(record.ID);
 
 			Assert.IsNotNull(retrievedBase);
 			Assert.IsNotNull(retrievedDerived);
@@ -101,14 +100,14 @@ namespace Kosson.KRUD.Tests
 		{
 			var referenced = new Table();
 			referenced.Value = INTMARKER;
-			referenced.Insert();
+			ORM.Insert(referenced);
 
 			var record = new DerivedLinked();
 			record.Value2Record = referenced;
-			record.Insert();
+			ORM.Insert(record);
 
-			var retrievedBase = orm.Select<Table>().ByID(record.ID);
-			var retrievedDerived = orm.Select<DerivedLinked>().ByID(record.ID);
+			var retrievedBase = ORM.Select<Table>().ByID(record.ID);
+			var retrievedDerived = ORM.Select<DerivedLinked>().ByID(record.ID);
 			var retrievedDerivedAsBase = retrievedDerived as Table;
 
 			Assert.IsNotNull(retrievedBase);
@@ -127,14 +126,14 @@ namespace Kosson.KRUD.Tests
 		{
 			var referenced = new Table();
 			referenced.Value = INTMARKER;
-			referenced.Insert();
+			ORM.Insert(referenced);
 
 			Table /* note type change */ record = new DerivedLinked();
 			record.Value2 = (int)referenced.ID;
-			record.Insert();
+			ORM.Insert(record);
 
-			var retrievedBase = orm.Select<Table>().ByID(record.ID);
-			var retrievedDerived = orm.Select<DerivedLinked>().ByID(record.ID);
+			var retrievedBase = ORM.Select<Table>().ByID(record.ID);
+			var retrievedDerived = ORM.Select<DerivedLinked>().ByID(record.ID);
 			var retrievedDerivedAsBase = retrievedDerived as Table;
 
 			Assert.IsNotNull(retrievedBase);
@@ -154,8 +153,8 @@ namespace Kosson.KRUD.Tests
 			var record = new DerivedSameStoreTable();
 			record.Value = INTMARKER + 1;
 			record.Value2 = INTMARKER;
-			record.Insert();
-			var retrieved = orm.Select<DerivedSameStoreTable>().ByID(record.ID);
+			ORM.Insert(record);
+			var retrieved = ORM.Select<DerivedSameStoreTable>().ByID(record.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(2 * INTMARKER + 1, retrieved.ValuesAdded);
 		}
@@ -166,11 +165,11 @@ namespace Kosson.KRUD.Tests
 			var record = new DerivedReadOnly();
 			Assert.AreEqual(0, record.ReadOnly);
 			record.ReadOnly = INTMARKER;
-			record.Insert();
-			var retrieved = orm.Select<DerivedReadOnly>().ByID(record.ID);
+			ORM.Insert(record);
+			var retrieved = ORM.Select<DerivedReadOnly>().ByID(record.ID);
 			Assert.AreEqual(0, retrieved.Value);
 
-			var retrievedBase = orm.Select<Table>().ByID(record.ID);
+			var retrievedBase = ORM.Select<Table>().ByID(record.ID);
 			Assert.AreEqual(0, retrievedBase.Value);
 		}
 

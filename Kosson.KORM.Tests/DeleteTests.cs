@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
-using Kosson.Kontext;
 using System.Threading.Tasks;
 
 namespace Kosson.KRUD.Tests
@@ -19,9 +18,9 @@ namespace Kosson.KRUD.Tests
 		public async Task AsyncDelete()
 		{
 			var record = new MainTestTable();
-			record.Insert();
-			await record.DeleteAsync();
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			ORM.Insert(record);
+			await ORM.DeleteAsync(record);
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.IsNull(retrieved);
 		}
 
@@ -29,9 +28,9 @@ namespace Kosson.KRUD.Tests
 		public void DeleteByRecordDeletes()
 		{
 			var record = new MainTestTable();
-			record.Insert();
-			record.Delete();
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			ORM.Insert(record);
+			ORM.Delete(record);
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.IsNull(retrieved);
 		}
 
@@ -44,11 +43,11 @@ namespace Kosson.KRUD.Tests
 					new MainTestTable(),
 					new MainTestTable()
 				};
-			records.StoreAll();
-			var retrieved1 = orm.Select<MainTestTable>().Execute();
+			ORM.StoreAll(records);
+			var retrieved1 = ORM.Select<MainTestTable>().Execute();
 			Assert.AreEqual(3, retrieved1.Count());
-			records.DeleteAll();
-			var retrieved2 = orm.Select<MainTestTable>().Execute();
+			ORM.DeleteAll(records);
+			var retrieved2 = ORM.Select<MainTestTable>().Execute();
 			Assert.AreEqual(0, retrieved2.Count());
 		}
 
@@ -57,9 +56,9 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			record.Value = INTMARKER;
-			record.Insert();
-			orm.Delete<MainTestTable>().ByID(record.ID);
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			ORM.Insert(record);
+			ORM.Delete<MainTestTable>().ByID(record.ID);
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.IsNull(retrieved);
 		}
 
@@ -68,9 +67,9 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			record.Value = INTMARKER;
-			record.Insert();
-			var count = orm.Delete<MainTestTable>().WhereFieldEquals("Value", INTMARKER).Execute();
-			var retrieved = orm.Select<MainTestTable>().ByID(record.ID);
+			ORM.Insert(record);
+			var count = ORM.Delete<MainTestTable>().WhereFieldEquals("Value", INTMARKER).Execute();
+			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.IsNull(retrieved);
 			Assert.AreNotEqual(0, count);
 		}
@@ -80,9 +79,9 @@ namespace Kosson.KRUD.Tests
 		public void DeleteByInvalidIDFails()
 		{
 			var record = new MainTestTable();
-			record.Insert();
+			ORM.Insert(record);
 			record.ID = -1;
-			record.Delete();
+			ORM.Delete(record);
 		}
 	}
 }

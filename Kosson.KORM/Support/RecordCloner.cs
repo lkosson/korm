@@ -16,12 +16,11 @@ namespace Kosson.KORM.Support
 			this.metaBuilder = metaBuilder;
 		}
 
-		object IRecordCloner.Clone(object source)
+		T IRecordCloner.Clone<T>(T source)
 		{
 			if (source == null) return null;
-			var type = source.GetType();
-			var clone = factory.Create(type);
-			var fields = metaBuilder.Get(type).Fields;
+			var clone = factory.Create<T>();
+			var fields = metaBuilder.Get(source.GetType()).Fields;
 			foreach (var field in fields)
 			{
 				var value = field.Property.GetMethod.Invoke(source, null);

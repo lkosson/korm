@@ -19,11 +19,11 @@ namespace Kosson.KRUD.Tests
 			var record1 = new Table1();
 			var record2 = new Table2();
 			record2.Inline = new Inline();
-			record2.Insert();
+			ORM.Insert(record2);
 			record1.FK = record2;
-			record1.Insert();
+			ORM.Insert(record1);
 
-			var retrieved = orm.Select<Table1>().ByID(record1.ID);
+			var retrieved = ORM.Select<Table1>().ByID(record1.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.IsNotNull(retrieved.FK);
 			Assert.AreEqual(record2.ID, retrieved.FK.ID);
@@ -32,9 +32,9 @@ namespace Kosson.KRUD.Tests
 
 			retrieved.FK.Inline.Value++;
 			retrieved.FK.Inline.FK = record1;
-			retrieved.FK.Update();
+			ORM.Update(retrieved.FK);
 
-			var retrievedfk = orm.Select<Table2>().ByID(retrieved.FK.ID);
+			var retrievedfk = ORM.Select<Table2>().ByID(retrieved.FK.ID);
 			Assert.IsNotNull(retrievedfk);
 			Assert.IsNotNull(retrievedfk.Inline);
 			Assert.AreEqual(INTMARKER + 1, retrievedfk.Inline.Value);
@@ -47,11 +47,11 @@ namespace Kosson.KRUD.Tests
 			var record1 = new Table1();
 			var record2 = new Table2();
 			record2.Inline = new Inline();
-			await record2.InsertAsync();
+			await ORM.InsertAsync(record2);
 			record1.FK = record2;
-			await record1.InsertAsync();
+			await ORM.InsertAsync(record1);
 
-			var retrieved = await orm.Select<Table1>().ByIDAsync(record1.ID);
+			var retrieved = await ORM.Select<Table1>().ByIDAsync(record1.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.IsNotNull(retrieved.FK);
 			Assert.AreEqual(record2.ID, retrieved.FK.ID);
@@ -60,9 +60,9 @@ namespace Kosson.KRUD.Tests
 
 			retrieved.FK.Inline.Value++;
 			retrieved.FK.Inline.FK = record1;
-			await retrieved.FK.UpdateAsync();
+			await ORM.UpdateAsync(retrieved.FK);
 
-			var retrievedfk = await orm.Select<Table2>().ByIDAsync(retrieved.FK.ID);
+			var retrievedfk = await ORM.Select<Table2>().ByIDAsync(retrieved.FK.ID);
 			Assert.IsNotNull(retrievedfk);
 			Assert.IsNotNull(retrievedfk.Inline);
 			Assert.AreEqual(INTMARKER + 1, retrievedfk.Inline.Value);

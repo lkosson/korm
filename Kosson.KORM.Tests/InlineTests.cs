@@ -18,15 +18,15 @@ namespace Kosson.KRUD.Tests
 			var record = new Table();
 			record.Inline1 = null;
 			record.Inline2.Nested = null;
-			record.Insert();
+			ORM.Insert(record);
 		}
 
 		[TestMethod]
 		public void InlinesAreRetrieved()
 		{
 			var record = new Table();
-			record.Insert();
-			var retrieved = orm.Select<Table>().ByID(record.ID);
+			ORM.Insert(record);
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.IsNotNull(retrieved.Inline1);
 			Assert.IsNotNull(retrieved.Inline2);
@@ -39,8 +39,8 @@ namespace Kosson.KRUD.Tests
 		public void InlinesAreIndependent()
 		{
 			var record = new Table();
-			record.Insert();
-			var retrieved = orm.Select<Table>().ByID(record.ID);
+			ORM.Insert(record);
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
 			Assert.AreNotEqual(retrieved.Inline1, retrieved.Inline2);
 			Assert.AreNotEqual(retrieved.Inline1, retrieved.RenamedInline);
 			Assert.AreNotEqual(retrieved.Inline2, retrieved.RenamedInline);
@@ -59,8 +59,8 @@ namespace Kosson.KRUD.Tests
 			record.Inline1.Nested.NestedValue = "1";
 			record.Inline2.Nested.NestedValue = "2";
 			record.RenamedInline.Nested.NestedValue = "3";
-			record.Insert();
-			var retrieved = orm.Select<Table>().ByID(record.ID);
+			ORM.Insert(record);
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
 			Assert.AreEqual(record.Inline1.InlinedValue, retrieved.Inline1.InlinedValue);
 			Assert.AreEqual(record.Inline2.InlinedValue, retrieved.Inline2.InlinedValue);
 			Assert.AreEqual(record.RenamedInline.InlinedValue, retrieved.RenamedInline.InlinedValue);
@@ -73,15 +73,15 @@ namespace Kosson.KRUD.Tests
 		public void InlinesAreUpdated()
 		{
 			var record = new Table();
-			record.Insert();
+			ORM.Insert(record);
 			record.Inline1.InlinedValue = 1;
 			record.Inline2.InlinedValue = 2;
 			record.RenamedInline.InlinedValue = 3;
 			record.Inline1.Nested.NestedValue = "1";
 			record.Inline2.Nested.NestedValue = "2";
 			record.RenamedInline.Nested.NestedValue = "3";
-			record.Update();
-			var retrieved = orm.Select<Table>().ByID(record.ID);
+			ORM.Update(record);
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
 			Assert.AreEqual(record.Inline1.InlinedValue, retrieved.Inline1.InlinedValue);
 			Assert.AreEqual(record.Inline2.InlinedValue, retrieved.Inline2.InlinedValue);
 			Assert.AreEqual(record.RenamedInline.InlinedValue, retrieved.RenamedInline.InlinedValue);
@@ -96,8 +96,8 @@ namespace Kosson.KRUD.Tests
 			var record = new Table();
 			record.Inline1.InlinedValue = 1;
 			record.Inline2.InlinedValue = 2;
-			record.Insert();
-			var retrieved = orm.Select<Table>().WhereFieldEquals("Inline1.InlinedValue", record.Inline1.InlinedValue).ExecuteFirst();
+			ORM.Insert(record);
+			var retrieved = ORM.Select<Table>().WhereFieldEquals("Inline1.InlinedValue", record.Inline1.InlinedValue).ExecuteFirst();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(record.Inline1.InlinedValue, retrieved.Inline1.InlinedValue);
 			Assert.AreEqual(record.ID, retrieved.ID);
@@ -108,8 +108,8 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new Table();
 			record.RenamedInline.InlinedValue = INTMARKER;
-			record.Insert();
-			var retrieved = orm.Select<Table>().WhereFieldEquals("RenamedInline.InlinedValue", record.RenamedInline.InlinedValue).ExecuteFirst();
+			ORM.Insert(record);
+			var retrieved = ORM.Select<Table>().WhereFieldEquals("RenamedInline.InlinedValue", record.RenamedInline.InlinedValue).ExecuteFirst();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(record.RenamedInline.InlinedValue, retrieved.RenamedInline.InlinedValue);
 			Assert.AreEqual(record.ID, retrieved.ID);
@@ -120,8 +120,8 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new Table();
 			record.RenamedInline.Nested.NestedValue = STRINGMARKER;
-			record.Insert();
-			var retrieved = orm.Select<Table>().WhereFieldEquals("RenamedInline.Nested.NestedValue", record.RenamedInline.Nested.NestedValue).ExecuteFirst();
+			ORM.Insert(record);
+			var retrieved = ORM.Select<Table>().WhereFieldEquals("RenamedInline.Nested.NestedValue", record.RenamedInline.Nested.NestedValue).ExecuteFirst();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(record.RenamedInline.Nested.NestedValue, retrieved.RenamedInline.Nested.NestedValue);
 			Assert.AreEqual(record.ID, retrieved.ID);
@@ -132,18 +132,18 @@ namespace Kosson.KRUD.Tests
 		{
 			var foreign1 = new Foreign();
 			foreign1.ForeignValue = INTMARKER;
-			foreign1.Insert();
+			ORM.Insert(foreign1);
 
 			var foreign2 = new Foreign();
 			foreign2.ForeignValue = INTMARKER + 1;
-			foreign2.Insert();
+			ORM.Insert(foreign2);
 
 			var record = new Table();
 			record.Inline1.Foreign = foreign1;
 			record.Inline2.Foreign = foreign2;
-			record.Insert();
+			ORM.Insert(record);
 
-			var retrieved = orm.Select<Table>().ByID(record.ID);
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
 			Assert.IsNotNull(retrieved.Inline1.Foreign);
 			Assert.IsNotNull(retrieved.Inline2.Foreign);
 			Assert.IsNull(retrieved.Inline1.Nested.NestedForeign);
@@ -157,13 +157,13 @@ namespace Kosson.KRUD.Tests
 		{
 			var foreign = new Foreign();
 			foreign.ForeignValue = INTMARKER;
-			foreign.Insert();
+			ORM.Insert(foreign);
 
 			var record = new Table();
 			record.Inline1.Nested.NestedForeign = foreign;
-			record.Insert();
+			ORM.Insert(record);
 
-			var retrieved = orm.Select<Table>().ByID(record.ID);
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
 			Assert.IsNotNull(retrieved.Inline1.Nested.NestedForeign);
 			Assert.IsNull(retrieved.Inline2.Nested.NestedForeign);
 			Assert.IsNull(retrieved.Inline1.Foreign);

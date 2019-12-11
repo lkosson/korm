@@ -1,4 +1,5 @@
 ﻿using Kosson.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -14,17 +15,24 @@ namespace Kosson.KRUD.Tests
 	{
 		protected override bool NeedsDatabase { get { return false; } }
 		protected override string Provider { get { return "empty"; } }
+		protected IRecordCloner RecordCloner { get; private set; }
 
 		protected override IEnumerable<Type> Tables()
 		{
 			return Enumerable.Empty<Type>();
 		}
 
+		public override void Init()
+		{
+			base.Init();
+			RecordCloner = ServiceProvider.GetRequiredService<IRecordCloner>();
+		}
+
 		[TestMethod]
 		public void CloneIsCreated()
 		{
 			var record = new Table();
-			var clone = record.Clone();
+			var clone = RecordCloner.Clone(record);
 			Assert.IsNotNull(clone);
 			Assert.AreNotSame(record, clone);
 		}
@@ -43,7 +51,7 @@ namespace Kosson.KRUD.Tests
 				ValueRecordRef = new RecordRef<Table>(54321),
 				ValueInline = new MainTestTable() { ID = 112233 }
 			};
-			var clone = record.Clone();
+			var clone = RecordCloner.Clone(record);
 			Assert.AreEqual(record.ID, clone.ID);
 			Assert.AreEqual(record.ValueEnum, clone.ValueEnum);
 			Assert.AreEqual(record.ValueBool, clone.ValueBool);
@@ -70,7 +78,7 @@ namespace Kosson.KRUD.Tests
 				ValueRecordRef = new RecordRef<Table>(54321),
 				ValueInline = new MainTestTable() { ID = 112233 }
 			};
-			var clone = record.Clone();
+			var clone = RecordCloner.Clone(record);
 
 			record.ID = 0;
 			record.ValueEnum = DayOfWeek.Monday;
@@ -96,7 +104,7 @@ namespace Kosson.KRUD.Tests
 		{
 			var table = new Table();
 			var record = new Table { ValueRecord = table };
-			var clone = record.Clone();
+			var clone = RecordCloner.Clone(record);
 
 			Assert.AreEqual(table, clone.ValueRecord);
 		}
@@ -106,7 +114,7 @@ namespace Kosson.KRUD.Tests
 		{
 			var inline = new MainTestTable { Value = 12345 };
 			var record = new Table { ValueInline = inline };
-			var clone = record.Clone();
+			var clone = RecordCloner.Clone(record);
 
 			Assert.AreNotSame(inline, clone.ValueInline);
 			Assert.AreEqual(inline.Value, clone.ValueInline.Value);

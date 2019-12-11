@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
-using Kosson.Kontext;
 using System.Threading.Tasks;
 
 namespace Kosson.KRUD.Tests
@@ -20,8 +19,8 @@ namespace Kosson.KRUD.Tests
 		{
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER;
-			inserted.Insert();
-			var retrieved = await orm.Select<MainTestTable>().ExecuteAsync();
+			ORM.Insert(inserted);
+			var retrieved = await ORM.Select<MainTestTable>().ExecuteAsync();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(1, retrieved.Count);
 		}
@@ -31,8 +30,8 @@ namespace Kosson.KRUD.Tests
 		{
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER;
-			inserted.Insert();
-			var retrieved = orm.Select<MainTestTable>().ByID(inserted.ID);
+			ORM.Insert(inserted);
+			var retrieved = ORM.Select<MainTestTable>().ByID(inserted.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(inserted.ID, retrieved.ID);
 			Assert.AreEqual(inserted.Value, retrieved.Value);
@@ -41,15 +40,15 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RetrievalByIntValue()
 		{
-			orm.Delete<MainTestTable>().Execute();
+			ORM.Delete<MainTestTable>().Execute();
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER;
-			inserted.Insert();
+			ORM.Insert(inserted);
 			var other = new MainTestTable();
 			other.Value = INTMARKER + 1;
 			other.VarLenString = STRINGMARKER;
-			other.Insert();
-			var retrieved = orm.Select<MainTestTable>().WhereFieldEquals("Value", INTMARKER).Execute().Single();
+			ORM.Insert(other);
+			var retrieved = ORM.Select<MainTestTable>().WhereFieldEquals("Value", INTMARKER).Execute().Single();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(inserted.ID, retrieved.ID);
 			Assert.AreEqual(INTMARKER, retrieved.Value);
@@ -58,15 +57,15 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RetrievalByStringValue()
 		{
-			orm.Delete<MainTestTable>().Execute();
+			ORM.Delete<MainTestTable>().Execute();
 			var other = new MainTestTable();
 			other.Value = INTMARKER;
-			other.Insert();
+			ORM.Insert(other);
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER + 1;
 			inserted.VarLenString = STRINGMARKER;
-			inserted.Insert();
-			var retrieved = orm.Select<MainTestTable>().WhereFieldEquals("VarLenString", STRINGMARKER).Execute().Single();
+			ORM.Insert(inserted);
+			var retrieved = ORM.Select<MainTestTable>().WhereFieldEquals("VarLenString", STRINGMARKER).Execute().Single();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(inserted.ID, retrieved.ID);
 			Assert.AreEqual(STRINGMARKER, retrieved.VarLenString);
@@ -75,13 +74,13 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RetrievalByNull()
 		{
-			orm.Delete<MainTestTable>().Execute();
+			ORM.Delete<MainTestTable>().Execute();
 			var inserted = new MainTestTable();
-			inserted.Insert();
+			ORM.Insert(inserted);
 			var other = new MainTestTable();
 			other.VarLenString = STRINGMARKER;
-			other.Insert();
-			var retrieved = orm.Select<MainTestTable>().WhereFieldIsNull("VarLenString").Execute().Single();
+			ORM.Insert(other);
+			var retrieved = ORM.Select<MainTestTable>().WhereFieldIsNull("VarLenString").Execute().Single();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(inserted.ID, retrieved.ID);
 			Assert.IsNull(retrieved.VarLenString);
@@ -90,14 +89,14 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RetrieveByComparison()
 		{
-			orm.Delete<MainTestTable>().Execute();
+			ORM.Delete<MainTestTable>().Execute();
 			var other = new MainTestTable();
 			other.Value = INTMARKER;
-			other.Insert();
+			ORM.Insert(other);
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER + 1;
-			inserted.Insert();
-			var retrieved = orm.Select<MainTestTable>().WhereField("Value", DBExpressionComparison.Greater, INTMARKER).Execute().Single();
+			ORM.Insert(inserted);
+			var retrieved = ORM.Select<MainTestTable>().WhereField("Value", DBExpressionComparison.Greater, INTMARKER).Execute().Single();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(inserted.ID, retrieved.ID);
 			Assert.AreEqual(inserted.Value, retrieved.Value);
@@ -106,14 +105,14 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RetrieveByFieldCondition()
 		{
-			orm.Delete<MainTestTable>().Execute();
+			ORM.Delete<MainTestTable>().Execute();
 			var other = new MainTestTable();
 			other.Value = INTMARKER;
-			other.Insert();
+			ORM.Insert(other);
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER + 1;
-			inserted.Insert();
-			var retrieved = orm.Select<MainTestTable>().WhereField("Value", "{0} > {1}", INTMARKER).Execute().Single();
+			ORM.Insert(inserted);
+			var retrieved = ORM.Select<MainTestTable>().WhereField("Value", "{0} > {1}", INTMARKER).Execute().Single();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(inserted.ID, retrieved.ID);
 			Assert.AreEqual(inserted.Value, retrieved.Value);
@@ -122,14 +121,14 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RetrieveByRawCondition()
 		{
-			orm.Delete<MainTestTable>().Execute();
+			ORM.Delete<MainTestTable>().Execute();
 			var other = new MainTestTable();
 			other.Value = INTMARKER;
-			other.Insert();
+			ORM.Insert(other);
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER + 1;
-			inserted.Insert();
-			var retrieved = orm.Select<MainTestTable>().Where("0 < {0}", INTMARKER).Execute();
+			ORM.Insert(inserted);
+			var retrieved = ORM.Select<MainTestTable>().Where("0 < {0}", INTMARKER).Execute();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(2, retrieved.Count);
 		}
@@ -137,14 +136,14 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RetrieveByArray()
 		{
-			orm.Delete<MainTestTable>().Execute();
+			ORM.Delete<MainTestTable>().Execute();
 			for (int i = 0; i < 10; i++)
 			{
 				var item = new MainTestTable();
 				item.Value = INTMARKER + i;
-				item.Insert();
+				ORM.Insert(item);
 			}
-			var retrieved = orm.Select<MainTestTable>().WhereFieldIn("Value", INTMARKER + 5, INTMARKER + 8, INTMARKER + 12).Execute();
+			var retrieved = ORM.Select<MainTestTable>().WhereFieldIn("Value", INTMARKER + 5, INTMARKER + 8, INTMARKER + 12).Execute();
 			Assert.AreEqual(2, retrieved.Count);
 			Assert.AreEqual(INTMARKER + 5, retrieved.Min(v => v.Value));
 			Assert.AreEqual(INTMARKER + 8, retrieved.Max(v => v.Value));
@@ -153,19 +152,19 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RetrieveByOr()
 		{
-			orm.Delete<MainTestTable>().Execute();
+			ORM.Delete<MainTestTable>().Execute();
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER;
-			inserted.Insert();
+			ORM.Insert(inserted);
 			var inserted2 = new MainTestTable();
 			inserted2.Value = INTMARKER + 1;
 			inserted2.VarLenString = STRINGMARKER;
-			inserted2.Insert();
+			ORM.Insert(inserted2);
 			var other = new MainTestTable();
 			other.Value = INTMARKER + 2;
 			other.VarLenString = STRINGMARKER;
-			other.Insert();
-			var retrieved = orm.Select<MainTestTable>().WhereFieldEquals("Value", INTMARKER).Or().WhereFieldEquals("ID", inserted2.ID).Execute();
+			ORM.Insert(other);
+			var retrieved = ORM.Select<MainTestTable>().WhereFieldEquals("Value", INTMARKER).Or().WhereFieldEquals("ID", inserted2.ID).Execute();
 			Assert.AreEqual(2, retrieved.Count());
 			Assert.IsNotNull(retrieved.FirstOrDefault(i => i.Value == INTMARKER));
 			Assert.IsNotNull(retrieved.FirstOrDefault(i => i.ID == inserted2.ID));
@@ -174,20 +173,20 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RetrieveByOrAndAnd()
 		{
-			orm.Delete<MainTestTable>().Execute();
+			ORM.Delete<MainTestTable>().Execute();
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER;
 			inserted.VarLenString = STRINGMARKER;
-			inserted.Insert();
+			ORM.Insert(inserted);
 			var inserted2 = new MainTestTable();
 			inserted2.Value = INTMARKER + 1;
 			inserted2.VarLenString = STRINGMARKER;
-			inserted2.Insert();
+			ORM.Insert(inserted2);
 			var other = new MainTestTable();
 			other.Value = INTMARKER + 2;
 			other.VarLenString = STRINGMARKER;
-			other.Insert();
-			var retrieved = orm.Select<MainTestTable>()
+			ORM.Insert(other);
+			var retrieved = ORM.Select<MainTestTable>()
 				.WhereFieldEquals("Value", INTMARKER)
 				.WhereFieldEquals("VarLenString", STRINGMARKER)
 				.Or()
@@ -202,19 +201,19 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RetrieveByOrWithMultipleClauses()
 		{
-			orm.Delete<MainTestTable>().Execute();
+			ORM.Delete<MainTestTable>().Execute();
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER;
-			inserted.Insert();
+			ORM.Insert(inserted);
 			var inserted2 = new MainTestTable();
 			inserted2.Value = INTMARKER + 1;
 			inserted2.VarLenString = STRINGMARKER;
-			inserted2.Insert();
+			ORM.Insert(inserted2);
 			var inserted3 = new MainTestTable();
 			inserted3.Value = INTMARKER + 2;
 			inserted3.VarLenString = STRINGMARKER;
-			inserted3.Insert();
-			var retrieved = orm.Select<MainTestTable>().WhereFieldEquals("Value", INTMARKER).WhereFieldEquals("ID", inserted2.ID).Or().WhereFieldEquals("ID", inserted.ID).Execute().Single();
+			ORM.Insert(inserted3);
+			var retrieved = ORM.Select<MainTestTable>().WhereFieldEquals("Value", INTMARKER).WhereFieldEquals("ID", inserted2.ID).Or().WhereFieldEquals("ID", inserted.ID).Execute().Single();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(inserted.ID, retrieved.ID);
 		}
@@ -224,8 +223,8 @@ namespace Kosson.KRUD.Tests
 		{
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER;
-			inserted.Insert();
-			var retrieved = orm.Select<MainTestTable>().ForUpdate().ByID(inserted.ID);
+			ORM.Insert(inserted);
+			var retrieved = ORM.Select<MainTestTable>().ForUpdate().ByID(inserted.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(inserted.ID, retrieved.ID);
 			Assert.AreEqual(inserted.Value, retrieved.Value);
@@ -236,10 +235,10 @@ namespace Kosson.KRUD.Tests
 		{
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER;
-			inserted.Insert();
-			inserted.Insert();
-			inserted.Insert();
-			var retrieved = orm.Select<MainTestTable>().Limit(2).Execute();
+			ORM.Insert(inserted);
+			ORM.Insert(inserted);
+			ORM.Insert(inserted);
+			var retrieved = ORM.Select<MainTestTable>().Limit(2).Execute();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(2, retrieved.Count);
 		}

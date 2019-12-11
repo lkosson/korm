@@ -15,7 +15,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void EmptyReaderIsEmpty()
 		{
-			using (var reader = orm.Select<MainTestTable>().ExecuteReader())
+			using (var reader = ORM.Select<MainTestTable>().ExecuteReader())
 			{
 				Assert.IsNotNull(reader);
 				Assert.IsFalse(reader.MoveNext());
@@ -27,8 +27,8 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			record.Value = INTMARKER;
-			record.Insert();
-			using (var reader = orm.Select<MainTestTable>().ExecuteReader())
+			ORM.Insert(record);
+			using (var reader = ORM.Select<MainTestTable>().ExecuteReader())
 			{
 				Assert.IsTrue(reader.MoveNext());
 				Assert.IsNotNull(reader.Read());
@@ -41,8 +41,8 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			record.Value = INTMARKER;
-			record.Insert();
-			using (var reader = await orm.Select<MainTestTable>().ExecuteReaderAsync())
+			ORM.Insert(record);
+			using (var reader = await ORM.Select<MainTestTable>().ExecuteReaderAsync())
 			{
 				Assert.IsTrue(await reader.MoveNextAsync());
 				Assert.IsNotNull(reader.Read());
@@ -54,7 +54,7 @@ namespace Kosson.KRUD.Tests
 		[ExpectedException(typeof(ObjectDisposedException))]
 		public void DisposedReaderThrows()
 		{
-			var reader = orm.Select<MainTestTable>().ExecuteReader();
+			var reader = ORM.Select<MainTestTable>().ExecuteReader();
 			reader.Dispose();
 			reader.MoveNext();
 		}
@@ -62,7 +62,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void MultipleReaderDisposes()
 		{
-			var reader = orm.Select<MainTestTable>().ExecuteReader();
+			var reader = ORM.Select<MainTestTable>().ExecuteReader();
 			reader.Dispose();
 			reader.Dispose();
 		}
@@ -73,8 +73,8 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new MainTestTable();
 			record.Value = INTMARKER;
-			record.Insert();
-			var reader = orm.Select<MainTestTable>().ExecuteReader();
+			ORM.Insert(record);
+			var reader = ORM.Select<MainTestTable>().ExecuteReader();
 			while (reader.MoveNext()) reader.Read();
 			reader.Read();
 		}

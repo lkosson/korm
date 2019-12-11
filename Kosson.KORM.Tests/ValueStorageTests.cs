@@ -28,12 +28,12 @@ namespace Kosson.KRUD.Tests
 		{
 			var record = new TRecord();
 			record.Value = value;
-			record.Insert();
-			var retrieved = orm.Select<TRecord>().ByID(record.ID);
+			ORM.Insert(record);
+			var retrieved = ORM.Select<TRecord>().ByID(record.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(record.Value, retrieved.Value);
 
-			using (var reader = orm.Select<TRecord>().WhereID(record.ID).ExecuteReader())
+			using (var reader = ORM.Select<TRecord>().WhereID(record.ID).ExecuteReader())
 			{
 				reader.MoveNext();
 				var retrievedByReader = reader.Read();
@@ -114,8 +114,8 @@ namespace Kosson.KRUD.Tests
 			var record = new SingleValueTableBlob();
 			record.Value = new byte[15000];
 			for (int i = 0; i < record.Value.Length; i++) record.Value[i] = (byte)i;
-			record.Insert();
-			var retrieved = orm.Select<SingleValueTableBlob>().ByID(record.ID);
+			ORM.Insert(record);
+			var retrieved = ORM.Select<SingleValueTableBlob>().ByID(record.ID);
 			Assert.IsNotNull(retrieved);
 			Assert.IsNotNull(retrieved.Value);
 			Assert.AreEqual(record.Value.Length, retrieved.Value.Length);

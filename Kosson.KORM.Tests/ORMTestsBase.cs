@@ -2,8 +2,8 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
-using Kosson.Kontext;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kosson.KRUD.Tests
 {
@@ -12,7 +12,7 @@ namespace Kosson.KRUD.Tests
 	{
 		protected const int INTMARKER = 54321;
 		protected const string STRINGMARKER = "MARKER";
-		protected IORM orm;
+		protected IORM ORM { get; private set; }
 
 		protected abstract IEnumerable<Type> Tables();
 
@@ -20,13 +20,10 @@ namespace Kosson.KRUD.Tests
 		public override void Init()
 		{
  			base.Init();
-			Context.Current.Add<IMetaBuilder>(new Kosson.KRUD.Meta.ReflectionMetaBuilder());
-			Context.Current.Add<IRecordLoader>(new Kosson.KRUD.RecordLoader.DynamicRecordLoader());
-			Context.Current.Add<IORM>(new Kosson.KRUD.ORM.DBORM());
-
-			orm = Context.Current.Get<IORM>();
-			orm.CreateTables(Tables());
+			ORM = ServiceProvider.GetRequiredService<IORM>();
+			ORM.CreateTables(Tables());
 		}
+
 	}
 
 	[Table]

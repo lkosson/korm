@@ -15,19 +15,19 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void SubqueryIsSelected()
 		{
-            new MainTestTable() { Value = INTMARKER - 1 }.Insert();
-			new MainTestTable() { Value = INTMARKER }.Insert();
-			new MainTestTable() { Value = INTMARKER }.Insert();
-			new MainTestTable() { Value = INTMARKER + 1 }.Insert();
+            ORM.Insert(new MainTestTable() { Value = INTMARKER - 1 });
+			ORM.Insert(new MainTestTable() { Value = INTMARKER });
+			ORM.Insert(new MainTestTable() { Value = INTMARKER });
+			ORM.Insert(new MainTestTable() { Value = INTMARKER + 1 });
 
 			var record = new Table();
 			record.Value = INTMARKER;
             record.DefaultValue = new MainTestTable().DefaultValue;
-			record.Insert();
+			ORM.Insert(record);
 			Assert.AreEqual(0, record.Count);
 			Assert.AreEqual(0, record.CountConstructed);
 
-			var retrieved = orm.Select<Table>().ByID(record.ID);
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
 			Assert.AreEqual(2, retrieved.Count);
 			Assert.AreEqual(2, retrieved.CountConstructed);
             Assert.AreEqual(1, retrieved.CountDistinctConstructed);
