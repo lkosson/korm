@@ -1,4 +1,5 @@
 ﻿using Kosson.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,32 +14,30 @@ namespace Kosson.KRUD
 	/// </summary>
 	public class BackupProvider : IBackupProvider
 	{
-		private IORM orm;
-		private IMetaBuilder metaBuilder;
-		private IPropertyBinder propertyBinder;
-		private IConverter converter;
+		private IServiceProvider serviceProvider;
+		private IBackupRestorer backupRestorer;
 
-		public BackupProvider(IORM orm, IMetaBuilder metaBuilder, IPropertyBinder propertyBinder, IConverter converter)
+		public BackupProvider(IServiceProvider serviceProvider, IBackupRestorer backupRestorer)
 		{
-			this.orm = orm;
-			this.metaBuilder = metaBuilder;
-			this.propertyBinder = propertyBinder;
-			this.converter = converter;
+			this.serviceProvider = serviceProvider;
+			this.backupRestorer = backupRestorer;
 		}
 
 		IBackupSet IBackupProvider.CreateBackupSet(IBackupWriter writer)
 		{
-			return new BackupSet(orm, writer, metaBuilder, propertyBinder, converter);
+			var backupset = ActivatorUtilities.CreateInstance<BackupSet>(serviceProvider, writer);
+			return backupset;
 		}
 
 		void IBackupProvider.Restore(IBackupReader reader)
 		{
-			new BackupRestorer(reader, orm, propertyBinder).Restore();
+			backupRestorer.Restore(reader);
 		}
 
 		void IBackupProvider.ClearTables(IEnumerable<Type> types)
 		{
-			new BackupClearer(orm, metaBuilder, types).Clear();
+			var clearer = ActivatorUtilities.CreateInstance<BackupClearer>(serviceProvider);
+			clearer.Clear(types);
 		}
 	}
 }

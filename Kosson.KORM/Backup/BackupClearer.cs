@@ -13,25 +13,23 @@ namespace Kosson.KRUD
 	{
 		private IORM orm;
 		private IMetaBuilder metaBuilder;
-		private IEnumerable<Type> types;
 		private HashSet<string> tablesCleared;
 		private HashSet<string> tablesInProgress;
 
-		public BackupClearer(IORM orm, IMetaBuilder metaBuilder, IEnumerable<Type> types)
+		public BackupClearer(IORM orm, IMetaBuilder metaBuilder)
 		{
 			this.orm = orm;
 			this.metaBuilder = metaBuilder;
-			this.types = types;
 			tablesCleared = new HashSet<string>();
 			tablesInProgress = new HashSet<string>();
 		}
 
-		public void Clear()
+		public void Clear(IEnumerable<Type> types)
 		{
-			foreach (var type in types) Clear(type);
+			foreach (var type in types) Clear(types, type);
 		}
 
-		private void Clear(Type type)
+		private void Clear(IEnumerable<Type> types, Type type)
 		{
 			var meta = metaBuilder.Get(type);
 			var table = meta.DBName;
@@ -43,22 +41,22 @@ namespace Kosson.KRUD
 			else
 			{
 				tablesInProgress.Add(table);
-				ClearReferencingForeignKeys(meta.TableType);
+				ClearReferencingForeignKeys(types, meta.TableType);
 				ClearTable(type);
 				tablesInProgress.Remove(table);
 				tablesCleared.Add(table);
 			}
 		}
 
-		private void ClearReferencingForeignKeys(Type type)
+		private void ClearReferencingForeignKeys(IEnumerable<Type> types, Type type)
 		{
 			foreach (var reftype in types)
 			{
-				ClearIfReferences(reftype, reftype, type);
+				ClearIfReferences(types, reftype, reftype, type);
 			}
 		}
 
-		private void ClearIfReferences(Type typeToClear, Type typeForMeta, Type typeToReference)
+		private void ClearIfReferences(IEnumerable<Type> types, Type typeToClear, Type typeForMeta, Type typeToReference)
 		{
 			var meta = metaBuilder.Get(typeForMeta);
 
@@ -68,7 +66,7 @@ namespace Kosson.KRUD
 				if (field.IsReadOnly) continue;
 				if (field.IsInline)
 				{
-					ClearIfReferences(typeToClear, field.Type, typeToReference);
+					ClearIfReferences(types, typeToClear, field.Type, typeToReference);
 				}
 				else if (field.IsForeignKey)
 				{
@@ -81,7 +79,7 @@ namespace Kosson.KRUD
 					{
 						if (field.Type != typeToReference) continue;
 					}
-					Clear(typeToClear);
+					Clear(types, typeToClear);
 					break;
 				}
 			}

@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace Kosson.KRUD
 {
-	class BackupRestorer
+	class BackupRestorer : IBackupRestorer
 	{
 		private IMetaBuilder metaBuilder;
-		private IBackupReader reader;
 		private IORM orm;
 		private IPropertyBinder propertyBinder;
+		private IFactory factory;
 		private Dictionary<string, TableState> tableStates;
 		private Action<IRecord> storeRecordDelegate;
 		private Action<IRecord> insertRecordPKDelegate;
@@ -23,17 +23,17 @@ namespace Kosson.KRUD
 		private Type insertRecordPKDelegateType;
 		private bool supportsPKInsert;
 
-		public BackupRestorer(IBackupReader reader, IORM orm, IPropertyBinder propertyBinder)
+		public BackupRestorer(IMetaBuilder metaBuilder, IORM orm, IDB db, IPropertyBinder propertyBinder, IFactory factory)
 		{
-			metaBuilder = KORMContext.Current.MetaBuilder;
-			this.reader = reader;
+			this.metaBuilder = metaBuilder;
 			this.orm = orm;
 			this.propertyBinder = propertyBinder;
+			this.factory = factory;
 			tableStates = new Dictionary<string, TableState>();
-			supportsPKInsert = KORMContext.Current.DB.CommandBuilder.SupportsPrimaryKeyInsert;
+			supportsPKInsert = db.CommandBuilder.SupportsPrimaryKeyInsert;
 		}
 
-		public void Restore()
+		public void Restore(IBackupReader reader)
 		{
 			var previousCulture = Thread.CurrentThread.CurrentCulture;
 			try
@@ -60,7 +60,7 @@ namespace Kosson.KRUD
 				var tableName = metaBuilder.Get(type).DBName;
 				if (!tableStates.TryGetValue(tableName, out tableState))
 				{
-					tableState = new TableState(orm, type);
+					tableState = new TableState(orm, factory, type);
 				}
 				tableStates[typeName] = tableState;
 				tableStates[tableName] = tableState;
@@ -187,14 +187,16 @@ namespace Kosson.KRUD
 		class TableState
 		{
 			private IORM orm;
+			private IFactory factory;
 			public Dictionary<long, long> IDMappings { get; private set; }
 			public Dictionary<long, long> RowVersions { get; private set; }
 			public long MaxWrittenID { get; set; }
 			public long MaxExistingID { get; set; }
 
-			public TableState(IORM orm, Type type)
+			public TableState(IORM orm, IFactory factory, Type type)
 			{
 				this.orm = orm;
+				this.factory = factory;
 				IDMappings = new Dictionary<long, long>();
 				RowVersions = new Dictionary<long, long>();
 				FindMaxID(type);
@@ -214,7 +216,7 @@ namespace Kosson.KRUD
 			private void FindNextID<TRecord>()
 				where TRecord : class, IRecord, new()
 			{
-				var record = (IRecord)KORMContext.Current.Factory.Create<TRecord>();
+				var record = factory.Create<TRecord>();
 				orm.Store(record);
 				MaxWrittenID = record.ID;
 				orm.Delete(record);

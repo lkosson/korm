@@ -15,7 +15,7 @@ namespace Kosson.KRUD
 	/// <summary>
 	/// Abstract IDB implementation based on ADO.NET providers.
 	/// </summary>
-	public abstract class ADONETDB : IDB, IDisposable
+	public abstract class ADONETDB : IDB
 	{
 		private static Logging log;
 		private IDBCommandBuilder commandBuilder;

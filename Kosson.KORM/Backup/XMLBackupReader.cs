@@ -26,12 +26,12 @@ namespace Kosson.KRUD
 		/// Creates a new record deserializer reading from a given stream.
 		/// </summary>
 		/// <param name="stream">Stream to read data from.</param>
-		public XMLBackupReader(Stream stream)
+		public XMLBackupReader(IMetaBuilder metaBuilder, IPropertyBinder propertyBinder, IConverter converter, IFactory factory, Stream stream)
 		{
 			typeMapping = new Dictionary<string, Type>();
-			metaBuilder = KORMContext.Current.MetaBuilder;
-			converter = KORMContext.Current.Converter;
-			factory = KORMContext.Current.Factory;
+			this.metaBuilder = metaBuilder;
+			this.converter = converter;
+			this.factory = factory;
 			var xrs = new XmlReaderSettings
 			{
 				IgnoreComments = true,

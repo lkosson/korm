@@ -17,17 +17,19 @@ namespace Kosson.KRUD
 		private IMetaBuilder metaBuilder;
 		private IPropertyBinder propertyBinder;
 		private IConverter converter;
+		private IFactory factory;
 		private HashSet<Type> tablesCompleted;
 		private HashSet<Type> tablesInProgress;
 		private Dictionary<Type, HashSet<long>> recordsCompleted;
 
-		public BackupSet(IORM orm, IBackupWriter writer, IMetaBuilder metaBuilder, IPropertyBinder propertyBinder, IConverter converter)
+		public BackupSet(IORM orm, IBackupWriter writer, IMetaBuilder metaBuilder, IPropertyBinder propertyBinder, IConverter converter, IFactory factory)
 		{
 			this.orm = orm;
 			this.writer = writer;
 			this.metaBuilder = metaBuilder;
 			this.propertyBinder = propertyBinder;
 			this.converter = converter;
+			this.factory = factory;
 			tablesCompleted = new HashSet<Type>();
 			tablesInProgress = new HashSet<Type>();
 			recordsCompleted = new Dictionary<Type, HashSet<long>>();
@@ -180,7 +182,7 @@ namespace Kosson.KRUD
 				if (recordsInProgress.Contains(foreignRecord))
 				{
 					var id = foreignRecord.ID;
-					foreignRecord = (IRecord)KORMContext.Current.Factory.Create(fieldType);
+					foreignRecord = (IRecord)factory.Create(fieldType);
 					foreignRecord.ID = id;
 				}
 				else

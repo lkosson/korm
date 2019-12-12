@@ -11,7 +11,7 @@ namespace Kosson.Interfaces
 	/// <summary>
 	/// Provider for creation, manipulation and execution of database commands and transactions for a given database engine.
 	/// </summary>
-	public interface IDB
+	public interface IDB : IDisposable
 	{
 		/// <summary>
 		/// Connection string constructed from provider configuration used to access the database.

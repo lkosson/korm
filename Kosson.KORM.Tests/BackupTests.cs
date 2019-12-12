@@ -13,12 +13,14 @@ namespace Kosson.KRUD.Tests
 	public abstract partial class BackupTests : ORMTestsBase
 	{
 		protected IBackupProvider BackupProvider { get; private set; }
+		protected IRecordCloner RecordCloner { get; private set; }
 
 		[TestInitialize]
 		public override void Init()
 		{
 			base.Init();
 			BackupProvider = ServiceProvider.GetRequiredService<IBackupProvider>();
+			RecordCloner = ServiceProvider.GetRequiredService<IRecordCloner>();
 		}
 
 		protected override System.Collections.Generic.IEnumerable<Type> Tables()
@@ -33,7 +35,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void BackupCompletes()
 		{
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 			using (var set = BackupProvider.CreateBackupSet(writer))
 			{
 			}
@@ -42,7 +44,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RecordsAreBackedUp()
 		{
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 			var r1 = new MainTestTable { ID = MainTestTable.DEFAULTVALUE };
 			var r2 = new TableReferenced { ID = MainTestTable.DEFAULTVALUE };
 			using (var set = BackupProvider.CreateBackupSet(writer))
@@ -56,7 +58,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void TablesAreBackedUp()
 		{
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 			ORM.Store(new MainTestTable());
 			ORM.Store(new MainTestTable());
 			ORM.Store(new TableReferenced());
@@ -73,7 +75,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void ReferencedRecordsAreIncluded()
 		{
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 			var r1 = new TableReferenced();
 			var r2 = new TableReferenced();
 			ORM.Store(r1);
@@ -95,7 +97,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void CyclicReferencedRecordsAreIncluded()
 		{
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 			var r1 = new TableCyclic1();
 			var r2 = new TableCyclic1();
 			ORM.Store(r1);
@@ -156,7 +158,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void RecordsAreRestored()
 		{
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 			var r1 = new MainTestTable { Value = MainTestTable.DEFAULTVALUE };
 			var r2 = new TableReferenced { Value = MainTestTable.DEFAULTVALUE };
 			ORM.Store(r1);
@@ -181,7 +183,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void TablesAreRestored()
 		{
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 			ORM.Store(new MainTestTable());
 			ORM.Store(new MainTestTable());
 			ORM.Store(new TableReferenced());
@@ -205,7 +207,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void ReferencedRecordsAreRestored()
 		{
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 			var r1 = new TableReferenced();
 			var r2 = new TableReferenced();
 			ORM.Store(r1);
@@ -235,7 +237,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void CyclicReferencedRecordsAreRestored()
 		{
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 			var r1 = new TableCyclic1();
 			var r2 = new TableCyclic1();
 			ORM.Store(r1);
@@ -294,7 +296,8 @@ namespace Kosson.KRUD.Tests
 		public void CyclicReferencedRecordsAreRestoredXML()
 		{
 			var ms = new MemoryStream();
-			var writer = ActivatorUtilities.CreateInstance<XMLBackupWriter>(ServiceProvider, ms);
+			var xmlbackup = ActivatorUtilities.CreateInstance<XMLBackup>(ServiceProvider);
+			var writer = xmlbackup.CreateWriter(ms);
 			var r1 = new TableCyclic1();
 			var r2 = new TableCyclic1();
 			ORM.Store(r1);
@@ -328,7 +331,7 @@ namespace Kosson.KRUD.Tests
 			BackupProvider.ClearTables(new[] { typeof(TableCyclic1), typeof(TableCyclic2) });
 
 			ms.Position = 0;
-			var reader = new XMLBackupReader(ms);
+			var reader = xmlbackup.CreateReader(ms);
 			BackupProvider.Restore(reader);
 
 			var res1 = ORM.Select<TableCyclic1>().Execute();
@@ -353,7 +356,7 @@ namespace Kosson.KRUD.Tests
 		[TestMethod]
 		public void DuplicatedIDsAreReplaced()
 		{
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 
 			var r = new MainTestTable();
 			ORM.Store(r);
@@ -376,7 +379,7 @@ namespace Kosson.KRUD.Tests
 		public void PrimaryKeyIsRestoredWhereSupported()
 		{
 			if (!DB.CommandBuilder.SupportsPrimaryKeyInsert) Assert.Inconclusive("Database does not support specifying primary key value.");
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 
 			var r1 = new MainTestTable() { ID = 101, Value = 1 };
 			var r2 = new MainTestTable() { ID = 102, Value = 2 };
@@ -411,7 +414,7 @@ namespace Kosson.KRUD.Tests
 		public void PrimaryKeyLowerThanCurrentIsRestoredWhereSupported()
 		{
 			if (!DB.CommandBuilder.SupportsPrimaryKeyInsert) Assert.Inconclusive("Database does not support specifying primary key value.");
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 
 			var r1 = new MainTestTable() { Value = 1 };
 			var r2 = new MainTestTable() { Value = 2 };
@@ -448,7 +451,7 @@ namespace Kosson.KRUD.Tests
 		public void PrimaryKeyAndForeignKeyIsRestoredWhereSupported()
 		{
 			if (!DB.CommandBuilder.SupportsPrimaryKeyInsert) Assert.Inconclusive("Database does not support specifying primary key value.");
-			var writer = new MockBackupWriter();
+			var writer = new MockBackupWriter(RecordCloner);
 
 			// force IDs to start from greater than 1
 			ORM.Store(new TableReferenced());
@@ -533,8 +536,9 @@ namespace Kosson.KRUD.Tests
 			private IRecordCloner recordCloner;
 			public List<Record> Records { get; private set; }
 
-			public MockBackupWriter()
+			public MockBackupWriter(IRecordCloner recordCloner)
 			{
+				this.recordCloner = recordCloner;
 				Records = new List<Record>();
 			}
 

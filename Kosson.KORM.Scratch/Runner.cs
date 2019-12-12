@@ -1,4 +1,5 @@
 ﻿using Kosson.Interfaces;
+using Kosson.KRUD;
 using System;
 using System.IO;
 using System.Linq;
@@ -13,19 +14,19 @@ namespace Kosson.KORM.Scratch
 		private IBackupProvider backupProvider;
 		private IPropertyBinder propertyBinder;
 		private IConverter converter;
-		private IRecordLoader recordLoader;
-		private IFactory factory;
+		private DatabaseCopier databaseCopier;
+		private XMLBackup xmlBackup;
 
-		public Runner(IDB db, IORM orm, IMetaBuilder metaBuilder, IBackupProvider backupProvider, IPropertyBinder propertyBinder, IConverter converter, IRecordLoader recordLoader, IFactory factory)
+		public Runner(DatabaseCopier databaseCopier, XMLBackup xmlBackup, IDB db, IORM orm, IMetaBuilder metaBuilder, IBackupProvider backupProvider, IPropertyBinder propertyBinder, IConverter converter)
 		{
+			this.databaseCopier = databaseCopier;
+			this.xmlBackup = xmlBackup;
 			this.db = db;
 			this.orm = orm;
 			this.metaBuilder = metaBuilder;
 			this.backupProvider = backupProvider;
 			this.propertyBinder = propertyBinder;
 			this.converter = converter;
-			this.recordLoader = recordLoader;
-			this.factory = factory;
 		}
 
 		public void Run()
@@ -69,19 +70,20 @@ namespace Kosson.KORM.Scratch
 
 			orm.Delete(ux);
 
-			//using (var fs = new FileStream("backup.xml", FileMode.Open))
-			//using (var br = new XMLBackupReader(fs))
-			//{
-			//	Context.Current.Get<IBackupProvider>().Restore(br);
-			//}
+			using (var fs = new FileStream("backup.xml", FileMode.Open))
+			using (var br = xmlBackup.CreateReader(fs))
+			{
+				backupProvider.Restore(br);
+			}
 
 			using (var fs = new FileStream("backup.xml", FileMode.Create))
-			using (var bw = new KRUD.XMLBackupWriter(metaBuilder, propertyBinder, converter, fs))
+			using (var bw = xmlBackup.CreateWriter(fs))
 			{
 				var bs = backupProvider.CreateBackupSet(bw);
 				bs.AddRecords<Membership>();
 			}
 
+			//databaseCopier.CopyTo
 			//KRUD.DatabaseBackupWriter.Run(metaBuilder, propertyBinder, converter, recordLoader, factory, "sqlite", "data source=backup.sqlite3;version=3", new[] { typeof(User), typeof(Role), typeof(Membership) });
 
 			//var profiler = Context.Current.Get<IProfiler>();

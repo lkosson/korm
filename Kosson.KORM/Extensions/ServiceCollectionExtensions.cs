@@ -16,13 +16,13 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddSingleton<IPropertyBinder, Kosson.Kore.PropertyBinder.ReflectionPropertyBinder>();
 			services.AddSingleton<IMetaBuilder, Kosson.KRUD.Meta.ReflectionMetaBuilder>();
 			services.AddSingleton<IRecordLoader, Kosson.KRUD.RecordLoader.DynamicRecordLoader>();
-			services.AddSingleton<IBackupProvider, Kosson.KRUD.BackupProvider>();
+			services.AddTransient<IBackupProvider, Kosson.KRUD.BackupProvider>();
 			services.AddSingleton<IRecordCloner, Kosson.KORM.Support.RecordCloner>();
+			services.AddTransient<IBackupRestorer, Kosson.KRUD.BackupRestorer>();
 			services.AddScoped<IORM, Kosson.KRUD.ORM.DBORM>();
 			services.AddScoped<IDB, TDB>();
-				/*
-			var db = new KRUD.MSSQL.SQLDB(null, "server=(local);database=kosson;integrated security=true");
-			*/
+			services.AddTransient<Kosson.KRUD.DatabaseCopier>();
+			services.AddTransient<Kosson.KRUD.XMLBackup>();
 		}
 	}
 }
