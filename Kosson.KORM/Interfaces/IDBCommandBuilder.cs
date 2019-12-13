@@ -318,7 +318,6 @@ namespace Kosson.Interfaces
 		void Tag(IDBComment tag);
 	}
 
-
 	/// <summary>
 	/// Generic database command.
 	/// </summary>

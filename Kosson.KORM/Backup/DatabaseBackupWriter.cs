@@ -9,10 +9,7 @@ using System.Threading.Tasks;
 
 namespace Kosson.KRUD
 {
-	/// <summary>
-	/// Backup writer storing records in a specified database.
-	/// </summary>
-	public class DatabaseBackupWriter : IBackupWriter
+	class DatabaseBackupWriter : IBackupWriter
 	{
 		private BackupRestorer restorer;
 

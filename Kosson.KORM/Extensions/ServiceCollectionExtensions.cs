@@ -23,6 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddScoped<IDB, TDB>();
 			services.AddTransient<Kosson.KRUD.DatabaseCopier>();
 			services.AddTransient<Kosson.KRUD.XMLBackup>();
+			services.AddTransient<Kosson.KRUD.DatabaseScripting>();
 		}
 	}
 }

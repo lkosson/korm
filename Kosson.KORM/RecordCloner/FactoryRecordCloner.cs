@@ -3,14 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kosson.KORM.Support
+namespace Kosson.KORM.RecordCloner
 {
-	class RecordCloner : IRecordCloner
+	class FactoryRecordCloner : IRecordCloner
 	{
 		private IFactory factory;
 		private IMetaBuilder metaBuilder;
 
-		public RecordCloner(IFactory factory, IMetaBuilder metaBuilder)
+		public FactoryRecordCloner(IFactory factory, IMetaBuilder metaBuilder)
 		{
 			this.factory = factory;
 			this.metaBuilder = metaBuilder;

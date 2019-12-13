@@ -8,15 +8,11 @@ using System.Threading.Tasks;
 
 namespace Kosson.KRUD
 {
-	/// <summary>
-	/// Record serializer producing SQL script inserting rows for specified records.
-	/// </summary>
-	public class SQLScriptBackupWriter : IBackupWriter
+	class SQLScriptBackupWriter : IBackupWriter
 	{
 		private StreamWriter sw;
 		private Dictionary<Type, TableState> tableStates;
 		private IMetaBuilder metaBuilder;
-		private IDB db;
 		private IDBCommandBuilder cb;
 		private ORM.DBTableCreator tc;
 
@@ -32,9 +28,9 @@ namespace Kosson.KRUD
 		/// <param name="targetDB">Database provider to use for SQL command construction.</param>
 		public SQLScriptBackupWriter(IDB db, IMetaBuilder metaBuilder, Stream stream)
 		{
+			this.metaBuilder = metaBuilder;
 			sw = new StreamWriter(stream, Encoding.UTF8, 65536, true);
 			tableStates = new Dictionary<Type, TableState>();
-			metaBuilder = KORMContext.Current.MetaBuilder;
 			cb = db.CommandBuilder;
 			tc = new ORM.DBTableCreator(db, metaBuilder, WriteCreateTableCommand);
 			CreateStructure = true;
