@@ -1,17 +1,13 @@
 ﻿using Kosson.Interfaces;
-using Kosson.Kore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD.ORM
+namespace Kosson.KORM.ORM
 {
 	/// <summary>
 	/// Object-relational mapper using IDB for database communication.
 	/// </summary>
-	public class DBORM : IORM
+	class DBORM : IORM
 	{
 		private IDB db;
 		private IMetaBuilder metaBuilder;

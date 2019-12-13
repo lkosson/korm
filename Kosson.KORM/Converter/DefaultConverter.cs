@@ -1,17 +1,11 @@
 ﻿using Kosson.Interfaces;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 
-namespace Kosson.Kore.Converter
+namespace Kosson.KORM.Converter
 {
-	/// <summary>
-	/// Default implementation of IConverter component
-	/// </summary>
-	public class DefaultConverter : IConverter
+	class DefaultConverter : IConverter
 	{
 		private static readonly Type typeObject = typeof(object);
 		private static readonly Type typeByte = typeof(byte);
@@ -26,14 +20,12 @@ namespace Kosson.Kore.Converter
 		private static readonly Type typeGuid = typeof(Guid);
 		private static readonly Type typeBlob = typeof(byte[]);
 
-		/// <summary>
-		/// CultureInfo used for string conversions.
-		/// </summary>
+		private static readonly object[] defaultByTypeCode;
+
 		protected virtual CultureInfo Culture { get { return System.Globalization.CultureInfo.InvariantCulture; } }
 
-		private ConcurrentDictionary<Type, object> defaultValues = new ConcurrentDictionary<Type, object>();
-
-		private static object[] defaultByTypeCode;
+		private readonly IFactory factory;
+		private readonly ConcurrentDictionary<Type, object> defaultValues;
 
 		static DefaultConverter()
 		{
@@ -56,6 +48,12 @@ namespace Kosson.Kore.Converter
 			defaultByTypeCode[(int)TypeCode.UInt16] = (ushort)0;
 			defaultByTypeCode[(int)TypeCode.UInt32] = (uint)0;
 			defaultByTypeCode[(int)TypeCode.UInt64] = (ulong)0;
+		}
+
+		public DefaultConverter(IFactory factory)
+		{
+			this.factory = factory;
+			defaultValues = new ConcurrentDictionary<Type, object>();
 		}
 
 		object IConverter.Convert(object value, Type type)
@@ -111,7 +109,7 @@ namespace Kosson.Kore.Converter
 
 			if (type.IsArray) result = Array.CreateInstance(type.GetElementType(), 0);
 			else if (!type.IsValueType) result = null;
-			else result = KORMContext.Current.Factory.Create(type);
+			else result = factory.Create(type);
 			defaultValues[type] = result;
 			return result;
 		}
@@ -165,12 +163,12 @@ namespace Kosson.Kore.Converter
 
 		private object FromConvertible(IConvertible value, Type type)
 		{
-			//if (typeof(IRecordRef).IsAssignableFrom(type))
-			//{
-			//	var recordref = (IRecordRef)KORMContext.Current.Factory.Create(type);
-			//	recordref.ID = value.ToInt64(Culture);
-			//	return recordref;
-			//}
+			if (typeof(IRecordRef).IsAssignableFrom(type))
+			{
+				var recordref = (IRecordRef)factory.Create(type);
+				recordref.ID = value.ToInt64(Culture);
+				return recordref;
+			}
 			return value.ToType(type, Culture);
 		}
 
@@ -188,20 +186,5 @@ namespace Kosson.Kore.Converter
 			//if (type == typeulong) return (ulong)val;
 			return Fail(value, type);
 		}
-		/*
-		private static object FromRecord(IRecord record, Type type)
-		{
-			if (type == typeof(long)) return record.ID;
-			var reftype = typeof(RecordRef<>).MakeGenericType(record.GetType());
-			if (type.IsAssignableFrom(reftype))
-			{
-				var recordref = (IRecordRef)KORMContext.Current.Factory.Create(reftype);
-				// TODO: czy to zadziała
-				recordref.ID = record.ID;
-				return recordref;
-			}
-			return Fail(record, type);
-		}
-		 */
 	}
 }

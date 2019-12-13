@@ -2,25 +2,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
 
-namespace Kosson.KRUD
+namespace Kosson.KORM.Backup
 {
 	class BackupSet : IBackupSet
 	{
-		private IORM orm;
-		private IBackupWriter writer;
-		private IMetaBuilder metaBuilder;
-		private IPropertyBinder propertyBinder;
-		private IConverter converter;
-		private IFactory factory;
-		private HashSet<Type> tablesCompleted;
-		private HashSet<Type> tablesInProgress;
-		private Dictionary<Type, HashSet<long>> recordsCompleted;
+		private readonly IORM orm;
+		private readonly IBackupWriter writer;
+		private readonly IMetaBuilder metaBuilder;
+		private readonly IPropertyBinder propertyBinder;
+		private readonly IConverter converter;
+		private readonly IFactory factory;
+
+		private readonly HashSet<Type> tablesCompleted;
+		private readonly HashSet<Type> tablesInProgress;
+		private readonly Dictionary<Type, HashSet<long>> recordsCompleted;
 
 		public BackupSet(IORM orm, IBackupWriter writer, IMetaBuilder metaBuilder, IPropertyBinder propertyBinder, IConverter converter, IFactory factory)
 		{
@@ -144,7 +141,6 @@ namespace Kosson.KRUD
 		{
 			var typed = new Func<IRecordRef, IRecord>(GetRecordFromRef<Record>).ChangeDelegateGenericArgument(type);
 			return typed(recordRef);
-			//return (IRecord)GetType().GetMethod("GetRecordFromRefTyped", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).MakeGenericMethod(type).Invoke(this, new[] { recordRef });
 		}
 
 		private void AddRecordAndForeign(Type type, IRecord record, IEnumerable<IMetaRecordField> foreigns, Stack<IRecord> recordsInProgress)

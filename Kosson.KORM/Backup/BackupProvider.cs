@@ -2,20 +2,16 @@
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD
+namespace Kosson.KORM.Backup
 {
 	/// <summary>
 	/// Default provider for creating and restoring database backups.
 	/// </summary>
 	public class BackupProvider : IBackupProvider
 	{
-		private IServiceProvider serviceProvider;
-		private IBackupRestorer backupRestorer;
+		private readonly IServiceProvider serviceProvider;
+		private readonly IBackupRestorer backupRestorer;
 
 		public BackupProvider(IServiceProvider serviceProvider, IBackupRestorer backupRestorer)
 		{
@@ -32,12 +28,6 @@ namespace Kosson.KRUD
 		void IBackupProvider.Restore(IBackupReader reader)
 		{
 			backupRestorer.Restore(reader);
-		}
-
-		void IBackupProvider.ClearTables(IEnumerable<Type> types)
-		{
-			var clearer = ActivatorUtilities.CreateInstance<BackupClearer>(serviceProvider);
-			clearer.Clear(types);
 		}
 	}
 }

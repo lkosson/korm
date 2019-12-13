@@ -1,10 +1,6 @@
-﻿using Kosson.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace Kosson.KRUD
+namespace Kosson.Interfaces
 {
 	/// <summary>
 	/// Mutable IRow implementation based on list of values

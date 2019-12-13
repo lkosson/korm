@@ -1,13 +1,9 @@
 ﻿using Kosson.Interfaces;
-using Kosson.KRUD.CommandBuilder;
+using Kosson.KORM.DB.CommandBuilder;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD.MSSQL
+namespace Kosson.KORM.MSSQL
 {
 	class CommandBuilder : DBCommandBuilder
 	{

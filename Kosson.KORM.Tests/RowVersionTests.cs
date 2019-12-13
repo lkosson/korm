@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
+using Kosson.KORM.DB;
 
 namespace Kosson.KRUD.Tests
 {
@@ -72,7 +73,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KRUDConcurrentModificationException))]
+		[ExpectedException(typeof(KORMConcurrentModificationException))]
 		public void InterleavedUpdatesFail()
 		{
 			var record = new RowVersionTable();
@@ -117,7 +118,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KRUDConcurrentModificationException))]
+		[ExpectedException(typeof(KORMConcurrentModificationException))]
 		public void DeleteAfterUpdateFails()
 		{
 			var record = new RowVersionTable();

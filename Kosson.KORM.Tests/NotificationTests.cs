@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
+using Kosson.KORM.DB;
 
 namespace Kosson.KRUD.Tests
 {
@@ -24,7 +25,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ORMInsertFailedException))]
+		[ExpectedException(typeof(KORMInsertFailedException))]
 		public void InsertBeforeNotificationsResultThrowsException()
 		{
 			var record = new Table();
@@ -74,7 +75,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ORMUpdateFailedException))]
+		[ExpectedException(typeof(KORMUpdateFailedException))]
 		public void UpdateBeforeNotificationsResultThrowsException()
 		{
 			var record = new Table();
@@ -129,7 +130,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ORMDeleteFailedException))]
+		[ExpectedException(typeof(KORMDeleteFailedException))]
 		public void DeleteBeforeNotificationsResultThrowsException()
 		{
 			var record = new Table();

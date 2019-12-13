@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Kosson.Interfaces
+﻿namespace Kosson.Interfaces
 {
 	/// <summary>
 	/// Database record with 64-bit integer as a primary key.

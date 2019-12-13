@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Kosson.Interfaces
+﻿namespace Kosson.Interfaces
 {
 	/// <summary>
 	/// Interface for receiving progress notifications and controlling insertion process performed by ORM.

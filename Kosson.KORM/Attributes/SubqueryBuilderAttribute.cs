@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Kosson.KRUD;
 
 namespace Kosson.Interfaces
 {
-	/// <summary>
-	/// Declares a property value as a subquery.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+    /// <summary>
+    /// Declares a property value as a subquery.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
 	public abstract class SubqueryBuilderAttribute : Attribute
 	{
 		/// <summary>

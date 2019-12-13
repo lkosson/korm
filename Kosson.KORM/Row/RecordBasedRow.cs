@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Kosson.Interfaces
 {
@@ -40,7 +37,7 @@ namespace Kosson.Interfaces
 			{
 				if (builders.TryGetValue(type, out builder)) return builder(meta, record);
 			}
-			var builderMethod = typeof(RecordBasedRow).GetMethod("CreateImpl", BindingFlags.Static | BindingFlags.NonPublic);
+			var builderMethod = typeof(RecordBasedRow).GetMethod(nameof(RecordBasedRow.CreateImpl), BindingFlags.Static | BindingFlags.NonPublic);
 			builder = (Func<IMetaRecord, IRecord, IRow>)builderMethod.MakeGenericMethod(type).CreateDelegate(typeof(Func<IMetaRecord, IRecord, IRow>));
 			lock (builders)
 			{

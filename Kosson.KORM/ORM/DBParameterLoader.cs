@@ -1,15 +1,13 @@
 ﻿using Kosson.Interfaces;
+using Kosson.KORM.DB;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD.ORM
+namespace Kosson.KORM.ORM
 {
 	class DBParameterLoader
 	{
@@ -47,7 +45,7 @@ namespace Kosson.KRUD.ORM
 				if (trim)
 					value = value.Substring(0, maxlen);
 				else
-					throw new KRUDDataLengthException(name, maxlen, value);
+					throw new KORMDataLengthException(name, maxlen, value);
 			}
 			return value;
 		}

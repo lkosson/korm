@@ -1,14 +1,10 @@
 ﻿using Kosson.Interfaces;
-using System;
-using System.Collections.Concurrent;
+using Kosson.KORM.DB;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Kosson.KRUD.ORM
+namespace Kosson.KORM.ORM
 {
 	class DBORMUpdate<TRecord> : DBORMCommandBase<TRecord, IDBUpdate>, IORMUpdate<TRecord> where TRecord : IRecord
 	{
@@ -115,7 +111,7 @@ namespace Kosson.KRUD.ORM
 					ApplyRowVersion(rowVersion, rowVersionParameter);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record, ref parameters);
 					int lcount = DB.ExecuteNonQuery(cmdUpdate);
-					if (rowVersion != null && lcount == 0) throw new KRUDConcurrentModificationException(cmdUpdate);
+					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate);
 
 					count += lcount;
 					if (notify != null) result = notify.OnUpdated();
@@ -149,7 +145,7 @@ namespace Kosson.KRUD.ORM
 					ApplyRowVersion(rowVersion, rowVersionParameter);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record, ref parameters);
 					int lcount = await DB.ExecuteNonQueryAsync(cmdUpdate);
-					if (rowVersion != null && lcount == 0) throw new KRUDConcurrentModificationException(cmdUpdate);
+					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate);
 
 					count += lcount;
 					if (notify != null) result = notify.OnUpdated();

@@ -3,25 +3,24 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD
+namespace Kosson.KORM.Backup
 {
 	class BackupRestorer : IBackupRestorer
 	{
-		private IMetaBuilder metaBuilder;
-		private IORM orm;
-		private IPropertyBinder propertyBinder;
-		private IFactory factory;
-		private Dictionary<string, TableState> tableStates;
+		private readonly IMetaBuilder metaBuilder;
+		private readonly IORM orm;
+		private readonly IPropertyBinder propertyBinder;
+		private readonly IFactory factory;
+
+		private readonly bool supportsPKInsert;
+		private readonly Dictionary<string, TableState> tableStates;
+
 		private Action<IRecord> storeRecordDelegate;
 		private Action<IRecord> insertRecordPKDelegate;
 		private Type storeRecordDelegateType;
 		private Type insertRecordPKDelegateType;
-		private bool supportsPKInsert;
 
 		public BackupRestorer(IMetaBuilder metaBuilder, IORM orm, IDB db, IPropertyBinder propertyBinder, IFactory factory)
 		{

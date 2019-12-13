@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Kosson.Interfaces
+﻿namespace Kosson.Interfaces
 {
+	/// <summary>
+	/// Database connection parameters.
+	/// </summary>
 	public class KORMConfiguration
 	{
+		/// <summary>
+		/// Database connection string.
+		/// </summary>
 		public string ConnectionString { get; set; }
 	}
 }

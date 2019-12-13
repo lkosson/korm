@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Kosson.KRUD
+namespace Kosson.KORM.Backup
 {
 	public class XMLBackup
 	{
-		private IServiceProvider serviceProvider;
+		private readonly IServiceProvider serviceProvider;
 
 		public XMLBackup(IServiceProvider serviceProvider)
 		{

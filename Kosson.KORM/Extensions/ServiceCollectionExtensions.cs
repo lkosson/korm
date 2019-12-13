@@ -11,19 +11,20 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TDB : class, IDB
 		{
 			services.AddSingleton<KORMConfiguration>();
-			services.AddSingleton<IConverter, Kosson.Kore.Converter.DefaultConverter>();
-			services.AddSingleton<IFactory, Kosson.Kore.Factory.DynamicMethodFactory>();
-			services.AddSingleton<IPropertyBinder, Kosson.Kore.PropertyBinder.ReflectionPropertyBinder>();
-			services.AddSingleton<IMetaBuilder, Kosson.KRUD.Meta.ReflectionMetaBuilder>();
-			services.AddSingleton<IRecordLoader, Kosson.KRUD.RecordLoader.DynamicRecordLoader>();
-			services.AddTransient<IBackupProvider, Kosson.KRUD.BackupProvider>();
-			services.AddSingleton<IRecordCloner, Kosson.KORM.Support.RecordCloner>();
-			services.AddTransient<IBackupRestorer, Kosson.KRUD.BackupRestorer>();
-			services.AddScoped<IORM, Kosson.KRUD.ORM.DBORM>();
+			services.AddSingleton<IConverter, Kosson.KORM.Converter.DefaultConverter>();
+			services.AddSingleton<IFactory, Kosson.KORM.Factory.DynamicMethodFactory>();
+			services.AddSingleton<IPropertyBinder, Kosson.KORM.PropertyBinder.ReflectionPropertyBinder>();
+			services.AddSingleton<IMetaBuilder, Kosson.KORM.Meta.ReflectionMetaBuilder>();
+			services.AddSingleton<IRecordLoader, Kosson.KORM.RecordLoader.DynamicRecordLoader>();
+			services.AddTransient<IBackupProvider, Kosson.KORM.Backup.BackupProvider>();
+			services.AddSingleton<IRecordCloner, Kosson.KORM.RecordCloner.FactoryRecordCloner>();
+			services.AddTransient<IBackupRestorer, Kosson.KORM.Backup.BackupRestorer>();
+			services.AddTransient<IDatabaseCopier, Kosson.KORM.Backup.DatabaseCopier>();
+			services.AddTransient<IDatabaseEraser, Kosson.KORM.Backup.DatabaseEraser>();
+			services.AddTransient<IDatabaseScriptGenerator, Kosson.KORM.Backup.DatabaseScriptGenerator>();
+			services.AddScoped<IORM, Kosson.KORM.ORM.DBORM>();
 			services.AddScoped<IDB, TDB>();
-			services.AddTransient<Kosson.KRUD.DatabaseCopier>();
-			services.AddTransient<Kosson.KRUD.XMLBackup>();
-			services.AddTransient<Kosson.KRUD.DatabaseScripting>();
+			services.AddTransient<Kosson.KORM.Backup.XMLBackup>();
 		}
 	}
 }

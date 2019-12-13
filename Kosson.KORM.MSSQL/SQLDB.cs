@@ -1,14 +1,11 @@
 ﻿using Kosson.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
-using System.Linq;
-using System.Text;
 using Microsoft.Extensions.Logging;
+using Kosson.KORM.DB;
 
-namespace Kosson.KRUD.MSSQL
+namespace Kosson.KORM.MSSQL
 {
 	public class SQLDB : ADONETDB
 	{
@@ -82,23 +79,23 @@ namespace Kosson.KRUD.MSSQL
 			SqlException se = exc as SqlException;
 			if (se != null)
 			{
-				if (se.Number == 1222) return new KRUDLockException(exc);
-				else if (se.Number == 2627) return new KRUDDuplicateValueException(exc);
-				else if (se.Number == 3701) return new KRUDInvalidStructureException(exc, cmd);
-				else if (se.Number == 1785) return new KRUDInvalidStructureException(exc, cmd); // multiple cascade paths
-				else if (se.Number == 2714) return new KRUDObjectExistsException(exc, cmd); // object exists
-				else if (se.Number == 2705) return new KRUDObjectExistsException(exc, cmd); // column exists
-				else if (se.Number == 10054) return new KRUDConnectionException(exc); // winsock - connection reset
-				else if (se.Number == 64) return new KRUDConnectionException(exc); // name no longer available
-				else if (se.Number == 1231) return new KRUDConnectionException(exc); // conn err
+				if (se.Number == 1222) return new KORMLockException(exc);
+				else if (se.Number == 2627) return new KORMDuplicateValueException(exc);
+				else if (se.Number == 3701) return new KORMInvalidStructureException(exc, cmd);
+				else if (se.Number == 1785) return new KORMInvalidStructureException(exc, cmd); // multiple cascade paths
+				else if (se.Number == 2714) return new KORMObjectExistsException(exc, cmd); // object exists
+				else if (se.Number == 2705) return new KORMObjectExistsException(exc, cmd); // column exists
+				else if (se.Number == 10054) return new KORMConnectionException(exc); // winsock - connection reset
+				else if (se.Number == 64) return new KORMConnectionException(exc); // name no longer available
+				else if (se.Number == 1231) return new KORMConnectionException(exc); // conn err
 				else if (se.Number == 547)
 				{
 					var idx = se.Message.IndexOf("table");
-					if (idx < 0) return new KRUDForeignKeyException(exc, cmd, se.Message);
+					if (idx < 0) return new KORMForeignKeyException(exc, cmd, se.Message);
 					string tab = se.Message.Substring(idx);
 					tab = tab.Substring(tab.IndexOf('"') + 1);
 					tab = tab.Substring(0, tab.IndexOf('"'));
-					return new KRUDForeignKeyException(exc, cmd, tab);
+					return new KORMForeignKeyException(exc, cmd, tab);
 				}
 			}
 			return base.TranslateException(exc, cmd);

@@ -1,16 +1,14 @@
 ﻿using Kosson.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
-namespace Kosson.KRUD.RecordLoader
+namespace Kosson.KORM.RecordLoader
 {
 	/// <summary>
 	/// Default implementation of IRecordLoader based on DynamicMethods generated during runtime.
 	/// </summary>
-	public class DynamicRecordLoader : IRecordLoader, IDisposable
+	class DynamicRecordLoader : IRecordLoader, IDisposable
 	{
 		private LoaderBuilder LoaderBuilder;
 		private ReaderWriterLockSlim rwlock;

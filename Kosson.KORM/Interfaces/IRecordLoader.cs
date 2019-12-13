@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Kosson.Interfaces
+﻿namespace Kosson.Interfaces
 {
 	/// <summary>
 	/// Provides support for creating record of a given type from IRow containing values of record properties.

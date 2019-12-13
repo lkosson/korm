@@ -1,13 +1,8 @@
 ﻿using Kosson.Interfaces;
-using Kosson.Kore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD.ORM
+namespace Kosson.KORM.ORM
 {
 	class DBORMCommandBase<TRecord> 
 		where TRecord : IRecord

@@ -1,6 +1,5 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Kosson.Interfaces;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Kosson.KORM.DB;
 
 namespace Kosson.KRUD.Tests
 {
@@ -15,33 +14,7 @@ namespace Kosson.KRUD.Tests
 		{
 			Assert.IsNotNull(DB);
 		}
-/* TODO
-		[TestMethod]
-		public void DBCanBeCreatedExplicitly()
-		{
-			using (Context.Begin())
-			{
-				var dbfactory = Context.Current.Get<IDBFactory>();
-				var db = dbfactory.Create(Provider);
-				Assert.IsNotNull(db);
-				Assert.AreEqual(Context.Current, db.OwningContext);
-			}
-		}
 
-		[TestMethod]
-		public void ExplicitlyCreatedDBIsIndependent()
-		{
-			using (Context.Begin())
-			{
-				var dbfactory = Context.Current.Get<IDBFactory>();
-				var db1 = Context.Current.Get<IDB>();
-				var db2 = dbfactory.Create(Provider);
-				var db3 = dbfactory.Create(Provider);
-				Assert.AreNotEqual(db1, db2);
-				Assert.AreNotEqual(db2, db3);
-			}
-		}
-		*/
 		[TestMethod]
 		public void ConnectionStringIsNotNull()
 		{
@@ -76,7 +49,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		[ExpectedException(typeof(KORMInvalidOperationException))]
 		public void MultipleBeginTransactionFails()
 		{
 			Assert.IsFalse(DB.IsTransactionOpen);
@@ -100,21 +73,21 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		[ExpectedException(typeof(KORMInvalidOperationException))]
 		public void CommitWithoutTransactionFails()
 		{
 			DB.Commit();
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		[ExpectedException(typeof(KORMInvalidOperationException))]
 		public void RollbackWithoutTransactionFails()
 		{
 			DB.Rollback();
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		[ExpectedException(typeof(KORMInvalidOperationException))]
 		public void MultipleCommitsFails()
 		{
 			Assert.IsFalse(DB.IsTransactionOpen);
@@ -126,7 +99,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		[ExpectedException(typeof(KORMInvalidOperationException))]
 		public void MultipleRollbacksFails()
 		{
 			Assert.IsFalse(DB.IsTransactionOpen);
@@ -182,7 +155,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		[ExpectedException(typeof(KORMInvalidOperationException))]
 		public void ImplicitTransactionCannotBeCommitted()
 		{
 			DB.CreateCommand("SELECT 1");
@@ -191,7 +164,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KRUDInvalidOperationException))]
+		[ExpectedException(typeof(KORMInvalidOperationException))]
 		public void ImplicitTransactionCannotBeRolledBack()
 		{
 			DB.CreateCommand("SELECT 1");

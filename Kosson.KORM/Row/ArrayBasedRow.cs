@@ -1,10 +1,7 @@
 ﻿using Kosson.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Kosson.KRUD
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Read-only IRow implementation based on array of objects and dictionary of column names.

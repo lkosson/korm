@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using Kosson.KORM.Backup;
 
 namespace Kosson.KRUD.Tests
 {
@@ -14,6 +15,7 @@ namespace Kosson.KRUD.Tests
 	{
 		protected IBackupProvider BackupProvider { get; private set; }
 		protected IRecordCloner RecordCloner { get; private set; }
+		protected IDatabaseEraser DatabaseEraser { get; private set; }
 
 		[TestInitialize]
 		public override void Init()
@@ -21,6 +23,7 @@ namespace Kosson.KRUD.Tests
 			base.Init();
 			BackupProvider = ServiceProvider.GetRequiredService<IBackupProvider>();
 			RecordCloner = ServiceProvider.GetRequiredService<IRecordCloner>();
+			DatabaseEraser = ServiceProvider.GetRequiredService<IDatabaseEraser>();
 		}
 
 		protected override System.Collections.Generic.IEnumerable<Type> Tables()
@@ -134,7 +137,7 @@ namespace Kosson.KRUD.Tests
 		{
 			ORM.Store(new MainTestTable());
 			ORM.Store(new MainTestTable());
-			BackupProvider.ClearTables(new[] { typeof(MainTestTable) });
+			DatabaseEraser.Clear(new[] { typeof(MainTestTable) });
 			var res = ORM.Select<MainTestTable>().Execute();
 			Assert.AreEqual(0, res.Count);
 		}
@@ -150,7 +153,7 @@ namespace Kosson.KRUD.Tests
 			r3.FKNone = r1;
 			ORM.Store(r3);
 
-			BackupProvider.ClearTables(new[] { typeof(TableReferenced), typeof(TableReferencing) });
+			DatabaseEraser.Clear(new[] { typeof(TableReferenced), typeof(TableReferencing) });
 			var res = ORM.Select<TableReferencing>().Execute();
 			Assert.AreEqual(0, res.Count);
 		}
@@ -168,7 +171,7 @@ namespace Kosson.KRUD.Tests
 				set.AddRecords(new Record[] { r1, r2 });
 			}
 
-			BackupProvider.ClearTables(new[] { typeof(MainTestTable), typeof(TableReferenced) });
+			DatabaseEraser.Clear(new[] { typeof(MainTestTable), typeof(TableReferenced) });
 
 			var reader = writer.CreateReader();
 			BackupProvider.Restore(reader);
@@ -194,7 +197,7 @@ namespace Kosson.KRUD.Tests
 				set.AddTable(typeof(TableReferenced));
 			}
 
-			BackupProvider.ClearTables(new[] { typeof(MainTestTable), typeof(TableReferenced) });
+			DatabaseEraser.Clear(new[] { typeof(MainTestTable), typeof(TableReferenced) });
 
 			var reader = writer.CreateReader();
 			BackupProvider.Restore(reader);
@@ -221,7 +224,7 @@ namespace Kosson.KRUD.Tests
 				set.AddTable(typeof(TableReferencing));
 			}
 
-			BackupProvider.ClearTables(new[] { typeof(TableReferencing), typeof(TableReferenced) });
+			DatabaseEraser.Clear(new[] { typeof(TableReferencing), typeof(TableReferenced) });
 
 			var reader = writer.CreateReader();
 			BackupProvider.Restore(reader);
@@ -268,7 +271,7 @@ namespace Kosson.KRUD.Tests
 				set.AddTable(typeof(TableCyclic1));
 			}
 
-			BackupProvider.ClearTables(new[] { typeof(TableCyclic1), typeof(TableCyclic2) });
+			DatabaseEraser.Clear(new[] { typeof(TableCyclic1), typeof(TableCyclic2) });
 
 			var reader = writer.CreateReader();
 			BackupProvider.Restore(reader);
@@ -328,7 +331,7 @@ namespace Kosson.KRUD.Tests
 				set.AddTable(typeof(TableCyclic1));
 			}
 
-			BackupProvider.ClearTables(new[] { typeof(TableCyclic1), typeof(TableCyclic2) });
+			DatabaseEraser.Clear(new[] { typeof(TableCyclic1), typeof(TableCyclic2) });
 
 			ms.Position = 0;
 			var reader = xmlbackup.CreateReader(ms);
@@ -392,7 +395,7 @@ namespace Kosson.KRUD.Tests
 				set.AddRecords(new Record[] { r2, r3, r4, r1, r5 });
 			}
 
-			BackupProvider.ClearTables(new[] { typeof(MainTestTable) });
+			DatabaseEraser.Clear(new[] { typeof(MainTestTable) });
 
 			var reader = writer.CreateReader();
 			BackupProvider.Restore(reader);
@@ -429,7 +432,7 @@ namespace Kosson.KRUD.Tests
 				set.AddTable(typeof(MainTestTable));
 			}
 
-			BackupProvider.ClearTables(new[] { typeof(MainTestTable) });
+			DatabaseEraser.Clear(new[] { typeof(MainTestTable) });
 
 			var reader = writer.CreateReader();
 			BackupProvider.Restore(reader);
@@ -468,7 +471,7 @@ namespace Kosson.KRUD.Tests
 				set.AddRecords(new Record[] { r1, r2 });
 			}
 
-			BackupProvider.ClearTables(new[] { typeof(TableReferencing), typeof(TableReferenced) });
+			DatabaseEraser.Clear(new[] { typeof(TableReferencing), typeof(TableReferenced) });
 
 			var reader = writer.CreateReader();
 			BackupProvider.Restore(reader);

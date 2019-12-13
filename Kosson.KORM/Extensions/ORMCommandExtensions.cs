@@ -1,10 +1,7 @@
-﻿using Kosson.Interfaces;
-using Kosson.KRUD;
+﻿using Kosson.KORM.DB;
+using Kosson.KORM.Meta;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Kosson.Interfaces
@@ -154,7 +151,7 @@ namespace Kosson.Interfaces
 		public static TCommand WhereID<TCommand>(this TCommand query, long id)
 			where TCommand : IORMNarrowableCommand<TCommand>
 		{
-			return query.WhereFieldEquals(Kosson.KRUD.Meta.MetaRecord.PKNAME, id);
+			return query.WhereFieldEquals(MetaRecord.PKNAME, id);
 		}
 
 		/// <summary>
@@ -167,7 +164,7 @@ namespace Kosson.Interfaces
 		public static void ByID<TRecord>(this IORMUpdate<TRecord> query, long id) where TRecord : IRecord
 		{
 			int count = query.WhereID(id).Execute();
-			if (count != 1) throw new ORMUpdateFailedException();
+			if (count != 1) throw new KORMUpdateFailedException();
 		}
 
 		/// <summary>
@@ -193,7 +190,7 @@ namespace Kosson.Interfaces
 		public async static Task ByIDAsync<TRecord>(this IORMUpdate<TRecord> query, long id) where TRecord : IRecord
 		{
 			int count = await query.WhereID(id).ExecuteAsync();
-			if (count != 1) throw new ORMUpdateFailedException();
+			if (count != 1) throw new KORMUpdateFailedException();
 		}
 
 		/// <summary>
@@ -219,7 +216,7 @@ namespace Kosson.Interfaces
 		public static void ByID<TRecord>(this IORMDelete<TRecord> query, long id) where TRecord : IRecord
 		{
 			int count = query.WhereID(id).Execute();
-			if (count != 1) throw new ORMDeleteFailedException();
+			if (count != 1) throw new KORMDeleteFailedException();
 		}
 
 		/// <summary>
@@ -245,7 +242,7 @@ namespace Kosson.Interfaces
 		public async static Task ByIDAsync<TRecord>(this IORMDelete<TRecord> query, long id) where TRecord : IRecord
 		{
 			int count = await query.WhereID(id).ExecuteAsync();
-			if (count != 1) throw new ORMDeleteFailedException();
+			if (count != 1) throw new KORMDeleteFailedException();
 		}
 
 		/// <summary>

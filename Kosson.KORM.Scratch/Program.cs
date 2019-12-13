@@ -9,7 +9,7 @@ namespace Kosson.KORM.Scratch
 		static void Main(string[] args)
 		{
 			var services = new ServiceCollection();
-			services.AddKORMServices<KRUD.MSSQL.SQLDB>();
+			services.AddKORMServices<MSSQL.SQLDB>();
 			services.AddScoped<Runner>();
 			services.AddSingleton<ILogger, ConsoleLogger>();
 

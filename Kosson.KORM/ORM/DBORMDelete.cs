@@ -1,13 +1,10 @@
 ﻿using Kosson.Interfaces;
-using System;
+using Kosson.KORM.DB;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Kosson.KRUD.ORM
+namespace Kosson.KORM.ORM
 {
 	class DBORMDelete<TRecord> : DBORMCommandBase<TRecord, IDBDelete>, IORMDelete<TRecord> where TRecord : IRecord
 	{
@@ -73,7 +70,7 @@ namespace Kosson.KRUD.ORM
 					if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
 					DB.SetParameter(idParameter, record.ID);
 					int lcount = DB.ExecuteNonQuery(cmdDelete);
-					if (rowVersion != null && lcount == 0) throw new KRUDConcurrentModificationException(cmdDelete);
+					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete);
 
 					count += lcount;
 					if (notify != null) result = notify.OnDeleted();
@@ -113,7 +110,7 @@ namespace Kosson.KRUD.ORM
 					if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
 					DB.SetParameter(idParameter, record.ID);
 					int lcount = await DB.ExecuteNonQueryAsync(cmdDelete);
-					if (rowVersion != null && lcount == 0) throw new KRUDConcurrentModificationException(cmdDelete);
+					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete);
 
 					count += lcount;
 					if (notify != null) result = notify.OnDeleted();

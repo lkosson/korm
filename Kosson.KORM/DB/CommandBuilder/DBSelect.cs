@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Kosson.KRUD.CommandBuilder
+namespace Kosson.KORM.DB.CommandBuilder
 {
 	/// <inheritdoc/>
 	public class DBSelect : DBCommandWithWhere, IDBSelect

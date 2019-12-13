@@ -1,14 +1,10 @@
 ﻿using Kosson.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD.ORM
+namespace Kosson.KORM.ORM
 {
 	class ReaderRecordLoaderBuilder
 	{
@@ -34,22 +30,22 @@ namespace Kosson.KRUD.ORM
 		public ReaderRecordLoaderBuilder(IMetaBuilder metaBuilder)
 		{
 			this.metaBuilder = metaBuilder;
-			miIsDBNull = typeof(DbDataReader).GetMethod("IsDBNull");
-			miGetBoolean = typeof(DbDataReader).GetMethod("GetBoolean");
-			miGetByte = typeof(DbDataReader).GetMethod("GetByte");
-			miGetInt16 = typeof(DbDataReader).GetMethod("GetInt16");
-			miGetInt32 = typeof(DbDataReader).GetMethod("GetInt32");
-			miGetInt64 = typeof(DbDataReader).GetMethod("GetInt64");
-			miGetFloat = typeof(DbDataReader).GetMethod("GetFloat");
-			miGetDouble = typeof(DbDataReader).GetMethod("GetDouble");
-			miGetDecimal = typeof(DbDataReader).GetMethod("GetDecimal");
-			miGetDateTime = typeof(DbDataReader).GetMethod("GetDateTime");
-			miGetGuid = typeof(DbDataReader).GetMethod("GetGuid");
-			miGetString = typeof(DbDataReader).GetMethod("GetString");
-			miGetValue = typeof(DbDataReader).GetMethod("GetValue");
-			miConvert = typeof(IConverter).GetMethod("Convert", new[] { typeof(object), typeof(Type) });
-			miCreate = typeof(FactoryExtensions).GetMethod("Create", new[] { typeof(IFactory), typeof(Type) });
-			miGetType = typeof(Type).GetMethod("GetTypeFromHandle");
+			miIsDBNull = typeof(DbDataReader).GetMethod(nameof(DbDataReader.IsDBNull));
+			miGetBoolean = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetBoolean));
+			miGetByte = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetByte));
+			miGetInt16 = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetInt16));
+			miGetInt32 = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetInt32));
+			miGetInt64 = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetInt64));
+			miGetFloat = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetFloat));
+			miGetDouble = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetDouble));
+			miGetDecimal = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetDecimal));
+			miGetDateTime = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetDateTime));
+			miGetGuid = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetGuid));
+			miGetString = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetString));
+			miGetValue = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetValue));
+			miConvert = typeof(IConverter).GetMethod(nameof(IConverter.Convert), new[] { typeof(object), typeof(Type) });
+			miCreate = typeof(FactoryExtensions).GetMethod(nameof(FactoryExtensions.Create), new[] { typeof(IFactory), typeof(Type) });
+			miGetType = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
 		}
 
 		public LoaderFromReaderByIndexDelegate<TRecord> Build<TRecord>()

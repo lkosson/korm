@@ -1,16 +1,10 @@
-﻿using Kosson.Interfaces;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD
+namespace Kosson.KORM.DB
 {
 	class Logging
 	{
@@ -111,7 +105,7 @@ namespace Kosson.KRUD
 		public void Log(Exception exc, DbCommand cmd, TraceToken token)
 		{
 			if (!TraceEnabled) return;
-			var exceptionLevel = exc is KRUDInvalidStructureException ? LogLevel.Warning : LogLevel.Error;
+			var exceptionLevel = exc is KORMInvalidStructureException ? LogLevel.Warning : LogLevel.Error;
 			if (!logger.IsEnabled(exceptionLevel)) return;
 			Trace(exceptionLevel, token.id, exc.Message);
 			// On Information and Debug LogLevels queries are already logged at start

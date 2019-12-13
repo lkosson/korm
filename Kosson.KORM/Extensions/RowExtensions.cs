@@ -1,6 +1,5 @@
 ﻿#define noLAZY
-using Kosson.Interfaces;
-using Kosson.KRUD;
+using Kosson.KORM;
 using System;
 using System.Collections;
 using System.Collections.Generic;

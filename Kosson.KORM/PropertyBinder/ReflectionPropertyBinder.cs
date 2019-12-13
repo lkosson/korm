@@ -2,18 +2,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.Kore.PropertyBinder
+namespace Kosson.KORM.PropertyBinder
 {
 	/// <summary>
 	/// Property binder implementation based on reflection.
 	/// </summary>
-	public class ReflectionPropertyBinder : IPropertyBinder
+	class ReflectionPropertyBinder : IPropertyBinder
 	{
 		private IConverter converter;
 		private ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>> cache = new ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>>();

@@ -1,5 +1,5 @@
 ﻿using Kosson.Interfaces;
-using Kosson.KRUD;
+using Kosson.KORM.Backup;
 using System;
 using System.IO;
 using System.Linq;
@@ -14,11 +14,11 @@ namespace Kosson.KORM.Scratch
 		private IBackupProvider backupProvider;
 		private IPropertyBinder propertyBinder;
 		private IConverter converter;
-		private DatabaseCopier databaseCopier;
+		private IDatabaseCopier databaseCopier;
 		private XMLBackup xmlBackup;
-		private DatabaseScripting databaseScripting;
+		private IDatabaseScriptGenerator databaseScripting;
 
-		public Runner(DatabaseCopier databaseCopier, XMLBackup xmlBackup, DatabaseScripting databaseScripting, IDB db, IORM orm, IMetaBuilder metaBuilder, IBackupProvider backupProvider, IPropertyBinder propertyBinder, IConverter converter)
+		public Runner(IDatabaseCopier databaseCopier, XMLBackup xmlBackup, IDatabaseScriptGenerator databaseScripting, IDB db, IORM orm, IMetaBuilder metaBuilder, IBackupProvider backupProvider, IPropertyBinder propertyBinder, IConverter converter)
 		{
 			this.databaseCopier = databaseCopier;
 			this.xmlBackup = xmlBackup;
@@ -39,7 +39,7 @@ namespace Kosson.KORM.Scratch
 
 			using (var fs = new FileStream("backup.sql", FileMode.Create))
 			{
-				databaseScripting.WriteScript(fs, new[] { typeof(User), typeof(Membership), typeof(Role) });
+				databaseScripting.GenerateScript(fs, new[] { typeof(User), typeof(Membership), typeof(Role) });
 			}
 
 			var u = new User()

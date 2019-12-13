@@ -1,36 +1,33 @@
 ﻿using Kosson.Interfaces;
-using Kosson.KRUD.ORM;
+using Kosson.KORM.ORM;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Kosson.KRUD
+namespace Kosson.KORM.Backup
 {
-	public class DatabaseCopier
+	class DatabaseCopier : IDatabaseCopier
 	{
-		private IServiceProvider serviceProvider;
-		private IMetaBuilder metaBuilder;
-		private IBackupProvider backupProvider;
+		private readonly IServiceProvider serviceProvider;
+		private readonly IMetaBuilder metaBuilder;
 
-		public DatabaseCopier(IServiceProvider serviceProvider, IMetaBuilder metaBuilder, IBackupProvider backupProvider)
+		public DatabaseCopier(IServiceProvider serviceProvider, IMetaBuilder metaBuilder)
 		{
 			this.serviceProvider = serviceProvider;
 			this.metaBuilder = metaBuilder;
-			this.backupProvider = backupProvider;
 		}
 
-		public void CopyTo<TDB>(KORMConfiguration targetConfiguration, IEnumerable<Type> tables)
-			where TDB : IDB
+		void IDatabaseCopier.CopyTo<TDB>(KORMConfiguration targetConfiguration, IEnumerable<Type> tables)
 		{
 			using (var targetDB = ActivatorUtilities.CreateInstance<TDB>(serviceProvider, targetConfiguration))
 			{
 				var targetORM = ActivatorUtilities.CreateInstance<DBORM>(serviceProvider, targetDB);
+				IDatabaseEraser targetEraser = new DatabaseEraser(targetORM, metaBuilder);
 
 				targetDB.CreateDatabase();
 				targetDB.BeginTransaction();
 				new DBTableCreator(targetDB, metaBuilder).Create(tables);
-				new BackupClearer(targetORM, metaBuilder).Clear(tables);
+				targetEraser.Clear(tables);
 
 				using (var writer = ActivatorUtilities.CreateInstance<DatabaseBackupWriter>(serviceProvider, targetDB, targetORM))
 				{

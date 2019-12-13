@@ -1,32 +1,22 @@
 ﻿using Kosson.Interfaces;
+using Kosson.KORM.DB;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
-namespace Kosson.KRUD
+namespace Kosson.KORM.Backup
 {
-	/// <summary>
-	/// Low-performance, XML-based record deserializer.
-	/// </summary>
-	public class XMLBackupReader : IBackupReader
+	class XMLBackupReader : IBackupReader
 	{
-		private XmlReader xr;
-		private Dictionary<string, Type> typeMapping;
-		private IMetaBuilder metaBuilder;
-		private IConverter converter;
-		private IFactory factory;
+		private readonly IMetaBuilder metaBuilder;
+		private readonly IConverter converter;
+		private readonly IFactory factory;
+		private readonly XmlReader xmlreader;
+		private readonly Dictionary<string, Type> typeMapping;
 
-		/// <summary>
-		/// Creates a new record deserializer reading from a given stream.
-		/// </summary>
-		/// <param name="stream">Stream to read data from.</param>
-		public XMLBackupReader(IMetaBuilder metaBuilder, IPropertyBinder propertyBinder, IConverter converter, IFactory factory, Stream stream)
+		public XMLBackupReader(IMetaBuilder metaBuilder, IConverter converter, IFactory factory, Stream stream)
 		{
 			typeMapping = new Dictionary<string, Type>();
 			this.metaBuilder = metaBuilder;
@@ -37,67 +27,66 @@ namespace Kosson.KRUD
 				IgnoreComments = true,
 				IgnoreWhitespace = true
 			};
-			xr = XmlReader.Create(stream, xrs);
-			xr.ReadStartElement("records");
+			xmlreader = XmlReader.Create(stream, xrs);
+			xmlreader.ReadStartElement("records");
 		}
 
-		/// <inheritdoc />
-		public IRecord ReadRecord()
+		IRecord IBackupReader.ReadRecord()
 		{
-			if (xr.NodeType == XmlNodeType.EndElement && xr.Name == "records")
+			if (xmlreader.NodeType == XmlNodeType.EndElement && xmlreader.Name == "records")
 			{
-				xr.ReadEndElement();
+				xmlreader.ReadEndElement();
 				return null;
 			}
 
-			while (!xr.IsStartElement("record") && xr.Read()) ;
+			while (!xmlreader.IsStartElement("record") && xmlreader.Read()) ;
 
 			string typeName = null;
-			while (xr.MoveToNextAttribute())
+			while (xmlreader.MoveToNextAttribute())
 			{
-				if (xr.Name != "type") continue;
-				typeName = xr.Value;
+				if (xmlreader.Name != "type") continue;
+				typeName = xmlreader.Value;
 			}
-			xr.MoveToElement();
+			xmlreader.MoveToElement();
 
-			if (typeName == null) throw new KRUDBackupException(XMLPositionInfo() + "Missing \"type\" attribute.");
+			if (typeName == null) throw new KORMBackupException(XMLPositionInfo() + "Missing \"type\" attribute.");
 
 			var type = ResolveType(typeName);
 			var record = (IRecord)factory.Create(type);
-			xr.ReadStartElement("record");
+			xmlreader.ReadStartElement("record");
 			ReadFields(record);
-			xr.ReadEndElement();
+			xmlreader.ReadEndElement();
 			return record;
 		}
 
 		private void ReadFields(object target)
 		{
 			var meta = metaBuilder.Get(target.GetType());
-			while (xr.NodeType == XmlNodeType.Element)
+			while (xmlreader.NodeType == XmlNodeType.Element)
 			{
-				if (xr.IsEmptyElement)
+				if (xmlreader.IsEmptyElement)
 				{
-					xr.Read();
+					xmlreader.Read();
 					continue;
 				}
 
-				var name = xr.Name;
+				var name = xmlreader.Name;
 				var field = meta.GetField(name);
-				if (field == null) throw new KRUDBackupException(XMLPositionInfo() + "Invalid field name: " + name);
+				if (field == null) throw new KORMBackupException(XMLPositionInfo() + "Invalid field name: " + name);
 
-				xr.Read();
-				if (xr.NodeType == XmlNodeType.Element)
+				xmlreader.Read();
+				if (xmlreader.NodeType == XmlNodeType.Element)
 				{
 					var inline = factory.Create(field.Type);
 					ReadFields(inline);
 					field.Property.SetValue(target, inline);
-					xr.ReadEndElement();
+					xmlreader.ReadEndElement();
 				}
-				else if (xr.NodeType == XmlNodeType.Text)
+				else if (xmlreader.NodeType == XmlNodeType.Text)
 				{
 					object value;
-					var text = xr.Value;
-					xr.Read();
+					var text = xmlreader.Value;
+					xmlreader.Read();
 					if (field.IsRecordRef)
 					{
 						var recordref = (IRecordRef)factory.Create(field.Type);
@@ -118,13 +107,13 @@ namespace Kosson.KRUD
 							value = converter.Convert(text, field.Type);
 					}
 					field.Property.SetValue(target, value);
-					xr.ReadEndElement();
+					xmlreader.ReadEndElement();
 				}
-				else if (xr.NodeType == XmlNodeType.EndElement)
+				else if (xmlreader.NodeType == XmlNodeType.EndElement)
 				{
 					var value = converter.Convert("", field.Type);
 					field.Property.SetValue(target, value);
-					xr.ReadEndElement();
+					xmlreader.ReadEndElement();
 				}
 			}
 		}
@@ -143,21 +132,21 @@ namespace Kosson.KRUD
 						return type;
 					}
 				}
-				throw new KRUDBackupException(XMLPositionInfo() + "Unknown type: " + typeName);
+				throw new KORMBackupException(XMLPositionInfo() + "Unknown type: " + typeName);
 			}
 			return type;
 		}
 
 		private string XMLPositionInfo()
 		{
-			var li = xr as IXmlLineInfo;
+			var li = xmlreader as IXmlLineInfo;
 			if (li == null) return "";
 			return "Line " + li.LineNumber + ", position " + li.LinePosition + ": ";
 		}
 
 		void IDisposable.Dispose()
 		{
-			xr.Dispose();
+			xmlreader.Dispose();
 		}
 	}
 }

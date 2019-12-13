@@ -1,22 +1,17 @@
 ﻿using Kosson.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD
+namespace Kosson.KORM.Backup
 {
-	class BackupClearer
+	public class DatabaseEraser : IDatabaseEraser
 	{
-		private IORM orm;
-		private IMetaBuilder metaBuilder;
-		private HashSet<string> tablesCleared;
-		private HashSet<string> tablesInProgress;
+		private readonly IORM orm;
+		private readonly IMetaBuilder metaBuilder;
+		private readonly HashSet<string> tablesCleared;
+		private readonly HashSet<string> tablesInProgress;
 
-		public BackupClearer(IORM orm, IMetaBuilder metaBuilder)
+		public DatabaseEraser(IORM orm, IMetaBuilder metaBuilder)
 		{
 			this.orm = orm;
 			this.metaBuilder = metaBuilder;
@@ -24,7 +19,7 @@ namespace Kosson.KRUD
 			tablesInProgress = new HashSet<string>();
 		}
 
-		public void Clear(IEnumerable<Type> types)
+		void IDatabaseEraser.Clear(IEnumerable<Type> types)
 		{
 			foreach (var type in types) Clear(types, type);
 		}

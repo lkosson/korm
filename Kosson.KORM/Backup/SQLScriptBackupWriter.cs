@@ -1,12 +1,11 @@
 ﻿using Kosson.Interfaces;
+using Kosson.KORM.ORM;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD
+namespace Kosson.KORM.Backup
 {
 	class SQLScriptBackupWriter : IBackupWriter
 	{
@@ -14,18 +13,13 @@ namespace Kosson.KRUD
 		private Dictionary<Type, TableState> tableStates;
 		private IMetaBuilder metaBuilder;
 		private IDBCommandBuilder cb;
-		private ORM.DBTableCreator tc;
+		private DBTableCreator tc;
 
 		/// <summary>
 		/// Determines whether SQL commands creating database structure should be emitted.
 		/// </summary>
 		public bool CreateStructure { get; set; }
 
-		/// <summary>
-		/// Creates a new SQL script record serializer.
-		/// </summary>
-		/// <param name="stream">Output stream to write SQL script to.</param>
-		/// <param name="targetDB">Database provider to use for SQL command construction.</param>
 		public SQLScriptBackupWriter(IDB db, IMetaBuilder metaBuilder, Stream stream)
 		{
 			this.metaBuilder = metaBuilder;

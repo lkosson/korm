@@ -6,19 +6,18 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 
-namespace Kosson.Kore.Factory
+namespace Kosson.KORM.Factory
 {
 	/// <summary>
 	/// Implementation of IFactory using Dynamic Methods to create instances of classes.
 	/// </summary>
-	public class DynamicMethodFactory : IFactory
+	class DynamicMethodFactory : IFactory
 	{
 		private Dictionary<Type, Func<object>> constructors = new Dictionary<Type, Func<object>>();
 
 		Func<object> IFactory.GetConstructor(Type type)
 		{
-			Func<object> constructor;
-			if (!constructors.TryGetValue(type, out constructor))
+			if (!constructors.TryGetValue(type, out var constructor))
 			{
 				// Value-types factory returns boxed reference, so it cannot be Func<int>, because it's not castable to Func<object>
 				var returnType = type.IsValueType ? typeof(object) : type;
@@ -31,7 +30,6 @@ namespace Kosson.Kore.Factory
 					il.Emit(OpCodes.Initobj, type);
 					il.Emit(OpCodes.Ldloc, loc);
 					il.Emit(OpCodes.Box, type);
-					//il.Emit(OpCodes.Ldnull);
 				}
 				else
 				{

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Kosson.Interfaces
+﻿namespace Kosson.Interfaces
 {
 	/// <summary>
 	/// Record containing 64-bit integer representing a row version for optimistic concurrency.

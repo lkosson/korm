@@ -1,11 +1,10 @@
 ﻿using Kosson.Interfaces;
+using Kosson.KORM.DB;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD.ORM
+namespace Kosson.KORM.ORM
 {
 	class DBTableCreator
 	{
@@ -30,7 +29,7 @@ namespace Kosson.KRUD.ORM
 				if (String.IsNullOrWhiteSpace(cmdtext)) return;
 				db.ExecuteNonQuery(cmdtext);
 			}
-			catch (KRUDObjectExistsException)
+			catch (KORMObjectExistsException)
 			{
 				// ignored
 			}

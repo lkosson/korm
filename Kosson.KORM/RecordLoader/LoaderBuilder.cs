@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
 
-namespace Kosson.KRUD.RecordLoader
+namespace Kosson.KORM.RecordLoader
 {
 	class LoaderBuilder
 	{
@@ -23,9 +22,9 @@ namespace Kosson.KRUD.RecordLoader
 			this.metaBuilder = metaBuilder;
 			miGetItemByName = typeof(IRow).GetMethod("get_Item", new[] { typeof(string) });
 			miGetItemByIndex = typeof(IIndexBasedRow).GetMethod("get_Item", new[] { typeof(int) });
-			miConvert = typeof(IConverter).GetMethod("Convert", new[] { typeof(object), typeof(Type) });
-			miCreate = typeof(FactoryExtensions).GetMethod("Create", new[] { typeof(IFactory), typeof(Type) });
-			miGetType = typeof(Type).GetMethod("GetTypeFromHandle");
+			miConvert = typeof(IConverter).GetMethod(nameof(IConverter.Convert), new[] { typeof(object), typeof(Type) });
+			miCreate = typeof(FactoryExtensions).GetMethod(nameof(FactoryExtensions.Create), new[] { typeof(IFactory), typeof(Type) });
+			miGetType = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
 		}
 
 		public LoaderByNameDelegate<T> BuildByName<T>()

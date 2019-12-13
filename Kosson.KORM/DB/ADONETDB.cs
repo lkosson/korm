@@ -4,13 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Kosson.KRUD
+namespace Kosson.KORM.DB
 {
 	/// <summary>
 	/// Abstract IDB implementation based on ADO.NET providers.
@@ -141,7 +138,7 @@ namespace Kosson.KRUD
 #region Connection management
 		void IDB.BeginTransaction(IsolationLevel isolationLevel)
 		{
-			if (IsTransactionOpen) throw new KRUDInvalidOperationException("Transaction already open.");
+			if (IsTransactionOpen) throw new KORMInvalidOperationException("Transaction already open.");
 			IsolationLevel = isolationLevel;
 			Open(false);
 		}
@@ -158,7 +155,7 @@ namespace Kosson.KRUD
 				if (dbconn == null) dbconn = CreateConnection();
 				if (dbtran == null)
 				{
-					if (!isImplicit && IsImplicitTransaction) throw new KRUDInvalidOperationException("Implicit transaction already open.");
+					if (!isImplicit && IsImplicitTransaction) throw new KORMInvalidOperationException("Implicit transaction already open.");
 					dbtran = dbconn.BeginTransaction(IsolationLevel);
 					this.isImplicit = isImplicit;
 				}
@@ -169,8 +166,8 @@ namespace Kosson.KRUD
 		{
 			using (AcquireLock())
 			{
-				if (!IsTransactionOpen) throw new KRUDInvalidOperationException("Transaction not started.");
-				if (IsImplicitTransaction) throw new KRUDInvalidOperationException("Implicit transaction cannot be committed.");
+				if (!IsTransactionOpen) throw new KORMInvalidOperationException("Transaction not started.");
+				if (IsImplicitTransaction) throw new KORMInvalidOperationException("Implicit transaction cannot be committed.");
 				dbtran.Commit();
 				dbtran.Dispose();
 				dbtran = null;
@@ -181,8 +178,8 @@ namespace Kosson.KRUD
 		{
 			using (AcquireLock())
 			{
-				if (!IsTransactionOpen) throw new KRUDInvalidOperationException("Transaction not started.");
-				if (IsImplicitTransaction) throw new KRUDInvalidOperationException("Implicit transaction cannot be rolled back.");
+				if (!IsTransactionOpen) throw new KORMInvalidOperationException("Transaction not started.");
+				if (IsImplicitTransaction) throw new KORMInvalidOperationException("Implicit transaction cannot be rolled back.");
 				dbtran.Rollback();
 				dbtran.Dispose();
 				dbtran = null;
@@ -527,10 +524,10 @@ namespace Kosson.KRUD
 		/// <returns>Provider-independent exception.</returns>
 		protected virtual Exception TranslateException(Exception exc, DbCommand cmd)
 		{
-			if (exc is System.Data.Common.DbException) return new KRUDException(exc.Message, exc, cmd);
-			else if (exc is InvalidOperationException) return new KRUDException(exc.Message, exc, cmd);
-			else if (exc is KRUDException) return null; // rethrown in catch block calling HandleException
-			return new KRUDException(exc.Message, exc, cmd);
+			if (exc is System.Data.Common.DbException) return new KORMException(exc.Message, exc, cmd);
+			else if (exc is InvalidOperationException) return new KORMException(exc.Message, exc, cmd);
+			else if (exc is KORMException) return null; // rethrown in catch block calling HandleException
+			return new KORMException(exc.Message, exc, cmd);
 		}
 
 		private void HandleException(Exception exc, DbCommand cmd, TraceToken token = default(TraceToken))

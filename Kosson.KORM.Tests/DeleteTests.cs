@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
 using System.Threading.Tasks;
+using Kosson.KORM.DB;
 
 namespace Kosson.KRUD.Tests
 {
@@ -75,7 +76,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ORMDeleteFailedException))]
+		[ExpectedException(typeof(KORMDeleteFailedException))]
 		public void DeleteByInvalidIDFails()
 		{
 			var record = new MainTestTable();

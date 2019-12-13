@@ -1,11 +1,8 @@
 ﻿using Kosson.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 
-namespace Kosson.KRUD.CommandBuilder
+namespace Kosson.KORM.DB.CommandBuilder
 {
 	/// <inheritdoc/>
 	public class DBCommandBuilder : IDBCommandBuilder

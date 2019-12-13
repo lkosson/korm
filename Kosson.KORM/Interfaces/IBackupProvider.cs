@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Kosson.Interfaces
 {
@@ -24,11 +20,5 @@ namespace Kosson.Interfaces
 		/// </summary>
 		/// <param name="reader">Record deserializer to read records from.</param>
 		void Restore(IBackupReader reader);
-
-		/// <summary>
-		/// Clears all data from tables backing provided record types.
-		/// </summary>
-		/// <param name="types">Record types to clear.</param>
-		void ClearTables(IEnumerable<Type> types);
 	}
 }

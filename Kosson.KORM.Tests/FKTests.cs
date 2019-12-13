@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.Interfaces;
+using Kosson.KORM.DB;
 
 namespace Kosson.KRUD.Tests
 {
@@ -49,7 +50,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KRUDForeignKeyException), AllowDerivedTypes = true)]
+		[ExpectedException(typeof(KORMForeignKeyException), AllowDerivedTypes = true)]
 		public void ForeignKeyPreventsDelete()
 		{
 			var record1 = new Table1();
@@ -61,7 +62,7 @@ namespace Kosson.KRUD.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KRUDException), AllowDerivedTypes = true)]
+		[ExpectedException(typeof(KORMException), AllowDerivedTypes = true)]
 		public void ForeignKeyViolationThrowsException()
 		{
 			var record = new Table1();

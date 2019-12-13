@@ -1,18 +1,14 @@
 ﻿using Kosson.Interfaces;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.Kore.PropertyBinder
+namespace Kosson.KORM.PropertyBinder
 {
 	/// <summary>
 	/// Property binder implementation based on type descriptors.
 	/// </summary>
-	public class DescriptorPropertyBinder : IPropertyBinder
+	class DescriptorPropertyBinder : IPropertyBinder
 	{
 		private ConcurrentDictionary<Type, PropertyDescriptorCollection> cache = new ConcurrentDictionary<Type, PropertyDescriptorCollection>();
 

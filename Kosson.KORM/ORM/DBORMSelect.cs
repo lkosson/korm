@@ -1,14 +1,10 @@
 ﻿using Kosson.Interfaces;
-using Kosson.Kore;
-using System;
-using System.Collections.Concurrent;
+using Kosson.KORM.DB;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Kosson.KRUD.ORM
+namespace Kosson.KORM.ORM
 {
 	class DBQuerySelect<TRecord> : DBORMCommandBase<TRecord, IDBSelect>, IORMSelect<TRecord> where TRecord : class, IRecord, new()
 	{
@@ -48,7 +44,7 @@ namespace Kosson.KRUD.ORM
 
 				if (field.IsInline)
 				{
-					if (descentPath.Contains(field.ID)) throw new KRUDInvalidOperationException("Cyclic inlines detected on " + meta.Name + "." + field.Name + ".");
+					if (descentPath.Contains(field.ID)) throw new KORMInvalidOperationException("Cyclic inlines detected on " + meta.Name + "." + field.Name + ".");
 					var inlineAlias = tableAliasForJoins + "." + field.Name;
 					descentPath.Push(field.ID);
 					// Inlined columns are referencing inlining table alias - inlined column name contains inlining descent path and is unique even if same inline in included multiple times.
@@ -85,7 +81,7 @@ namespace Kosson.KRUD.ORM
 				var remoteName = cb.Identifier(remoteAlias, remoteKey.DBName);
 				var remotePrefix = fieldPrefix == null ? field.Name : fieldPrefix + "." + field.Name;
 
-				if (descentPath.Contains(field.ID)) throw new KRUDInvalidOperationException("Cyclic eager lookups detected on " + meta.Name + "." + field.Name + ".");
+				if (descentPath.Contains(field.ID)) throw new KORMInvalidOperationException("Cyclic eager lookups detected on " + meta.Name + "." + field.Name + ".");
 				descentPath.Push(field.ID);
 				template.Join(cb.Identifier(eagerMeta.DBName), cb.Equal(localName, remoteName), cb.Identifier(remoteAlias));
 				PrepareTemplate(cb, template, eagerMeta, remoteAlias, remoteAlias, remotePrefix, descentPath);

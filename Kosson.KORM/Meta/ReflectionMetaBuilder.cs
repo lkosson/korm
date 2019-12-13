@@ -1,24 +1,16 @@
 ﻿using Kosson.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
-namespace Kosson.KRUD.Meta
+namespace Kosson.KORM.Meta
 {
-	/// <summary>
-	/// IMetaBuilder based on reflection and type and properties attributes.
-	/// </summary>
-	public class ReflectionMetaBuilder : IMetaBuilder
+	class ReflectionMetaBuilder : IMetaBuilder
 	{
 		private IFactory factory;
 		private object syncroot;
 		private Dictionary<Type, IMetaRecord> cache;
 
-		/// <summary>
-		/// Creates new instance of ReflectionMetaBuilder.
-		/// </summary>
 		public ReflectionMetaBuilder(IFactory factory)
 		{
 			this.factory = factory;

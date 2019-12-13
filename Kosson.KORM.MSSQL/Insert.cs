@@ -1,12 +1,8 @@
 ﻿using Kosson.Interfaces;
-using Kosson.KRUD.CommandBuilder;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Kosson.KORM.DB.CommandBuilder;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Kosson.KRUD.MSSQL
+namespace Kosson.KORM.MSSQL
 {
 	class Insert : DBInsert
 	{
