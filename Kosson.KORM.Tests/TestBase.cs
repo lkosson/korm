@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Kosson.Interfaces;
+using Kosson.KORM;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Kosson.KRUD.Tests
+namespace Kosson.KORM.Tests
 {
 	[TestClass]
 	public abstract class TestBase

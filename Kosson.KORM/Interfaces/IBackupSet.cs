@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Backup set during creation.

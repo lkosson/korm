@@ -4,7 +4,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Extension methods for Kosson.Interfaces.IDB.

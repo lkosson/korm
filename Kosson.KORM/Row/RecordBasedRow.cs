@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Helper methods for creating IRow based on IRecord.

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Object-relational mapper for IRecords.

@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Kosson.Interfaces;
+using Kosson.KORM;
 
-namespace Kosson.KRUD.Tests
+namespace Kosson.KORM.Tests
 {
 	public abstract class ValueStorageTests : ORMTestsBase
 	{

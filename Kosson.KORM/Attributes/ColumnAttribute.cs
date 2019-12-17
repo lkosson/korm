@@ -1,14 +1,14 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
-	/// Marks a property as backed by database column. It will be stored and retrieved from database using KRUD ORM operations.
+	/// Marks a property as backed by database column. It will be stored and retrieved from database using ORM operations.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
 	public class ColumnAttribute : Attribute
@@ -19,7 +19,7 @@ namespace Kosson.Interfaces
 		public bool IsReadOnly { get; set; }
 
 		/// <summary>
-		/// Gets or sets database type used for backing column of a property. Default value of DbType.Object leaves database type selection to a KRUD provider.
+		/// Gets or sets database type used for backing column of a property. Default value of DbType.Object leaves database type selection to a ORM DB provider.
 		/// Value is ignored if custom backing type is provided.
 		/// </summary>
 		public DbType DBType { get; set; }
@@ -55,7 +55,7 @@ namespace Kosson.Interfaces
 		public string ColumnDefinition { get; set; }
 
 		/// <summary>
-		/// Marks a property as backed by database column. It will be stored and retrieved from database using KRUD ORM operations.
+		/// Marks a property as backed by database column. It will be stored and retrieved from database using ORM operations.
 		/// </summary>
 		/// <param name="type">Database type used for backing column for the property.</param>
 		public ColumnAttribute(DbType type = DbType.Object)
@@ -64,7 +64,7 @@ namespace Kosson.Interfaces
 		}
 
 		/// <summary>
-		/// Marks a property as backed by database column. It will be stored and retrieved from database using KRUD ORM operations.
+		/// Marks a property as backed by database column. It will be stored and retrieved from database using ORM operations.
 		/// </summary>
 		/// <param name="length">Maximum data length of a column.</param>
 		/// <param name="precision">Precision of data stored in a column.</param>
@@ -76,7 +76,7 @@ namespace Kosson.Interfaces
 		}
 
 		/// <summary>
-		/// Marks a property as backed by database column with a custom definition. It will be stored and retrieved from database using KRUD ORM operations.
+		/// Marks a property as backed by database column with a custom definition. It will be stored and retrieved from database using ORM operations.
 		/// </summary>
 		/// <param name="columnDefinition">Database engine-specific column definition to use for backing column.</param>
 		public ColumnAttribute(string columnDefinition)

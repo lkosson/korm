@@ -1,4 +1,4 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Kosson.KRUD.Tests
+namespace Kosson.KORM.Tests
 {
 	// Not an abstract class - no need for per-provider tests.
 	[TestClass]

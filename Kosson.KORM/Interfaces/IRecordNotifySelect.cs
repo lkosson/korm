@@ -1,4 +1,4 @@
-﻿namespace Kosson.Interfaces
+﻿namespace Kosson.KORM
 {
 	/// <summary>
 	/// Interface for receiving progress notifications and controlling record retrieval performed by ORM.

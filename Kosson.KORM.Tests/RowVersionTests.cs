@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Kosson.Interfaces;
-using Kosson.KORM.DB;
+using Kosson.KORM;
 
-namespace Kosson.KRUD.Tests
+namespace Kosson.KORM.Tests
 {
 	[TestClass]
 	public abstract partial class RowVersionTests : ORMTestsBase

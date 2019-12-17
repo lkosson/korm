@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Kosson.Interfaces;
+using Kosson.KORM;
 using System.Threading.Tasks;
 
-namespace Kosson.KRUD.Tests
+namespace Kosson.KORM.Tests
 {
 	public abstract class ComboTests : ORMTestsBase
 	{

@@ -2,7 +2,7 @@
 using System.Data;
 using System.Text;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Factory for creation of database commands in a dialect understood by a given database engine.

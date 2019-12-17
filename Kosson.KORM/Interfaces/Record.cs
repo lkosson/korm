@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Base type for IRecord providing equality comparison based on primary key (ID) property.

@@ -1,14 +1,11 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 
 namespace Kosson.KORM.Backup
 {
-	/// <summary>
-	/// Default provider for creating and restoring database backups.
-	/// </summary>
-	public class BackupProvider : IBackupProvider
+	class BackupProvider : IBackupProvider
 	{
 		private readonly IServiceProvider serviceProvider;
 		private readonly IBackupRestorer backupRestorer;

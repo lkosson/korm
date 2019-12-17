@@ -1,10 +1,10 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 using System;
 using System.Collections.Generic;
 
 namespace Kosson.KORM.Backup
 {
-	public class DatabaseEraser : IDatabaseEraser
+	class DatabaseEraser : IDatabaseEraser
 	{
 		private readonly IORM orm;
 		private readonly IMetaBuilder metaBuilder;

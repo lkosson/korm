@@ -1,4 +1,4 @@
-﻿namespace Kosson.Interfaces
+﻿namespace Kosson.KORM
 {
 	/// <summary>
 	/// Provides support for creating record of a given type from IRow containing values of record properties.

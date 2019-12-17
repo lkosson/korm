@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Mutable IRow implementation based on list of values

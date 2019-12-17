@@ -1,4 +1,4 @@
-﻿namespace Kosson.Interfaces
+﻿namespace Kosson.KORM
 {
 	/// <summary>
 	/// Database connection parameters.

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data.Common;
 
-namespace Kosson.KORM.DB
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Base class for exceptions indicating error during database communication or processing.
@@ -42,7 +42,7 @@ namespace Kosson.KORM.DB
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
 		/// <param name="cmd">Command causing the exception.</param>
 		public KORMException(string msg, Exception inner, DbCommand cmd)
-			: base(msg + (cmd == null ? "" : ("\n\n" + cmd.CommandText)), inner)
+			: base(msg + (cmd == null ? "" : "\n\n" + cmd.CommandText), inner)
 		{
 			this.cmd = cmd;
 		}

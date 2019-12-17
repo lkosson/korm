@@ -1,10 +1,10 @@
-﻿using Kosson.KORM.DB;
+﻿using Kosson.KORM;
 using Kosson.KORM.Meta;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Extension methods for Kosson.Interfaces.IORMCommand.

@@ -1,4 +1,4 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 using Kosson.KORM.Backup;
 using System;
 using System.IO;
@@ -90,8 +90,7 @@ namespace Kosson.KORM.Scratch
 				bs.AddRecords<Membership>();
 			}
 
-			//databaseCopier.CopyTo
-			//KRUD.DatabaseBackupWriter.Run(metaBuilder, propertyBinder, converter, recordLoader, factory, "sqlite", "data source=backup.sqlite3;version=3", new[] { typeof(User), typeof(Role), typeof(Membership) });
+			//databaseCopier.CopyTo<SQLite>(new KORMConfiguration { ConnectionString = "data source=backup.sqlite3;version=3" }, new[] { typeof(User), typeof(Role), typeof(Membership) });
 
 			//var profiler = Context.Current.Get<IProfiler>();
 			var sw = StatStopwatch.StartNew();

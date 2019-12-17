@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Component providing best-effort type conversion.

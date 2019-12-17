@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Interface for deserializing records stored in backup.

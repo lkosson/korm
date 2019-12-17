@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Component for getting and setting object's property value based on text expression.

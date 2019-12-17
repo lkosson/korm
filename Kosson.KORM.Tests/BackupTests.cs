@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Kosson.Interfaces;
+using Kosson.KORM;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Kosson.KORM.Backup;
 
-namespace Kosson.KRUD.Tests
+namespace Kosson.KORM.Tests
 {
 	[TestClass]
 	public abstract partial class BackupTests : ORMTestsBase

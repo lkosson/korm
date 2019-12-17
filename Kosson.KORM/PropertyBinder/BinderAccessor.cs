@@ -1,4 +1,4 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 
 namespace Kosson.KORM.PropertyBinder
 {

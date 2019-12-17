@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Extension methods for Kosson.Interfaces.IRecord.

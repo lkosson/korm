@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Kosson.Interfaces;
+using Kosson.KORM;
 using System.Threading.Tasks;
-using Kosson.KORM.DB;
 
-namespace Kosson.KRUD.Tests
+namespace Kosson.KORM.Tests
 {
 	[TestClass]
 	public abstract partial class DeleteTests : ORMTestsBase

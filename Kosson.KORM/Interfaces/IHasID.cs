@@ -1,4 +1,4 @@
-﻿namespace Kosson.Interfaces
+﻿namespace Kosson.KORM
 {
 	/// <summary>
 	/// Object that has ID property suitable for usage as primary key.

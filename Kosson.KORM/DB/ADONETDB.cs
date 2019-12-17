@@ -1,4 +1,4 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -517,7 +517,7 @@ namespace Kosson.KORM.DB
 #endregion
 #region Exception handling
 		/// <summary>
-		/// Translates ADO.NET provider-specific exception to KRUDException or its subtype.
+		/// Translates ADO.NET provider-specific exception to KORMException or its subtype.
 		/// </summary>
 		/// <param name="exc">Caught exception to translate.</param>
 		/// <param name="cmd">Command causing the exception.</param>

@@ -1,5 +1,4 @@
-﻿using Kosson.Interfaces;
-using Kosson.KORM.DB;
+﻿using Kosson.KORM;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;

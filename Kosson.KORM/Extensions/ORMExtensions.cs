@@ -1,9 +1,9 @@
-﻿using Kosson.KORM.DB;
+﻿using Kosson.KORM;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	public static class ORMExtensions
 	{

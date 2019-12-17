@@ -1,4 +1,4 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,7 +6,7 @@ using System.Text;
 namespace Kosson.KORM.DB.CommandBuilder
 {
 	/// <summary>
-	/// Base class for KRUD database commands with WHERE clause.
+	/// Base class for ORM database commands with WHERE clause.
 	/// </summary>
 	public abstract class DBCommandWithWhere : DBCommand
 	{

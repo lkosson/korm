@@ -1,8 +1,6 @@
-﻿using Kosson.KRUD.Tests;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Kosson.KRUD.Tests
+namespace Kosson.KORM.Tests
 {
 	[TestClass]
 	public class MSSQLBackupTests : BackupTests

@@ -1,4 +1,4 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddTransient<IDatabaseScriptGenerator, Kosson.KORM.Backup.DatabaseScriptGenerator>();
 			services.AddScoped<IORM, Kosson.KORM.ORM.DBORM>();
 			services.AddScoped<IDB, TDB>();
-			services.AddTransient<Kosson.KORM.Backup.XMLBackup>();
+			services.AddTransient<Kosson.KORM.XMLBackup>();
 		}
 	}
 }

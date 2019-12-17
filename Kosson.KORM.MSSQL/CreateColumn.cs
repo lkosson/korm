@@ -1,4 +1,4 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 using Kosson.KORM.DB.CommandBuilder;
 using System.Text;
 

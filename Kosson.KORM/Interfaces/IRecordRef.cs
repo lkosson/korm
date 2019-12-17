@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Untyped reference to a record.

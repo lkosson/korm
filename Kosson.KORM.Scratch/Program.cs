@@ -1,4 +1,4 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

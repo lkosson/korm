@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Kosson.Interfaces
+namespace Kosson.KORM
 {
 	/// <summary>
 	/// Declares a property as a subquery-based property. Its value is retrieved by executing provided subquery when perfroming SELECT. Value is ignored during UPDATE and INSERT.

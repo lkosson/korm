@@ -1,11 +1,11 @@
-﻿using Kosson.Interfaces;
+﻿using Kosson.KORM;
 using System;
 using System.Text;
 
 namespace Kosson.KORM.DB.CommandBuilder
 {
 	/// <summary>
-	/// Base class for KRUD database commands.
+	/// Base class for ORM database commands.
 	/// </summary>
 	public abstract class DBCommand : IDBCommand
 	{
