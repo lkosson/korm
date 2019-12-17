@@ -7,11 +7,11 @@ namespace Kosson.KORM
 	/// </summary>
 	public class HashRow : IRow
 	{
-		private List<object> values;
-		private Dictionary<string, int> names;
+		private readonly List<object> values;
+		private readonly Dictionary<string, int> names;
 
-		int IIndexBasedRow.Length { get { return values.Count; } }
-		object IIndexBasedRow.this[int index] { get { return index >= 0 && index < values.Count ? values[index] : null; } }
+		int IIndexBasedRow.Length => values.Count;
+		object IIndexBasedRow.this[int index] => index >= 0 && index < values.Count ? values[index] : null;
 		object IRow.this[string name] { get { var row = (IRow)this; return row[row.GetIndex(name)]; } }
 
 		/// <summary>

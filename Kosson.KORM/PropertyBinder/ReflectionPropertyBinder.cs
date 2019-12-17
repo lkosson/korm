@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
@@ -11,12 +10,13 @@ namespace Kosson.KORM.PropertyBinder
 	/// </summary>
 	class ReflectionPropertyBinder : IPropertyBinder
 	{
-		private IConverter converter;
-		private ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>> cache = new ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>>();
+		private readonly IConverter converter;
+		private readonly ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>> cache;
 
 		public ReflectionPropertyBinder(IConverter converter)
 		{
 			this.converter = converter;
+			cache = new ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>>();
 		}
 
 		private void AccessTarget(ref object target, ref string expression)

@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using Kosson.KORM.ORM;
+﻿using Kosson.KORM.ORM;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;

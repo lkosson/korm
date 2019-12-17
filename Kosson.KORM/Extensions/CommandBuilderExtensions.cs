@@ -15,9 +15,7 @@ namespace Kosson.KORM
 		/// <param name="rexpr">Second value to compare.</param>
 		/// <returns>Comparison expression testing for equality between lexpr and rexpr.</returns>
 		public static IDBExpression Equal(this IDBCommandBuilder builder, IDBExpression lexpr, IDBExpression rexpr)
-		{
-			return builder.Comparison(lexpr, DBExpressionComparison.Equal, rexpr);
-		}
+			=> builder.Comparison(lexpr, DBExpressionComparison.Equal, rexpr);
 
 		/// <summary>
 		/// Constructs an inequality comparison expression.
@@ -27,9 +25,7 @@ namespace Kosson.KORM
 		/// <param name="rexpr">Second value to compare.</param>
 		/// <returns>Comparison expression testing for inequality between lexpr and rexpr.</returns>
 		public static IDBExpression NotEqual(this IDBCommandBuilder builder, IDBExpression lexpr, IDBExpression rexpr)
-		{
-			return builder.Comparison(lexpr, DBExpressionComparison.NotEqual, rexpr);
-		}
+			=> builder.Comparison(lexpr, DBExpressionComparison.NotEqual, rexpr);
 
 		/// <summary>
 		/// Constructs an expression testing given value for NULL.
@@ -38,9 +34,7 @@ namespace Kosson.KORM
 		/// <param name="expr">Value to compare to NULL.</param>
 		/// <returns>Comparison expression testing expr for NULL.</returns>
 		public static IDBExpression IsNull(this IDBCommandBuilder builder, IDBExpression expr)
-		{
-			return Equal(builder, expr, null);
-		}
+			=> Equal(builder, expr, null);
 
 		/// <summary>
 		/// Constructs an expression testing given value for NOT NULL.
@@ -49,9 +43,7 @@ namespace Kosson.KORM
 		/// <param name="expr">Value to compare to NULL.</param>
 		/// <returns>Comparison expression testing expr for NOT NULL.</returns>
 		public static IDBExpression IsNotNull(this IDBCommandBuilder builder, IDBExpression expr)
-		{
-			return NotEqual(builder, expr, null);
-		}
+			=> NotEqual(builder, expr, null);
 
 		/// <summary>
 		/// Constructs an expression representing a given constant value.

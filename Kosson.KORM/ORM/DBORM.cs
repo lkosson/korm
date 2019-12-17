@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Kosson.KORM.ORM
@@ -9,10 +8,10 @@ namespace Kosson.KORM.ORM
 	/// </summary>
 	class DBORM : IORM
 	{
-		private IDB db;
-		private IMetaBuilder metaBuilder;
-		private IConverter converter;
-		private IFactory factory;
+		private readonly IDB db;
+		private readonly IMetaBuilder metaBuilder;
+		private readonly IConverter converter;
+		private readonly IFactory factory;
 		private static ReaderRecordLoaderCache cache;
 
 		/// <summary>

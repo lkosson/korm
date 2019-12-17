@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,8 +7,8 @@ namespace Kosson.KORM.Backup
 {
 	class DatabaseScriptGenerator : IDatabaseScriptGenerator
 	{
-		private IServiceProvider serviceProvider;
-		private IBackupProvider backupProvider;
+		private readonly IServiceProvider serviceProvider;
+		private readonly IBackupProvider backupProvider;
 
 		public DatabaseScriptGenerator(IServiceProvider serviceProvider, IBackupProvider backupProvider)
 		{

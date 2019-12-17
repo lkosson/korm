@@ -2,10 +2,10 @@
 
 namespace Kosson.KORM
 {
-    /// <summary>
-    /// Declares a property value as a subquery.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+	/// <summary>
+	/// Declares a property value as a subquery.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
 	public abstract class SubqueryBuilderAttribute : Attribute
 	{
 		/// <summary>
@@ -18,43 +18,43 @@ namespace Kosson.KORM
 		public abstract IDBExpression Build(string tableAlias, IMetaRecordField field, IDBCommandBuilder builder);
 	}
 
-    /// <summary>
-    /// Declares a property value as a scalar result of "SELECT SqlFunction() FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-    /// </summary>
-    public abstract class SingleValueAttribute : SubqueryBuilderAttribute
-    {
-        private string remoteTable;
-        private string remoteJoinField;
-        private string localJoinField;
+	/// <summary>
+	/// Declares a property value as a scalar result of "SELECT SqlFunction() FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+	/// </summary>
+	public abstract class SingleValueAttribute : SubqueryBuilderAttribute
+	{
+		private readonly string remoteTable;
+		private readonly string remoteJoinField;
+		private readonly string localJoinField;
 
 		/// <summary>
 		/// Constructs value expression for the subquery.
 		/// </summary>
 		/// <param name="builder">Builder to use for expression construction</param>
 		/// <returns>Database expression selecting subquery value.</returns>
-        protected abstract string GetSqlExpression(IDBCommandBuilder builder);
+		protected abstract string GetSqlExpression(IDBCommandBuilder builder);
 
-        /// <summary>
-        /// Declares a property value as a scalar result of "SELECT SqlFunction() FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-        /// </summary>
-        /// <param name="remoteTable">Table to perform SqlFunction on.</param>
-        /// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
-        /// <param name="localJoinField">Column name in the table for which the property is declared used for equality comparison.</param>
-        public SingleValueAttribute(string remoteTable, string remoteJoinField, string localJoinField)
-        {
-            this.remoteTable = remoteTable;
-            this.remoteJoinField = remoteJoinField;
-            this.localJoinField = localJoinField;
-        }
+		/// <summary>
+		/// Declares a property value as a scalar result of "SELECT SqlFunction() FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+		/// </summary>
+		/// <param name="remoteTable">Table to perform SqlFunction on.</param>
+		/// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
+		/// <param name="localJoinField">Column name in the table for which the property is declared used for equality comparison.</param>
+		public SingleValueAttribute(string remoteTable, string remoteJoinField, string localJoinField)
+		{
+			this.remoteTable = remoteTable;
+			this.remoteJoinField = remoteJoinField;
+			this.localJoinField = localJoinField;
+		}
 
-        /// <inheritdoc/>
-        public override IDBExpression Build(string tableAlias, IMetaRecordField field, IDBCommandBuilder builder)
-        {
-            var select = builder.Select();
+		/// <inheritdoc/>
+		public override IDBExpression Build(string tableAlias, IMetaRecordField field, IDBCommandBuilder builder)
+		{
+			var select = builder.Select();
 			BuildSelect(select, tableAlias, field, builder);
-            var selectExpr = builder.Expression(select.ToString());
-            return selectExpr;
-        }
+			var selectExpr = builder.Expression(select.ToString());
+			return selectExpr;
+		}
 
 		/// <summary>
 		/// Builds provided SELECT expression based on referenced table.
@@ -72,31 +72,31 @@ namespace Kosson.KORM
 			var remoteJoinExpr = builder.Identifier(remoteAlias, remoteJoinField);
 			select.Where(builder.Equal(localJoinExpr, remoteJoinExpr));
 		}
-    }
+	}
 
-    /// <summary>
-    /// Declares a property value as a scalar result of "SELECT SqlFunction(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-    /// </summary>
-    public abstract class SingleValueWithArgAttribute : SingleValueAttribute
-    {
+	/// <summary>
+	/// Declares a property value as a scalar result of "SELECT SqlFunction(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+	/// </summary>
+	public abstract class SingleValueWithArgAttribute : SingleValueAttribute
+	{
 		/// <summary>
 		/// Field on which the aggregation for subquery is performed.
 		/// </summary>
-        protected string remoteArgField;
+		protected readonly string remoteArgField;
 
-        /// <summary>
-        /// Declares a property value as a scalar result of "SELECT SqlFunction(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-        /// </summary>
-        /// <param name="remoteTable">Table to perform SqlFunction on.</param>
-        /// <param name="remoteArgField">Column name of remoteTable column used as a parameter for SqlFunction.</param>
-        /// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
-        /// <param name="localJoinField">Column name in the table for which the property is declared used for equality comparison.</param>
-        public SingleValueWithArgAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
-            : base (remoteTable, remoteJoinField, localJoinField)
-        {
-            this.remoteArgField = remoteArgField;
-        }
-    }
+		/// <summary>
+		/// Declares a property value as a scalar result of "SELECT SqlFunction(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+		/// </summary>
+		/// <param name="remoteTable">Table to perform SqlFunction on.</param>
+		/// <param name="remoteArgField">Column name of remoteTable column used as a parameter for SqlFunction.</param>
+		/// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
+		/// <param name="localJoinField">Column name in the table for which the property is declared used for equality comparison.</param>
+		public SingleValueWithArgAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
+			: base(remoteTable, remoteJoinField, localJoinField)
+		{
+			this.remoteArgField = remoteArgField;
+		}
+	}
 
 	/// <summary>
 	/// Declares a property value as a subquery.
@@ -104,147 +104,147 @@ namespace Kosson.KORM
 	public static class Subquery
 	{
 		/// <summary>
-        /// Declares a property value as a scalar result of "SELECT COUNT(*) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+		/// Declares a property value as a scalar result of "SELECT COUNT(*) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
 		/// </summary>
-        public sealed class CountAttribute : SingleValueAttribute
+		public sealed class CountAttribute : SingleValueAttribute
 		{
 			/// <inheritdoc/>
-            protected override string GetSqlExpression(IDBCommandBuilder builder)
-            { 
-                return "COUNT(*)"; 
-            }
+			protected override string GetSqlExpression(IDBCommandBuilder builder)
+			{
+				return "COUNT(*)";
+			}
 
-            /// <summary>
-            /// Declares a property value as a scalar result of "SELECT COUNT(*) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-            /// </summary>
-            /// <param name="remoteTable">Table to perform COUNT on.</param>
-            /// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
+			/// <summary>
+			/// Declares a property value as a scalar result of "SELECT COUNT(*) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+			/// </summary>
+			/// <param name="remoteTable">Table to perform COUNT on.</param>
+			/// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
 			/// <param name="localJoinField">Column name in the table for which the property is declared used for equality comparison.</param>
-            public CountAttribute(string remoteTable, string remoteJoinField, string localJoinField)
-                : base(remoteTable, remoteJoinField, localJoinField) 
-            {
-            }
+			public CountAttribute(string remoteTable, string remoteJoinField, string localJoinField)
+				: base(remoteTable, remoteJoinField, localJoinField)
+			{
+			}
 		}
-        
-        /// <summary>
-        /// Declares a property value as a scalar result of "SELECT SUM(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-        /// </summary>
-        public sealed class SumAttribute : SingleValueWithArgAttribute
-        {
+
+		/// <summary>
+		/// Declares a property value as a scalar result of "SELECT SUM(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+		/// </summary>
+		public sealed class SumAttribute : SingleValueWithArgAttribute
+		{
 			/// <inheritdoc/>
-            protected override string GetSqlExpression(IDBCommandBuilder builder)
-            {
-                return "SUM(" + builder.Identifier(remoteArgField) + ")";
-            }
+			protected override string GetSqlExpression(IDBCommandBuilder builder)
+			{
+				return "SUM(" + builder.Identifier(remoteArgField) + ")";
+			}
 
-            /// <summary>
-            /// Declares a property value as a scalar result of "SELECT SUM(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-            /// </summary>
-            /// <param name="remoteTable">Table to perform SUM on.</param>
-            /// <param name="remoteArgField">Column name of remoteTable column used as a parameter for sum function.</param>
-            /// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
+			/// <summary>
+			/// Declares a property value as a scalar result of "SELECT SUM(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+			/// </summary>
+			/// <param name="remoteTable">Table to perform SUM on.</param>
+			/// <param name="remoteArgField">Column name of remoteTable column used as a parameter for sum function.</param>
+			/// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
 			/// <param name="localJoinField">Column name in the table for which the property is declared used for equality comparison.</param>
-            public SumAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
-                : base(remoteTable, remoteArgField, remoteJoinField, localJoinField) 
-            {
-            }
-        }
+			public SumAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
+				: base(remoteTable, remoteArgField, remoteJoinField, localJoinField)
+			{
+			}
+		}
 
-        /// <summary>
-        /// Declares a property value as a scalar result of "SELECT MIN(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-        /// </summary>
-        public sealed class MinAttribute : SingleValueWithArgAttribute
-        {
+		/// <summary>
+		/// Declares a property value as a scalar result of "SELECT MIN(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+		/// </summary>
+		public sealed class MinAttribute : SingleValueWithArgAttribute
+		{
 			/// <inheritdoc/>
-            protected override string GetSqlExpression(IDBCommandBuilder builder)
-            {
-                return "MIN(" + builder.Identifier(remoteArgField) + ")";
-            }
+			protected override string GetSqlExpression(IDBCommandBuilder builder)
+			{
+				return "MIN(" + builder.Identifier(remoteArgField) + ")";
+			}
 
-            /// <summary>
-            /// Declares a property value as a scalar result of "SELECT MIN(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-            /// </summary>
-            /// <param name="remoteTable">Table to perform MIN on.</param>
-            /// <param name="remoteArgField">Column name of remoteTable column used as a parameter for min function.</param>
-            /// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
+			/// <summary>
+			/// Declares a property value as a scalar result of "SELECT MIN(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+			/// </summary>
+			/// <param name="remoteTable">Table to perform MIN on.</param>
+			/// <param name="remoteArgField">Column name of remoteTable column used as a parameter for min function.</param>
+			/// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
 			/// <param name="localJoinField">Column name in the table for which the property is declared used for equality comparison.</param>
-            public MinAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
-                : base(remoteTable, remoteArgField, remoteJoinField, localJoinField)
-            {
-            }
-        }
+			public MinAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
+				: base(remoteTable, remoteArgField, remoteJoinField, localJoinField)
+			{
+			}
+		}
 
-        /// <summary>
-        /// Declares a property value as a scalar result of "SELECT MAX(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-        /// </summary>
-        public sealed class MaxAttribute : SingleValueWithArgAttribute
-        {
+		/// <summary>
+		/// Declares a property value as a scalar result of "SELECT MAX(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+		/// </summary>
+		public sealed class MaxAttribute : SingleValueWithArgAttribute
+		{
 			/// <inheritdoc/>
-            protected override string GetSqlExpression(IDBCommandBuilder builder)
-            {
-                return "MAX(" + builder.Identifier(remoteArgField) + ")";
-            }
+			protected override string GetSqlExpression(IDBCommandBuilder builder)
+			{
+				return "MAX(" + builder.Identifier(remoteArgField) + ")";
+			}
 
-            /// <summary>
-            /// Declares a property value as a scalar result of "SELECT MAX(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-            /// </summary>
-            /// <param name="remoteTable">Table to perform MAX on.</param>
-            /// <param name="remoteArgField">Column name of remoteTable column used as a parameter for max function.</param>
-            /// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
+			/// <summary>
+			/// Declares a property value as a scalar result of "SELECT MAX(remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+			/// </summary>
+			/// <param name="remoteTable">Table to perform MAX on.</param>
+			/// <param name="remoteArgField">Column name of remoteTable column used as a parameter for max function.</param>
+			/// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
 			/// <param name="localJoinField">Column name in the table for which the property is declared used for equality comparison.</param>
-            public MaxAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
-                : base(remoteTable, remoteArgField, remoteJoinField, localJoinField)
-            {
-            }
-        }
+			public MaxAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
+				: base(remoteTable, remoteArgField, remoteJoinField, localJoinField)
+			{
+			}
+		}
 
-        /// <summary>
-        /// Declares a property value as a scalar result of "SELECT AVG(remoteSumField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-        /// </summary>
-        public sealed class AvgAttribute : SingleValueWithArgAttribute
-        {
+		/// <summary>
+		/// Declares a property value as a scalar result of "SELECT AVG(remoteSumField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+		/// </summary>
+		public sealed class AvgAttribute : SingleValueWithArgAttribute
+		{
 			/// <inheritdoc/>
-            protected override string GetSqlExpression(IDBCommandBuilder builder)
-            {
-                return "AVG(" + builder.Identifier(remoteArgField) + ")";
-            }
+			protected override string GetSqlExpression(IDBCommandBuilder builder)
+			{
+				return "AVG(" + builder.Identifier(remoteArgField) + ")";
+			}
 
-            /// <summary>
-            /// Declares a property value as a scalar result of "SELECT AVG(remoteSumField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-            /// </summary>
-            /// <param name="remoteTable">Table to perform AVG on.</param>
-            /// <param name="remoteArgField">Column name of remoteTable column used as a parameter for avg function.</param>
-            /// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
+			/// <summary>
+			/// Declares a property value as a scalar result of "SELECT AVG(remoteSumField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+			/// </summary>
+			/// <param name="remoteTable">Table to perform AVG on.</param>
+			/// <param name="remoteArgField">Column name of remoteTable column used as a parameter for avg function.</param>
+			/// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
 			/// <param name="localJoinField">Column name in the table for which the property is declared used for equality comparison.</param>
-            public AvgAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
-                : base(remoteTable, remoteArgField, remoteJoinField, localJoinField)
-            {
-            }
-        }
+			public AvgAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
+				: base(remoteTable, remoteArgField, remoteJoinField, localJoinField)
+			{
+			}
+		}
 
-        /// <summary>
-        /// Declares a property value as a scalar result of "SELECT COUNT(DISTINCT remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-        /// </summary>
-        public sealed class CountDistinctAttribute : SingleValueWithArgAttribute
-        {
+		/// <summary>
+		/// Declares a property value as a scalar result of "SELECT COUNT(DISTINCT remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+		/// </summary>
+		public sealed class CountDistinctAttribute : SingleValueWithArgAttribute
+		{
 			/// <inheritdoc/>
-            protected override string GetSqlExpression(IDBCommandBuilder builder)
-            {
-                return "COUNT(DISTINCT " + builder.Identifier(remoteArgField) + ")";
-            }
+			protected override string GetSqlExpression(IDBCommandBuilder builder)
+			{
+				return "COUNT(DISTINCT " + builder.Identifier(remoteArgField) + ")";
+			}
 
-            /// <summary>
-            /// Declares a property value as a scalar result of "SELECT COUNT(DISTINCT remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
-            /// </summary>
-            /// <param name="remoteTable">Table to perform COUNT DISTINCT on.</param>
-            /// <param name="remoteArgField">Column name of remoteTable column used as a parameter for count distinct function.</param>
-            /// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
+			/// <summary>
+			/// Declares a property value as a scalar result of "SELECT COUNT(DISTINCT remoteArgField) FROM remoteTable WHERE remoteJoinField = localJoinField" subquery using a given table and a join condition.
+			/// </summary>
+			/// <param name="remoteTable">Table to perform COUNT DISTINCT on.</param>
+			/// <param name="remoteArgField">Column name of remoteTable column used as a parameter for count distinct function.</param>
+			/// <param name="remoteJoinField">Column name of remoteTable column used for equality comparison.</param>
 			/// <param name="localJoinField">Column name in the table for which the property is declared used for equality comparison.</param>
-            public CountDistinctAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
-                : base(remoteTable, remoteArgField, remoteJoinField, localJoinField)
-            {
-            }
-        }
+			public CountDistinctAttribute(string remoteTable, string remoteArgField, string remoteJoinField, string localJoinField)
+				: base(remoteTable, remoteArgField, remoteJoinField, localJoinField)
+			{
+			}
+		}
 
 		/// <summary>
 		/// Declares a property value as a scalar result of "SELECT FIRST 1 remoteArgField FROM remoteTable WHERE remoteJoinField = localJoinField" subquery.

@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -7,9 +6,9 @@ namespace Kosson.KORM.ORM
 {
 	class ReaderRecordLoaderCache
 	{
-		private ReaderRecordLoaderBuilder builder;
-		private ReaderWriterLockSlim rwlock;
-		private Dictionary<Type, Delegate> cache;
+		private readonly ReaderRecordLoaderBuilder builder;
+		private readonly ReaderWriterLockSlim rwlock;
+		private readonly Dictionary<Type, Delegate> cache;
 
 		public ReaderRecordLoaderCache(IMetaBuilder metaBuilder)
 		{

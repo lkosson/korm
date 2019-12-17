@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Kosson.KORM
 {
@@ -8,8 +7,8 @@ namespace Kosson.KORM
 	/// </summary>
 	class ArrayBasedRow : IRow
 	{
-		private object[] values;
-		private Dictionary<string, int> names;
+		private readonly object[] values;
+		private readonly Dictionary<string, int> names;
 
 		int IIndexBasedRow.Length { get { return values.Length; } }
 		object IIndexBasedRow.this[int index] { get { return index >= 0 && index < values.Length ? values[index] : null; } }

@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
 
@@ -9,7 +8,7 @@ namespace Kosson.KORM.ORM
 	{
 		protected override bool UseFullFieldNames { get { return false; } }
 
-		public DBORMDelete(IDB db, IMetaBuilder metaBuilder) 
+		public DBORMDelete(IDB db, IMetaBuilder metaBuilder)
 			: base(db, metaBuilder)
 		{
 		}

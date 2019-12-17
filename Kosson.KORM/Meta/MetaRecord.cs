@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -9,9 +8,9 @@ namespace Kosson.KORM.Meta
 	{
 		public const string PKNAME = "ID";
 
-		private List<MetaRecordField> fields;
-		private List<MetaRecordIndex> indices;
-		private Dictionary<string, MetaRecordField> fieldsLookup;
+		private readonly List<MetaRecordField> fields;
+		private readonly List<MetaRecordIndex> indices;
+		private readonly Dictionary<string, MetaRecordField> fieldsLookup;
 
 		public Type Type { get; private set; }
 		public Type TableType { get; private set; }
@@ -22,9 +21,9 @@ namespace Kosson.KORM.Meta
 		public string DBQuery { get; private set; }
 		public bool IsManualID { get; private set; }
 		public IMetaRecordField InliningField { get; private set; }
-		public IReadOnlyCollection<IMetaRecordField> Fields { get { return fields; } }
-		public IReadOnlyCollection<IMetaRecordIndex> Indices { get { return indices; } }
-		public IMetaRecordField RowVersion { get { return GetField(IRecordWithRowVersionINT.NAME); } }
+		public IReadOnlyCollection<IMetaRecordField> Fields => fields;
+		public IReadOnlyCollection<IMetaRecordIndex> Indices => indices;
+		public IMetaRecordField RowVersion => GetField(IRecordWithRowVersionINT.NAME);
 		public IMetaRecordField PrimaryKey
 		{
 			get

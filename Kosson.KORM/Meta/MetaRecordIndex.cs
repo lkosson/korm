@@ -1,19 +1,18 @@
-﻿using Kosson.KORM;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Kosson.KORM.Meta
 {
 	class MetaRecordIndex : MetaObject, IMetaRecordIndex
 	{
-		private IMetaRecordField[] keyfields;
-		private IMetaRecordField[] includedFields;
+		private readonly IMetaRecordField[] keyfields;
+		private readonly IMetaRecordField[] includedFields;
 
 		public IMetaRecord Record { get; private set; }
 		public string DBName { get; private set; }
 		public bool IsUnique { get; private set; }
-		public IReadOnlyCollection<IMetaRecordField> KeyFields { get { return keyfields; } }
-		public IReadOnlyCollection<IMetaRecordField> IncludedFields { get { return includedFields; } }
+		public IReadOnlyCollection<IMetaRecordField> KeyFields => keyfields;
+		public IReadOnlyCollection<IMetaRecordField> IncludedFields => includedFields;
 
 		public MetaRecordIndex(IndexAttribute index, IMetaRecord record)
 		{

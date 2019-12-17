@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -183,7 +182,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 					{
 						AppendCRLF(sb);
 					}
-					else 
+					else
 					{
 						var columnTable = columnIdentifier.Fragments.FirstOrDefault();
 						if (previousTable != columnTable)

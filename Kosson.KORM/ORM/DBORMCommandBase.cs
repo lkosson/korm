@@ -1,26 +1,23 @@
-﻿using Kosson.KORM;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Kosson.KORM.ORM
 {
-	class DBORMCommandBase<TRecord> 
+	class DBORMCommandBase<TRecord>
 		where TRecord : IRecord
 	{
 		protected static IMetaRecord meta;
 		private static string[] parametersNameCache = new[] { "P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7" };
-
-		private IDB db;
-		protected IMetaBuilder metaBuilder;
+		protected readonly IMetaBuilder metaBuilder;
 		private List<object> parameters;
 		protected virtual bool UseFullFieldNames { get { return true; } }
 		protected IEnumerable<object> Parameters { get { return parameters ?? Enumerable.Empty<object>(); } }
 
-		public IDB DB { get { return db; } }
+		public IDB DB { get; }
 
 		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder)
 		{
-			this.db = db;
+			this.DB = db;
 			this.metaBuilder = metaBuilder;
 			if (meta == null) meta = metaBuilder.Get(typeof(TRecord));
 		}
@@ -31,7 +28,7 @@ namespace Kosson.KORM.ORM
 			var pnum = parameters.Count;
 			var pname = pnum < parametersNameCache.Length ? parametersNameCache[pnum] : "P" + pnum;
 			parameters.Add(value);
-			return db.CommandBuilder.Parameter(pname);
+			return DB.CommandBuilder.Parameter(pname);
 		}
 
 		public IDBExpression Array(object[] values)
@@ -41,23 +38,23 @@ namespace Kosson.KORM.ORM
 			{
 				pvalues[i] = Parameter(values[i]);
 			}
-			return db.CommandBuilder.Array(pvalues);
+			return DB.CommandBuilder.Array(pvalues);
 		}
 
 		public IDBIdentifier Field(string name)
 		{
 			IMetaRecordField metafield = meta.GetField(name);
-			if (metafield == null) return db.CommandBuilder.Identifier(name);
+			if (metafield == null) return DB.CommandBuilder.Identifier(name);
 			{
 				if (UseFullFieldNames)
 				{
 					var metaRecord = metafield.Record;
 					while (metaRecord.InliningField != null) metaRecord = metaRecord.InliningField.Record;
-					return db.CommandBuilder.Identifier(metaRecord.Name, metafield.DBName);
+					return DB.CommandBuilder.Identifier(metaRecord.Name, metafield.DBName);
 				}
 				else
 				{
-					return db.CommandBuilder.Identifier(metafield.DBName);
+					return DB.CommandBuilder.Identifier(metafield.DBName);
 				}
 			}
 		}

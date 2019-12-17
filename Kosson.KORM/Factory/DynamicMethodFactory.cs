@@ -1,10 +1,6 @@
-﻿using Kosson.KORM;
-using System;
-using System.Collections.Concurrent;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection.Emit;
-using System.Text;
 
 namespace Kosson.KORM.Factory
 {
@@ -13,7 +9,7 @@ namespace Kosson.KORM.Factory
 	/// </summary>
 	class DynamicMethodFactory : IFactory
 	{
-		private Dictionary<Type, Func<object>> constructors = new Dictionary<Type, Func<object>>();
+		private readonly Dictionary<Type, Func<object>> constructors = new Dictionary<Type, Func<object>>();
 
 		Func<object> IFactory.GetConstructor(Type type)
 		{

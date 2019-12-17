@@ -13,9 +13,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TRecord">Type of record to add.</typeparam>
 		/// <param name="record">Record to add to database.</param>
 		public static void Insert<TRecord>(this IORM orm, TRecord record) where TRecord : IRecord
-		{
-			orm.InsertAll((IEnumerable<TRecord>)new[] { record });
-		}
+			=> orm.InsertAll(new[] { record });
 
 		/// <summary>
 		/// Asynchronous version of Insert.
@@ -24,9 +22,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TRecord">Type of record to add.</typeparam>
 		/// <param name="record">Record to add to database.</param>
 		public static Task InsertAsync<TRecord>(this IORM orm, TRecord record) where TRecord : IRecord
-		{
-			return orm.InsertAllAsync((IEnumerable<TRecord>)new[] { record });
-		}
+			=> orm.InsertAllAsync(new[] { record });
 
 		/// <summary>
 		/// Adds a set of records to a database and assigns primary key (ID) to all of them.
@@ -57,9 +53,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TRecord">Type of record to update.</typeparam>
 		/// <param name="record">Record to update in database.</param>
 		public static void Update<TRecord>(this IORM orm, TRecord record) where TRecord : IRecord
-		{
-			orm.UpdateAll((IEnumerable<TRecord>)new[] { record });
-		}
+			=> orm.UpdateAll(new[] { record });
 
 		/// <summary>
 		/// Asynchronous version of Update.
@@ -68,9 +62,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TRecord">Type of record to update.</typeparam>
 		/// <param name="record">Record to update in database.</param>
 		public static Task UpdateAsync<TRecord>(this IORM orm, TRecord record) where TRecord : IRecord
-		{
-			return orm.UpdateAllAsync((IEnumerable<TRecord>)new[] { record });
-		}
+			=> orm.UpdateAllAsync(new[] { record });
 
 		/// <summary>
 		/// Updates all columns of all existing database backing records based on the given records.
@@ -151,9 +143,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TRecord">Type of record to delete.</typeparam>
 		/// <param name="record">Record to delete.</param>
 		public static void Delete<TRecord>(this IORM orm, TRecord record) where TRecord : IRecord
-		{
-			orm.DeleteAll((IEnumerable<TRecord>)new[] { record });
-		}
+			=> orm.DeleteAll(new[] { record });
 
 		/// <summary>
 		/// Asynchronous version of Delete.
@@ -162,9 +152,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TRecord">Type of record to delete.</typeparam>
 		/// <param name="record">Record to delete.</param>
 		public static Task DeleteAsync<TRecord>(this IORM orm, TRecord record) where TRecord : IRecord
-		{
-			return orm.DeleteAllAsync((IEnumerable<TRecord>)new[] { record });
-		}
+			=> orm.DeleteAllAsync(new[] { record });
 
 		/// <summary>
 		/// Deletes all existing database records based on the primary keys (ID) values of a given records.
@@ -196,9 +184,7 @@ namespace Kosson.KORM
 		/// <param name="recordref">Primary key (ID) reference to a record to retrieve.</param>
 		/// <returns>Record for a given record reference.</returns>
 		public static T Get<T>(this IORM orm, RecordRef<T> recordref) where T : class, IRecord, new()
-		{
-			return orm.Select<T>().ByID<T>(recordref.ID);
-		}
+			=> orm.Select<T>().ByID(recordref.ID);
 
 		/// <summary>
 		/// Asynchronous version of Get.
@@ -208,8 +194,6 @@ namespace Kosson.KORM
 		/// <param name="recordref">Primary key (ID) reference to a record to retrieve.</param>
 		/// <returns>Task representing asynchronous operation returning record for a given record reference.</returns>
 		public static Task<T> GetAsync<T>(this IORM orm, RecordRef<T> recordref) where T : class, IRecord, new()
-		{
-			return orm.Select<T>().ByIDAsync<T>(recordref.ID);
-		}
+			=> orm.Select<T>().ByIDAsync(recordref.ID);
 	}
 }

@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System;
+﻿using System;
 using System.Data;
 
 namespace Kosson.KORM.DB.CommandBuilder
@@ -8,200 +7,134 @@ namespace Kosson.KORM.DB.CommandBuilder
 	public class DBCommandBuilder : IDBCommandBuilder
 	{
 		/// <inheritdoc/>
-		public virtual string ParameterPrefix { get { return "@"; } }
+		public virtual string ParameterPrefix => "@";
 
 		/// <inheritdoc/>
-		public virtual string IdentifierQuoteLeft { get { return "\""; } }
+		public virtual string IdentifierQuoteLeft => "\"";
 
 		/// <inheritdoc/>
-		public virtual string IdentifierQuoteRight { get { return "\""; } }
+		public virtual string IdentifierQuoteRight => "\"";
 
 		/// <inheritdoc/>
-		public virtual string IdentifierSeparator { get { return "."; } }
+		public virtual string IdentifierSeparator => ".";
 
 		/// <inheritdoc/>
-		public virtual string StringQuoteLeft { get { return "'"; } }
+		public virtual string StringQuoteLeft => "'";
 
 		/// <inheritdoc/>
-		public virtual string StringQuoteRight { get { return "'"; } }
+		public virtual string StringQuoteRight => "'";
 
 		/// <inheritdoc/>
-		public virtual string CommentDelimiterLeft { get { return "/*"; } }
+		public virtual string CommentDelimiterLeft => "/*";
 
 		/// <inheritdoc/>
-		public virtual string CommentDelimiterRight { get { return "*/"; } }
+		public virtual string CommentDelimiterRight => "*/";
 
 		/// <inheritdoc/>
-		public virtual string ArrayElementSeparator { get { return ","; } }
+		public virtual string ArrayElementSeparator => ",";
 
 		/// <inheritdoc/>
-		public virtual bool SupportsPrimaryKeyInsert { get { return true; } }
+		public virtual bool SupportsPrimaryKeyInsert => true;
 
 		/// <inheritdoc/>
-		public virtual IDBSelect Select()
-		{
-			return new DBSelect(this);
-		}
+		public virtual IDBSelect Select() => new DBSelect(this);
 
 		/// <inheritdoc/>
-		public virtual IDBUpdate Update()
-		{
-			return new DBUpdate(this);
-		}
+		public virtual IDBUpdate Update() => new DBUpdate(this);
 
 		/// <inheritdoc/>
-		public virtual IDBDelete Delete()
-		{
-			return new DBDelete(this);
-		}
+		public virtual IDBDelete Delete() => new DBDelete(this);
 
 		/// <inheritdoc/>
-		public virtual IDBInsert Insert()
-		{
-			return new DBInsert(this);
-		}
+		public virtual IDBInsert Insert() => new DBInsert(this);
 
 		/// <inheritdoc/>
-		public virtual IDBCreateTable CreateTable()
-		{
-			return new DBCreateTable(this);
-		}
+		public virtual IDBCreateTable CreateTable() => new DBCreateTable(this);
 
 		/// <inheritdoc/>
-		public virtual IDBCreateColumn CreateColumn()
-		{
-			return new DBCreateColumn(this);
-		}
+		public virtual IDBCreateColumn CreateColumn() => new DBCreateColumn(this);
 
 		/// <inheritdoc/>
-		public virtual IDBCreateForeignKey CreateForeignKey()
-		{
-			return new DBCreateForeignKey(this);
-		}
+		public virtual IDBCreateForeignKey CreateForeignKey() => new DBCreateForeignKey(this);
 
 		/// <inheritdoc/>
-		public virtual IDBCreateIndex CreateIndex()
-		{
-			return new DBCreateIndex(this);
-		}
+		public virtual IDBCreateIndex CreateIndex() => new DBCreateIndex(this);
 
 		/// <inheritdoc/>
 		public virtual IDBExpression Type(DbType type, int length, int precision)
 		{
-            if (type == DbType.AnsiString && length > 0) return Expression("VARCHAR(" + length + ")");
-            if (type == DbType.AnsiString && length <= 0) return Expression("CLOB");
-            if (type == DbType.AnsiStringFixedLength) return Expression("CHAR(" + length + ")");
-            if (type == DbType.Binary && length > 0) return Expression("VARBINARY(" + length + ")");
-            if (type == DbType.Binary && length <= 0) return Expression("BLOB");
-            if (type == DbType.Boolean) return Expression("BOOLEAN");
-            if (type == DbType.Byte) return Expression("SMALLINT");
-            if (type == DbType.Currency) return Expression("DECIMAL(20, 4)");
-            if (type == DbType.Date) return Expression("DATE");
-            if (type == DbType.DateTime) return Expression("TIMESTAMP");
-            if (type == DbType.DateTime2) return Expression("TIMESTAMP");
-            if (type == DbType.DateTimeOffset) return Expression("TIMESTAMP WITH TIMEZONE");
-            if (type == DbType.Time) return Expression("TIME");
-            if (type == DbType.Decimal && length > 0) return Expression("DECIMAL(" + length + ", " + precision + ")");
+			if (type == DbType.AnsiString && length > 0) return Expression("VARCHAR(" + length + ")");
+			if (type == DbType.AnsiString && length <= 0) return Expression("CLOB");
+			if (type == DbType.AnsiStringFixedLength) return Expression("CHAR(" + length + ")");
+			if (type == DbType.Binary && length > 0) return Expression("VARBINARY(" + length + ")");
+			if (type == DbType.Binary && length <= 0) return Expression("BLOB");
+			if (type == DbType.Boolean) return Expression("BOOLEAN");
+			if (type == DbType.Byte) return Expression("SMALLINT");
+			if (type == DbType.Currency) return Expression("DECIMAL(20, 4)");
+			if (type == DbType.Date) return Expression("DATE");
+			if (type == DbType.DateTime) return Expression("TIMESTAMP");
+			if (type == DbType.DateTime2) return Expression("TIMESTAMP");
+			if (type == DbType.DateTimeOffset) return Expression("TIMESTAMP WITH TIMEZONE");
+			if (type == DbType.Time) return Expression("TIME");
+			if (type == DbType.Decimal && length > 0) return Expression("DECIMAL(" + length + ", " + precision + ")");
 			if (type == DbType.Decimal && length <= 0) return Expression("DECIMAL(38, 6)");
-            if (type == DbType.Double) return Expression("DOUBLE PRECISION");
-            if (type == DbType.Int16) return Expression("SMALLINT");
-            if (type == DbType.Int32) return Expression("INTEGER");
-            if (type == DbType.Int64) return Expression("BIGINT");
-            if (type == DbType.Guid) return Expression("VARCHAR(36)");
-            if (type == DbType.SByte) return Expression("SMALLINT");
-            if (type == DbType.Single) return Expression("REAL");
-            if (type == DbType.String && length > 0) return Expression("NVARCHAR(" + length + ")");
-            if (type == DbType.String && length <= 0) return Expression("NCLOB");
-            if (type == DbType.StringFixedLength) return Expression("NCHAR(" + length + ")");
-            if (type == DbType.UInt16) return Expression("INTEGER");
-            if (type == DbType.UInt32) return Expression("BIGINT");
-            if (type == DbType.UInt64) return Expression("DECIMAL(20, 0)");
-            if (type == DbType.Xml) return Expression("XML");
+			if (type == DbType.Double) return Expression("DOUBLE PRECISION");
+			if (type == DbType.Int16) return Expression("SMALLINT");
+			if (type == DbType.Int32) return Expression("INTEGER");
+			if (type == DbType.Int64) return Expression("BIGINT");
+			if (type == DbType.Guid) return Expression("VARCHAR(36)");
+			if (type == DbType.SByte) return Expression("SMALLINT");
+			if (type == DbType.Single) return Expression("REAL");
+			if (type == DbType.String && length > 0) return Expression("NVARCHAR(" + length + ")");
+			if (type == DbType.String && length <= 0) return Expression("NCLOB");
+			if (type == DbType.StringFixedLength) return Expression("NCHAR(" + length + ")");
+			if (type == DbType.UInt16) return Expression("INTEGER");
+			if (type == DbType.UInt32) return Expression("BIGINT");
+			if (type == DbType.UInt64) return Expression("DECIMAL(20, 0)");
+			if (type == DbType.Xml) return Expression("XML");
 			throw new ArgumentException("Unsupported type " + type);
 		}
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Null()
-		{
-			return new DBExpression("NULL");
-		}
+		public virtual IDBExpression Null() => new DBRawExpression(this, "NULL");
 
 		/// <inheritdoc/>
-		public virtual IDBComment Comment(string value)
-		{
-			return new DBComment(this, value);
-		}
+		public virtual IDBComment Comment(string value) => new DBComment(this, value);
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Const(long value)
-		{
-			return new DBExpression(value.ToString());
-		}
+		public virtual IDBExpression Const(long value) => new DBRawExpression(this, value.ToString());
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Const(string value)
-		{
-			return new DBStringConst(this, value);
-		}
+		public virtual IDBExpression Const(string value) => new DBStringConst(this, value);
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Const(double value)
-		{
-			return new DBExpression(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
-		}
+		public virtual IDBExpression Const(double value) => new DBRawExpression(this, value.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Const(decimal value)
-		{
-			return new DBExpression(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
-		}
+		public virtual IDBExpression Const(decimal value) => new DBRawExpression(this, value.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Const(DateTime value)
-		{
-			return new DBStringConst(this, value.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
-		}
+		public virtual IDBExpression Const(DateTime value) => new DBStringConst(this, value.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Const(byte[] value)
-		{
-			return new DBBlobConst(value);
-		}
+		public virtual IDBExpression Const(byte[] value) => new DBBlobConst(value);
 
 		/// <inheritdoc/>
-		public virtual IDBIdentifier Identifier(string name)
-		{
-			return new DBIdentifier(this, name);
-		}
+		public virtual IDBIdentifier Identifier(string name) => new DBIdentifier(this, name);
 
 		/// <inheritdoc/>
-		public virtual IDBIdentifier Identifier(params string[] names)
-		{
-			return new DBDottedIdentifier(this, names);
-		}
+		public virtual IDBIdentifier Identifier(params string[] names) => new DBDottedIdentifier(this, names);
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Expression(string expression)
-		{
-			return new DBExpression(expression);
-		}
+		public virtual IDBExpression Expression(string expression) => new DBRawExpression(this, expression);
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Comparison(IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr)
-		{
-			return new DBComparison(this, lexpr, comparison, rexpr);
-		}
+		public virtual IDBExpression Comparison(IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr) => new DBComparison(this, lexpr, comparison, rexpr);
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Parameter(string name)
-		{
-			return new DBParameter(this, name);
-		}
+		public virtual IDBExpression Parameter(string name) => new DBParameter(this, name);
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Array(IDBExpression[] values)
-		{
-			return new DBArray(this, values);
-		}
+		public virtual IDBExpression Array(IDBExpression[] values) => new DBArray(this, values);
 	}
 }

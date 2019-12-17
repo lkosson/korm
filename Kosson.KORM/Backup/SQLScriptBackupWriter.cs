@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using Kosson.KORM.ORM;
+﻿using Kosson.KORM.ORM;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,11 +8,11 @@ namespace Kosson.KORM.Backup
 {
 	class SQLScriptBackupWriter : IBackupWriter
 	{
-		private StreamWriter sw;
-		private Dictionary<Type, TableState> tableStates;
-		private IMetaBuilder metaBuilder;
-		private IDBCommandBuilder cb;
-		private DBTableCreator tc;
+		private readonly StreamWriter sw;
+		private readonly Dictionary<Type, TableState> tableStates;
+		private readonly IMetaBuilder metaBuilder;
+		private readonly IDBCommandBuilder cb;
+		private readonly DBTableCreator tc;
 
 		/// <summary>
 		/// Determines whether SQL commands creating database structure should be emitted.
@@ -124,7 +123,7 @@ namespace Kosson.KORM.Backup
 			{
 				if (!field.IsColumn) continue;
 				if (field.IsReadOnly && !field.IsPrimaryKey) continue;
-				
+
 				var value = field.Property.GetValue(record);
 				if (field.IsPrimaryKey)
 				{

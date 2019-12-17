@@ -1,14 +1,9 @@
-﻿using Kosson.KORM;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Kosson.KORM.RecordCloner
+﻿namespace Kosson.KORM.RecordCloner
 {
 	class FactoryRecordCloner : IRecordCloner
 	{
-		private IFactory factory;
-		private IMetaBuilder metaBuilder;
+		private readonly IFactory factory;
+		private readonly IMetaBuilder metaBuilder;
 
 		public FactoryRecordCloner(IFactory factory, IMetaBuilder metaBuilder)
 		{

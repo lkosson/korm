@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System;
+﻿using System;
 using System.Text;
 
 namespace Kosson.KORM.DB.CommandBuilder
@@ -131,7 +130,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendColumn(StringBuilder sb)
 		{
-			if (column== null) throw new ArgumentNullException("column");
+			if (column == null) throw new ArgumentNullException("column");
 			column.Append(sb);
 		}
 

@@ -10,7 +10,7 @@ namespace Kosson.KORM
 	/// </summary>
 	public static class RecordBasedRow
 	{
-		private static Dictionary<Type, Func<IMetaRecord, IRecord, IRow>> builders = new Dictionary<Type, Func<IMetaRecord, IRecord, IRow>>();
+		private static readonly Dictionary<Type, Func<IMetaRecord, IRecord, IRow>> builders = new Dictionary<Type, Func<IMetaRecord, IRecord, IRow>>();
 
 		/// <summary>
 		/// Creates a new IRow for a given record;
@@ -73,10 +73,10 @@ namespace Kosson.KORM
 
 		object IRow.this[string name]
 		{
-			get 
+			get
 			{
 				var row = (IRow)this;
-				return row[row.GetIndex(name)]; 
+				return row[row.GetIndex(name)];
 			}
 		}
 

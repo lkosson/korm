@@ -49,7 +49,7 @@ namespace Kosson.KORM
 			{
 				if (record.ID == id) return record;
 			}
-			return default(TRecord);
+			return default;
 		}
 
 		/// <summary>
@@ -72,7 +72,7 @@ namespace Kosson.KORM
 		/// <returns>Copy of a given record.</returns>
 		public static TRecord Clone<TRecord>(this IRecordCloner cloner, TRecord record) where TRecord : IRecord, new()
 		{
-			return (TRecord)cloner.Clone(record);
+			return cloner.Clone(record);
 		}
 	}
 }

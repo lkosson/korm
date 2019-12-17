@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
 
@@ -11,7 +10,7 @@ namespace Kosson.KORM.ORM
 		protected override bool UseFullFieldNames { get { return false; } }
 		private string commandText;
 
-		public DBORMUpdate(IDB db, IMetaBuilder metaBuilder) 
+		public DBORMUpdate(IDB db, IMetaBuilder metaBuilder)
 			: base(db, metaBuilder)
 		{
 			commandText = command.ToString();

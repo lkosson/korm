@@ -1,6 +1,4 @@
-﻿using Kosson.KORM;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Kosson.KORM.ORM
@@ -11,7 +9,7 @@ namespace Kosson.KORM.ORM
 		private IFactory factory;
 		private LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader;
 
-		public DBQuerySelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IFactory factory, LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader) 
+		public DBQuerySelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IFactory factory, LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader)
 			: base(db, metaBuilder)
 		{
 			this.converter = converter;

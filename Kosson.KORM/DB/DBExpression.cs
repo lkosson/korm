@@ -1,16 +1,26 @@
-﻿using Kosson.KORM;
-using System;
+﻿using System;
 using System.Text;
 
 namespace Kosson.KORM.DB
 {
-	class DBExpression : IDBExpression
+	class DBExpression
 	{
-		private string expression;
+		protected readonly IDBCommandBuilder builder;
+
+		protected DBExpression(IDBCommandBuilder builder)
+		{
+			this.builder = builder;
+		}
+	}
+
+	class DBRawExpression : DBExpression, IDBExpression
+	{
+		private readonly string expression;
 
 		public string RawValue { get { if (expression == null) throw new NotSupportedException(); return expression; } }
 
-		public DBExpression(string expression)
+		public DBRawExpression(IDBCommandBuilder builder, string expression)
+			: base(builder)
 		{
 			this.expression = expression;
 		}
@@ -28,25 +38,21 @@ namespace Kosson.KORM.DB
 		}
 	}
 
-	class DBComment : IDBComment
+	class DBComment : DBExpression, IDBComment
 	{
-		private string value;
-
-		private IDBCommandBuilder builder;
-
-		public string RawValue { get { return value; } }
+		public string RawValue { get; }
 
 		public DBComment(IDBCommandBuilder builder, string value)
+			: base(builder)
 		{
-			this.builder = builder;
-			if (value != null) this.value = value.Replace(builder.CommentDelimiterRight, "");
+			if (value != null) RawValue = value.Replace(builder.CommentDelimiterRight, "");
 		}
 
 		public virtual void Append(StringBuilder sb)
 		{
-			if (value == null) return;
+			if (RawValue == null) return;
 			sb.Append(builder.CommentDelimiterLeft);
-			sb.Append(value);
+			sb.Append(RawValue);
 			sb.Append(builder.CommentDelimiterRight);
 		}
 
@@ -58,29 +64,26 @@ namespace Kosson.KORM.DB
 		}
 	}
 
-	class DBStringConst : IDBExpression
+	class DBStringConst : DBExpression, IDBExpression
 	{
-		private string value;
-		private IDBCommandBuilder builder;
-
-		public string RawValue { get { return value; } }
+		public string RawValue { get; }
 
 		public DBStringConst(IDBCommandBuilder builder, string value)
+			: base(builder)
 		{
-			this.builder = builder;
-			if (value != null) this.value = value.Replace(builder.StringQuoteLeft, builder.StringQuoteLeft + builder.StringQuoteLeft);
+			if (value != null) this.RawValue = value.Replace(builder.StringQuoteLeft, builder.StringQuoteLeft + builder.StringQuoteLeft);
 		}
 
 		public virtual void Append(StringBuilder sb)
 		{
-			if (value == null)
+			if (RawValue == null)
 			{
 				sb.Append("NULL");
 			}
 			else
 			{
 				sb.Append(builder.StringQuoteLeft);
-				sb.Append(value);
+				sb.Append(RawValue);
 				sb.Append(builder.StringQuoteRight);
 			}
 		}
@@ -95,7 +98,7 @@ namespace Kosson.KORM.DB
 
 	class DBBlobConst : IDBExpression
 	{
-		private byte[] value;
+		private readonly byte[] value;
 
 		public string RawValue { get { throw new NotImplementedException(); } }
 
@@ -123,14 +126,11 @@ namespace Kosson.KORM.DB
 		}
 	}
 
-	class DBParameter : DBExpression
+	class DBParameter : DBRawExpression
 	{
-		private IDBCommandBuilder builder;
-
 		public DBParameter(IDBCommandBuilder builder, string name)
-			: base(name)
+			: base(builder, name)
 		{
-			this.builder = builder;
 		}
 
 		public override void Append(StringBuilder sb)
@@ -140,15 +140,13 @@ namespace Kosson.KORM.DB
 		}
 	}
 
-	class DBArray : DBExpression
+	class DBArray : DBRawExpression
 	{
-		private IDBCommandBuilder builder;
-		private IDBExpression[] values;
+		private readonly IDBExpression[] values;
 
 		public DBArray(IDBCommandBuilder builder, IDBExpression[] values)
-			: base(null)
+			: base(builder, null)
 		{
-			this.builder = builder;
 			this.values = values;
 		}
 
@@ -163,15 +161,12 @@ namespace Kosson.KORM.DB
 		}
 	}
 
-	class DBIdentifier : DBExpression, IDBIdentifier
+	class DBIdentifier : DBRawExpression, IDBIdentifier
 	{
-		private IDBCommandBuilder builder;
-
 		public DBIdentifier(IDBCommandBuilder builder, string identifier)
-			: base(identifier)
+			: base(builder, identifier)
 		{
 			if (identifier.Contains(builder.IdentifierQuoteRight)) throw new ArgumentException("Identifier contains invalid character: " + builder.IdentifierQuoteRight, "identifier");
-			this.builder = builder;
 		}
 
 		public override void Append(StringBuilder sb)
@@ -182,31 +177,28 @@ namespace Kosson.KORM.DB
 		}
 	}
 
-	class DBDottedIdentifier : IDBDottedIdentifier
+	class DBDottedIdentifier : DBExpression, IDBDottedIdentifier
 	{
-		private IDBCommandBuilder builder;
-		private string[] fragments;
-
 		public string RawValue { get { throw new NotSupportedException(); } }
-		public string[] Fragments { get { return fragments; } }
+		public string[] Fragments { get; }
 
 		public DBDottedIdentifier(IDBCommandBuilder builder, string[] fragments)
+			: base(builder)
 		{
 			foreach (var fragment in fragments)
 			{
 				if (fragment.Contains(builder.IdentifierQuoteRight)) throw new ArgumentException("Identifier fragment contains invalid character: " + builder.IdentifierQuoteRight, "identifier");
 			}
-			this.builder = builder;
-			this.fragments = fragments;
+			this.Fragments = fragments;
 		}
 
 		public virtual void Append(StringBuilder sb)
 		{
-			for (int i = 0; i < fragments.Length; i++)
+			for (int i = 0; i < Fragments.Length; i++)
 			{
 				if (i > 0) sb.Append(builder.IdentifierSeparator);
 				sb.Append(builder.IdentifierQuoteLeft);
-				sb.Append(fragments[i]);
+				sb.Append(Fragments[i]);
 				sb.Append(builder.IdentifierQuoteRight);
 			}
 		}
@@ -219,20 +211,19 @@ namespace Kosson.KORM.DB
 		}
 	}
 
-	class DBComparison : IDBExpression
+	class DBComparison : DBExpression, IDBExpression
 	{
-		private IDBCommandBuilder builder;
-		private IDBExpression lexpr;
-		private IDBExpression rexpr;
-		private DBExpressionComparison comparison;
+		private readonly IDBExpression lexpr;
+		private readonly IDBExpression rexpr;
+		private readonly DBExpressionComparison comparison;
 
 		public string RawValue { get { throw new NotSupportedException(); } }
 
 		public DBComparison(IDBCommandBuilder builder, IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr)
+			: base(builder)
 		{
 			if (lexpr == null) throw new ArgumentNullException("lexpr");
 			if (rexpr == null && comparison != DBExpressionComparison.Equal && comparison != DBExpressionComparison.NotEqual) throw new ArgumentNullException("rexpr");
-			this.builder = builder;
 			this.lexpr = lexpr;
 			this.rexpr = rexpr;
 			this.comparison = comparison;

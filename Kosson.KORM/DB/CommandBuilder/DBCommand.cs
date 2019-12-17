@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System;
+﻿using System;
 using System.Text;
 
 namespace Kosson.KORM.DB.CommandBuilder
@@ -9,7 +8,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 	/// </summary>
 	public abstract class DBCommand : IDBCommand
 	{
-		private IDBCommandBuilder builder;
+		private readonly IDBCommandBuilder builder;
 
 		/// <summary>
 		/// Table name.
@@ -22,7 +21,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		protected IDBComment tag;
 
 		/// <inheritdoc/>
-		public IDBCommandBuilder Builder { get { return builder; } }
+		public IDBCommandBuilder Builder => builder;
 
 		/// <summary>
 		/// Creates new DBCommand using provided builder.

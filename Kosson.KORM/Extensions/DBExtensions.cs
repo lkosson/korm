@@ -55,9 +55,7 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>Number of affected database rows or result code from DB command.</returns>
 		public static int ExecuteNonQuery(this IDB db, string command, params object[] parameters)
-		{
-			return CreateAndExecuteCommand(db, command, parameters, db.ExecuteNonQuery);
-		}
+			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteNonQuery);
 
 		/// <summary>
 		/// Creates and executes non-query DB command with parameters @P0, @P1, ..., @Pn with given values.
@@ -67,9 +65,7 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>Number of affected database rows or result code from DB command.</returns>
 		public static int ExecuteNonQuery(this IDB db, string command, IEnumerable<object> parameters)
-		{
-			return CreateAndExecuteCommand(db, command, parameters, db.ExecuteNonQuery);
-		}
+			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteNonQuery);
 
 		/// <summary>
 		/// Asynchronous version of ExecuteQuery.
@@ -80,9 +76,7 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>A task representing asynchronous operation returning number of affected database rows or result code from DB command.</returns>
 		public static Task<int> ExecuteNonQueryAsync(this IDB db, string command, params object[] parameters)
-		{
-			return CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteNonQueryAsync);
-		}
+			=> CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteNonQueryAsync);
 
 		/// <summary>
 		/// Asynchronous version of ExecuteQuery.
@@ -93,9 +87,7 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>A task representing asynchronous operation returning number of affected database rows or result code from DB command.</returns>
 		public static Task<int> ExecuteNonQueryAsync(this IDB db, string command, IEnumerable<object> parameters)
-		{
-			return CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteNonQueryAsync);
-		}
+			=> CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteNonQueryAsync);
 
 		/// <summary>
 		/// Asynchronous version of ExecuteQueryFirst.
@@ -117,14 +109,10 @@ namespace Kosson.KORM
 		/// <param name="command">DB command to execute.</param>
 		/// <returns>Array (possibly empty) of a query result.</returns>
 		private static IReadOnlyList<IRow> ExecuteQueryAll(this IDB db, DbCommand command)
-		{
-			return db.ExecuteQuery(command);
-		}
+			=> db.ExecuteQuery(command);
 
 		private static Task<IReadOnlyList<IRow>> ExecuteQueryAllAsync(this IDB db, DbCommand command)
-		{
-			return db.ExecuteQueryAsync(command);
-		}
+			=> db.ExecuteQueryAsync(command);
 
 		/// <summary>
 		/// Creates and executes DB query with parameters @P0, @P1, ..., @Pn with given values and returns array of rows of a result.
@@ -134,9 +122,7 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>Array (possibly empty) of a query result.</returns>
 		public static IReadOnlyList<IRow> ExecuteQuery(this IDB db, string command, params object[] parameters)
-		{
-			return CreateAndExecuteCommand(db, command, parameters, db.ExecuteQueryAll);
-		}
+			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteQueryAll);
 
 		/// <summary>
 		/// Creates and executes DB query with parameters @P0, @P1, ..., @Pn with given values and returns array of rows of a result.
@@ -146,9 +132,7 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>Array (possibly empty) of a query result.</returns>
 		public static IReadOnlyList<IRow> ExecuteQuery(this IDB db, string command, IEnumerable<object> parameters)
-		{
-			return CreateAndExecuteCommand(db, command, parameters, db.ExecuteQueryAll);
-		}
+			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteQueryAll);
 
 		/// <summary>
 		/// Asynchronous version of ExecuteQuery.
@@ -159,9 +143,7 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>A task representing asynchronous operation returning an array (possibly empty) of a query result.</returns>
 		public static Task<IReadOnlyList<IRow>> ExecuteQueryAsync(this IDB db, string command, params object[] parameters)
-		{
-			return CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteQueryAllAsync);
-		}
+			=> CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteQueryAllAsync);
 
 		/// <summary>
 		/// Asynchronous version of ExecuteQuery.
@@ -172,9 +154,7 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>A task representing asynchronous operation returning an array (possibly empty) of a query result.</returns>
 		public static Task<IReadOnlyList<IRow>> ExecuteQueryAsync(this IDB db, string command, IEnumerable<object> parameters)
-		{
-			return CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteQueryAllAsync);
-		}
+			=> CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteQueryAllAsync);
 
 		/// <summary>
 		/// Creates and executes DB query with parameters @P0, @P1, ..., @Pn with given values and returns one-time reader of rows of a result.
@@ -184,9 +164,7 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>One-time reader of rows of a query result.</returns>
 		public static DbDataReader ExecuteReader(this IDB db, string command, params object[] parameters)
-		{
-			return CreateAndExecuteCommand(db, command, parameters, db.ExecuteReader);
-		}
+			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteReader);
 
 		/// <summary>
 		/// Creates and executes DB query with parameters @P0, @P1, ..., @Pn with given values and returns one-time reader of rows of a result.
@@ -196,9 +174,7 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>One-time reader of rows of a query result.</returns>
 		public static DbDataReader ExecuteReader(this IDB db, string command, IEnumerable<object> parameters)
-		{
-			return CreateAndExecuteCommand(db, command, parameters, db.ExecuteReader);
-		}
+			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteReader);
 
 		/// <summary>
 		/// Asynchronous version of ExecuteReader.
@@ -209,9 +185,7 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>A task representing asynchronous operation returning an one-time reader of rows of a query result.</returns>
 		public static Task<DbDataReader> ExecuteReaderAsync(this IDB db, string command, params object[] parameters)
-		{
-			return CreateAndExecuteCommand(db, command, parameters, db.ExecuteReaderAsync);
-		}
+			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteReaderAsync);
 
 		/// <summary>
 		/// Asynchronous version of ExecuteReader.
@@ -222,8 +196,6 @@ namespace Kosson.KORM
 		/// <param name="parameters">Parameters for the command.</param>
 		/// <returns>A task representing asynchronous operation returning an one-time reader of rows of a query result.</returns>
 		public static Task<DbDataReader> ExecuteReaderAsync(this IDB db, string command, IEnumerable<object> parameters)
-		{
-			return CreateAndExecuteCommand(db, command, parameters, db.ExecuteReaderAsync);
-		}
+			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteReaderAsync);
 	}
 }

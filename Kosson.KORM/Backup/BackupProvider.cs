@@ -1,7 +1,5 @@
-﻿using Kosson.KORM;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 
 namespace Kosson.KORM.Backup
 {

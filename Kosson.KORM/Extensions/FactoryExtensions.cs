@@ -14,10 +14,7 @@ namespace Kosson.KORM
 		/// <param name="type">Type of the instance to create.</param>
 		/// <returns>New instance of a given type.</returns>
 		public static object Create(this IFactory factory, Type type)
-		{
-			var constructor = factory.GetConstructor(type);
-			return constructor();
-		}
+			=> factory.GetConstructor(type)();
 
 		/// <summary>
 		/// Creates a new instance of a given type.
@@ -26,8 +23,6 @@ namespace Kosson.KORM
 		/// <param name="factory">Factory to use for instance creation.</param>
 		/// <returns>New instance of a given type.</returns>
 		public static T Create<T>(this IFactory factory) where T : new()
-		{
-			return (T)factory.Create(typeof(T));
-		}
+			=> (T)factory.Create(typeof(T));
 	}
 }

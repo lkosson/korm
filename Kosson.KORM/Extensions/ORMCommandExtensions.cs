@@ -1,7 +1,5 @@
-﻿using Kosson.KORM;
-using Kosson.KORM.Meta;
+﻿using Kosson.KORM.Meta;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Kosson.KORM
@@ -68,7 +66,7 @@ namespace Kosson.KORM
 		/// <param name="comparison">Comparison type.</param>
 		/// <param name="value">Constant value for right side of the comparison.</param>
 		/// <returns>Original command with comparison added to it.</returns>
-		public static TCommand WhereField<TCommand>(this TCommand query, string field, DBExpressionComparison comparison, object value) 
+		public static TCommand WhereField<TCommand>(this TCommand query, string field, DBExpressionComparison comparison, object value)
 			where TCommand : IORMNarrowableCommand<TCommand>
 		{
 			var cb = query.DB.CommandBuilder;
@@ -87,9 +85,7 @@ namespace Kosson.KORM
 		/// <returns>Original command with comparison added to it.</returns>
 		public static TCommand WhereFieldEquals<TCommand>(this TCommand query, string field, object value)
 			where TCommand : IORMNarrowableCommand<TCommand>
-		{
-			return WhereField(query, field, DBExpressionComparison.Equal, value);
-		}
+			=> WhereField(query, field, DBExpressionComparison.Equal, value);
 
 		/// <summary>
 		/// Adds WHERE condition testing if given set contains value of column/property. Condition is joined with existing conditions by AND.
@@ -150,9 +146,7 @@ namespace Kosson.KORM
 		/// <returns>Original command with comparison added to it.</returns>
 		public static TCommand WhereID<TCommand>(this TCommand query, long id)
 			where TCommand : IORMNarrowableCommand<TCommand>
-		{
-			return query.WhereFieldEquals(MetaRecord.PKNAME, id);
-		}
+			=> query.WhereFieldEquals(MetaRecord.PKNAME, id);
 
 		/// <summary>
 		/// Executes UPDATE command after adding to it equality comparison between primary key (ID) and given constant value.
@@ -175,9 +169,7 @@ namespace Kosson.KORM
 		/// <param name="query">UPDATE command to execute.</param>
 		/// <param name="recordRef">Reference to a record to update.</param>
 		public static void ByRef<TRecord>(this IORMUpdate<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
-		{
-			ByID<TRecord>(query, recordRef.ID);
-		}
+			=> ByID(query, recordRef.ID);
 
 		/// <summary>
 		/// Asynchronous version of ByID.
@@ -202,9 +194,7 @@ namespace Kosson.KORM
 		/// <param name="query">UPDATE command to execute.</param>
 		/// <param name="recordRef">Reference to a record to update.</param>
 		public static Task ByRefAsync<TRecord>(this IORMUpdate<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
-		{
-			return ByIDAsync<TRecord>(query, recordRef.ID);
-		}
+			=> ByIDAsync(query, recordRef.ID);
 
 		/// <summary>
 		/// Executes DELETE command after adding to it equality comparison between primary key (ID) and given constant value.
@@ -227,9 +217,7 @@ namespace Kosson.KORM
 		/// <param name="query">DELETE command to execute.</param>
 		/// <param name="recordRef">Reference to a record to delete.</param>
 		public static void ByRef<TRecord>(this IORMDelete<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
-		{
-			ByID<TRecord>(query, recordRef.ID);
-		}
+			=> ByID(query, recordRef.ID);
 
 		/// <summary>
 		/// Asynchronous version of ByID.
@@ -254,9 +242,7 @@ namespace Kosson.KORM
 		/// <param name="query">DELETE command to execute.</param>
 		/// <param name="recordRef">Reference to a record to delete.</param>
 		public static Task ByRefAsync<TRecord>(this IORMDelete<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
-		{
-			return ByIDAsync<TRecord>(query, recordRef.ID);
-		}
+			=> ByIDAsync(query, recordRef.ID);
 
 		/// <summary>
 		/// Executes SELECT command after adding to it equality comparison between primary key (ID) and given constant value.
@@ -267,9 +253,7 @@ namespace Kosson.KORM
 		/// <param name="id">Primary KEY (ID) of a record to select.</param>
 		/// <returns>Record returned by the query or null if no record matches the query condition.</returns>
 		public static TRecord ByID<TRecord>(this IORMSelect<TRecord> query, long id) where TRecord : IRecord
-		{
-			return query.WhereID(id).ExecuteFirst();
-		}
+			=> query.WhereID(id).ExecuteFirst();
 
 		/// <summary>
 		/// Executes SELECT command after adding to it equality comparison between primary key (ID) and given constant value.
@@ -280,9 +264,7 @@ namespace Kosson.KORM
 		/// <param name="recordRef">Reference to a record to select.</param>
 		/// <returns>Record returned by the query or null if no record matches the query condition.</returns>
 		public static TRecord ByRef<TRecord>(this IORMSelect<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
-		{
-			return ByID<TRecord>(query, recordRef.ID);
-		}
+			=> ByID(query, recordRef.ID);
 
 		/// <summary>
 		/// Asynchronous version of ByID.
@@ -294,9 +276,7 @@ namespace Kosson.KORM
 		/// <param name="id">Primary KEY (ID) of a record to select.</param>
 		/// <returns>Task representing asynchronous operation returning record returned by the query or null if no record matches the query condition.</returns>
 		public static Task<TRecord> ByIDAsync<TRecord>(this IORMSelect<TRecord> query, long id) where TRecord : IRecord
-		{
-			return query.WhereID(id).ExecuteFirstAsync();
-		}
+			=> query.WhereID(id).ExecuteFirstAsync();
 
 		/// <summary>
 		/// Asynchronous version of ByRef.
@@ -308,9 +288,7 @@ namespace Kosson.KORM
 		/// <param name="recordRef">Reference to a record to select.</param>
 		/// <returns>Task representing asynchronous operation returning record returned by the query or null if no record matches the query condition.</returns>
 		public static Task<TRecord> ByRefAsync<TRecord>(this IORMSelect<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
-		{
-			return ByIDAsync<TRecord>(query, recordRef.ID);
-		}
+			=> ByIDAsync(query, recordRef.ID);
 
 		/// <summary>
 		/// Executes SELECT command and returns first record of the result or null when resultset is empty.
@@ -353,9 +331,7 @@ namespace Kosson.KORM
 		/// <param name="query">SELECT command to modify.</param>
 		/// <returns>Original command with LIMIT clause added to it.</returns>
 		public static IORMSelect<TRecord> First<TRecord>(this IORMSelect<TRecord> query) where TRecord : IRecord
-		{
-			return query.Limit(1);
-		}
+			=> query.Limit(1);
 
 		/// <summary>
 		/// Adds ORDER BY clause to the SELECT command. If the command already contains ORDER BY clause, additional column is added to it.
@@ -365,9 +341,7 @@ namespace Kosson.KORM
 		/// <param name="field">Column or property name to order the resultset by.</param>
 		/// <returns>Original command with ORDER BY clause added to it.</returns>
 		public static IORMSelect<TRecord> OrderBy<TRecord>(this IORMSelect<TRecord> query, string field) where TRecord : IRecord
-		{
-			return query.OrderBy(query.Field(field));
-		}
+			=> query.OrderBy(query.Field(field));
 
 		/// <summary>
 		/// Adds ORDER BY DESC clause to the SELECT command. If the command already contains ORDER BY clause, additional column is added to it.
@@ -377,9 +351,7 @@ namespace Kosson.KORM
 		/// <param name="field">Column or property name to order the resultset by.</param>
 		/// <returns>Original command with ORDER BY DESC clause added to it.</returns>
 		public static IORMSelect<TRecord> OrderByDescending<TRecord>(this IORMSelect<TRecord> query, string field) where TRecord : IRecord
-		{
-			return query.OrderBy(query.Field(field), true);
-		}
+			=> query.OrderBy(query.Field(field), true);
 
 		/// <summary>
 		/// Adds SET clause to the UPDATE command. If the command already contains SET clause, additional assignment is added to it.
@@ -404,8 +376,6 @@ namespace Kosson.KORM
 		/// <param name="comment">Tag comment to add.</param>
 		/// <returns>Original command with tag applied</returns>
 		public static TCommand Tag<TCommand>(this TCommand command, string comment) where TCommand : IORMCommand<TCommand>
-		{
-			return command.Tag(command.DB.CommandBuilder.Comment(comment));
-		}
- 	}
+			=> command.Tag(command.DB.CommandBuilder.Comment(comment));
+	}
 }

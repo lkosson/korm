@@ -13,8 +13,6 @@
 		/// <param name="value">Value to convert to given type.</param>
 		/// <returns>Value converted to given type.</returns>
 		public static T Convert<T>(this IConverter converter, object value)
-		{
-			return (T)converter.Convert(value, typeof(T));
-		}
+			=> (T)converter.Convert(value, typeof(T));
 	}
 }

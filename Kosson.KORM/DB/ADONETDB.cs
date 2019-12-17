@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -43,33 +42,33 @@ namespace Kosson.KORM.DB
 		public virtual string ConnectionString { get; set; }
 
 		/// <inheritdoc/>
-		public virtual IDBCommandBuilder CommandBuilder { get { return commandBuilder; } }
+		public virtual IDBCommandBuilder CommandBuilder => commandBuilder;
 
 		/// <inheritdoc/>
-		public virtual bool IsTransactionOpen { get { return dbtran != null; } }
+		public virtual bool IsTransactionOpen => dbtran != null;
 
 		/// <inheritdoc/>
-		public virtual bool IsImplicitTransaction { get { return isImplicit; } }
+		public virtual bool IsImplicitTransaction => isImplicit;
 
 		/// <summary>
 		/// Determines whether ADO.NET provider expects command preparation before execution.
 		/// </summary>
-		protected virtual bool PrepareCommands { get { return true; } }
+		protected virtual bool PrepareCommands => true;
 
 		/// <summary>
 		/// Determines whether ADO.NET provider supports command cancelation.
 		/// </summary>
-		protected virtual bool SupportsCancel { get { return true; } }
+		protected virtual bool SupportsCancel => true;
 
 		/// <summary>
 		/// Determines whether new line characters in command text should be removed before passing to ADO.NET provider.
 		/// </summary>
-		protected virtual bool ReplaceNewLines { get { return false; } }
+		protected virtual bool ReplaceNewLines => false;
 
 		/// <summary>
 		/// Determines whether CommandTimeout property of ADO.NET objects expects value in seconds instead of milliseconds.
 		/// </summary>
-		protected virtual bool CommandTimeoutSeconds { get { return false; } }
+		protected virtual bool CommandTimeoutSeconds => false;
 
 		/// <summary>
 		/// Creates new ADO.NET DbConnection.
@@ -87,7 +86,7 @@ namespace Kosson.KORM.DB
 			commandBuilder = CreateCommandBuilder();
 			if (log == null) log = new Logging(logger);
 		}
-
+		#region Synchronization
 		private IDisposable AcquireLock()
 		{
 			syncroot.Wait();
@@ -114,7 +113,8 @@ namespace Kosson.KORM.DB
 				sem.Release();
 			}
 		}
-
+		#endregion
+		#region Database creation
 		void IDB.CreateDatabase()
 		{
 			try
@@ -134,8 +134,8 @@ namespace Kosson.KORM.DB
 		protected virtual void CreateDatabaseImpl()
 		{
 		}
-
-#region Connection management
+		#endregion
+		#region Connection management
 		void IDB.BeginTransaction(IsolationLevel isolationLevel)
 		{
 			if (IsTransactionOpen) throw new KORMInvalidOperationException("Transaction already open.");
@@ -229,8 +229,8 @@ namespace Kosson.KORM.DB
 			Close();
 			syncroot.Dispose();
 		}
-#endregion
-#region Parameters handling
+		#endregion
+		#region Parameters handling
 		private bool IsNull(object val)
 		{
 			if (val == null) return true;
@@ -295,8 +295,8 @@ namespace Kosson.KORM.DB
 		{
 			command.Parameters.Clear();
 		}
-#endregion
-#region Command creation
+		#endregion
+		#region Command creation
 		/// <inheritdoc/>
 		protected virtual IDBCommandBuilder CreateCommandBuilder()
 		{
@@ -330,8 +330,8 @@ namespace Kosson.KORM.DB
 				throw;
 			}
 		}
-#endregion
-#region Command execution
+		#endregion
+		#region Command execution
 		int IDB.ExecuteNonQuery(DbCommand command)
 		{
 			var token = log.Start(command);
@@ -464,8 +464,8 @@ namespace Kosson.KORM.DB
 				throw;
 			}
 		}
-#endregion
-#region Reader processing
+		#endregion
+		#region Reader processing
 		private IReadOnlyList<IRow> ProcessReader(DbDataReader reader, int limit)
 		{
 			List<IRow> rows = limit == -1 ? new List<IRow>() : new List<IRow>(limit);
@@ -514,8 +514,8 @@ namespace Kosson.KORM.DB
 			}
 			return meta;
 		}
-#endregion
-#region Exception handling
+		#endregion
+		#region Exception handling
 		/// <summary>
 		/// Translates ADO.NET provider-specific exception to KORMException or its subtype.
 		/// </summary>
@@ -537,6 +537,6 @@ namespace Kosson.KORM.DB
 			log.Log(translated, cmd, token);
 			throw translated;
 		}
-#endregion
+		#endregion
 	}
 }

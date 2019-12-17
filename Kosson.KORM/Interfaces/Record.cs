@@ -75,7 +75,7 @@ namespace Kosson.KORM
 			return !(r1 == r2);
 		}
 
-#region IConvertible implementation
+		#region IConvertible implementation
 		TypeCode IConvertible.GetTypeCode()
 		{
 			return TypeCode.Object;
@@ -179,6 +179,6 @@ namespace Kosson.KORM
 		{
 			return (ulong)ID;
 		}
-#endregion
+		#endregion
 	}
 }

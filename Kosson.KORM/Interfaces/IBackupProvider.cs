@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Kosson.KORM
+﻿namespace Kosson.KORM
 {
 	/// <summary>
 	/// Interface for creating and restoring database backups.

@@ -1,12 +1,10 @@
-﻿using Kosson.KORM;
-
-namespace Kosson.KORM.PropertyBinder
+﻿namespace Kosson.KORM.PropertyBinder
 {
 	class BinderAccessor<TInput, TOutput>
 	{
-		private string expression;
-		private IPropertyBinder propertyBinder;
-		private IConverter converter;
+		private readonly string expression;
+		private readonly IPropertyBinder propertyBinder;
+		private readonly IConverter converter;
 
 		public BinderAccessor(IPropertyBinder propertyBinder, IConverter converter, string expression)
 		{

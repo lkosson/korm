@@ -1,5 +1,4 @@
-﻿using Kosson.KORM;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 
@@ -12,7 +11,7 @@ namespace Kosson.KORM.PropertyBinder
 	{
 		private ConcurrentDictionary<Type, PropertyDescriptorCollection> cache = new ConcurrentDictionary<Type, PropertyDescriptorCollection>();
 
-		private IConverter converter;
+		private readonly IConverter converter;
 
 		public DescriptorPropertyBinder(IConverter converter)
 		{
@@ -32,7 +31,7 @@ namespace Kosson.KORM.PropertyBinder
 		}
 
 		private PropertyDescriptor GetProperty(object target, string propname)
-		{			
+		{
 			var type = target.GetType();
 			PropertyDescriptorCollection properties;
 			if (!cache.TryGetValue(type, out properties))
