@@ -237,9 +237,11 @@ namespace Kosson.KORM.Tests
 			ORM.Insert(record);
 			Assert.IsFalse(record.OnSelectCalled);
 			Assert.IsFalse(record.OnSelectedCalled);
-			var reader = ORM.Select<Table>().WhereID(record.ID).ExecuteReader();
-			reader.MoveNext();
-			record = reader.Read();
+			using (var reader = ORM.Select<Table>().WhereID(record.ID).ExecuteReader())
+			{
+				reader.MoveNext();
+				record = reader.Read();
+			}
 			Assert.IsTrue(record.OnSelectCalled);
 			Assert.IsTrue(record.OnSelectedCalled);
 		}
@@ -251,9 +253,11 @@ namespace Kosson.KORM.Tests
 			ORM.Insert(record);
 			Assert.IsFalse(record.OnSelectCalled);
 			Assert.IsFalse(record.OnSelectedCalled);
-			var reader = await ORM.Select<Table>().WhereID(record.ID).ExecuteReaderAsync();
-			await reader.MoveNextAsync();
-			record = reader.Read();
+			using (var reader = await ORM.Select<Table>().WhereID(record.ID).ExecuteReaderAsync())
+			{
+				await reader.MoveNextAsync();
+				record = reader.Read();
+			}
 			Assert.IsTrue(record.OnSelectCalled);
 			Assert.IsTrue(record.OnSelectedCalled);
 		}

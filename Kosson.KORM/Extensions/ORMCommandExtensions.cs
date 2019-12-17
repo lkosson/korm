@@ -320,7 +320,12 @@ namespace Kosson.KORM
 		/// <returns>Record returned by the query or null if empty resultset is returned.</returns>
 		public static TRecord ExecuteFirst<TRecord>(this IORMSelect<TRecord> query) where TRecord : IRecord
 		{
-			return query.Limit(1).Execute().FirstOrDefault();
+			//return query.Limit(1).Execute().FirstOrDefault();
+			using (var reader = query.Limit(1).ExecuteReader())
+			{
+				if (!reader.MoveNext()) return default;
+				return reader.Read();
+			}
 		}
 
 		/// <summary>
@@ -332,8 +337,13 @@ namespace Kosson.KORM
 		/// <returns>Record returned by the query or null if empty resultset is returned.</returns>
 		public async static Task<TRecord> ExecuteFirstAsync<TRecord>(this IORMSelect<TRecord> query) where TRecord : IRecord
 		{
-			var records = await query.Limit(1).ExecuteAsync();
-			return records.FirstOrDefault();
+			using (var reader = await query.Limit(1).ExecuteReaderAsync())
+			{
+				if (!await reader.MoveNextAsync()) return default;
+				return reader.Read();
+			}
+			//var records = await query.Limit(1).ExecuteAsync();
+			//return records.FirstOrDefault();
 		}
 
 		/// <summary>

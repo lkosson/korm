@@ -80,7 +80,7 @@ namespace Kosson.KORM.Tests
 			public int Count { get; set; }
 		}
 
-		[Table("t2")]		
+		[Table("t2")]
 		class Table2 : Record
 		{
 			[Inline]
@@ -89,7 +89,7 @@ namespace Kosson.KORM.Tests
 
 		class Inline
 		{
-			[Column(System.Data.DbType.String, Length=10, IsNotNull=true)]
+			[Column(IsNotNull=true)]
 			[DBName("IV")]
 			public int Value { get; set; }
 

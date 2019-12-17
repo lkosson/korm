@@ -16,8 +16,10 @@ namespace Kosson.KORM.ORM
 		private readonly LoaderFromReaderByIndexDelegate<TRecord> loader;
 		private readonly IFactory factory;
 		private readonly Func<TRecord> constructor;
+		private readonly Func<TRecord> builder;
 		private readonly IConverter converter;
 		private DbDataReader reader;
+		private bool aborted;
 
 		public DBORMReader(IDB db, IFactory factory, IConverter converter, LoaderFromReaderByIndexDelegate<TRecord> loader, string sql, IEnumerable<object> parameters)
 		{
@@ -28,6 +30,7 @@ namespace Kosson.KORM.ORM
 			this.constructor = (Func<TRecord>)factory.GetConstructor(typeof(TRecord));
 			this.converter = converter;
 			this.loader = loader;
+			this.builder = typeof(IRecordNotifySelect).IsAssignableFrom(typeof(TRecord)) ? (Func<TRecord>)BuildRecordWithNotify : BuildRecord;
 		}
 
 		public void PrepareReader()
@@ -48,6 +51,32 @@ namespace Kosson.KORM.ORM
 			return record;
 		}
 
+		private TRecord BuildRecordWithNotify()
+		{
+			if (reader == null) ThrowDisposed();
+			var record = constructor();
+
+			var notify = (IRecordNotifySelect)record;
+			var result = notify.OnSelect(null);
+			if (result == RecordNotifyResult.Skip) return null;
+			if (result == RecordNotifyResult.Break)
+			{
+				aborted = true;
+				return null;
+			}
+
+			loader(record, reader, converter, factory);
+
+			result = notify.OnSelected(null);
+			if (result == RecordNotifyResult.Skip) return null;
+			if (result == RecordNotifyResult.Break)
+			{
+				aborted = true;
+				return null;
+			}
+			return record;
+		}
+
 		private void ThrowDisposed()
 		{
 			throw new ObjectDisposedException("Reader already disposed.");
@@ -58,8 +87,7 @@ namespace Kosson.KORM.ORM
 			if (reader == null) ThrowDisposed();
 			while (reader.Read())
 			{
-				var record = BuildRecord();
-				yield return record;
+				yield return builder();
 			}
 			reader.Dispose();
 			reader = null;
@@ -75,7 +103,7 @@ namespace Kosson.KORM.ORM
 		bool IORMReader<TRecord>.MoveNext()
 		{
 			if (reader == null) ThrowDisposed();
-			var result = reader.Read();
+			var result = aborted ? false : reader.Read();
 			if (!result) Dispose();
 			return result;
 		}
@@ -83,14 +111,14 @@ namespace Kosson.KORM.ORM
 		async Task<bool> IORMReader<TRecord>.MoveNextAsync()
 		{
 			if (reader == null) ThrowDisposed();
-			var result = await reader.ReadAsync();
+			var result = aborted ? false : await reader.ReadAsync();
 			if (!result) Dispose();
 			return result;
 		}
 
 		TRecord IORMReader<TRecord>.Read()
 		{
-			return BuildRecord();
+			return builder();
 		}
 
 		IEnumerator<TRecord> IEnumerable<TRecord>.GetEnumerator()

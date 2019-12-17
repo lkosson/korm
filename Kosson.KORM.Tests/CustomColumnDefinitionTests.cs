@@ -34,7 +34,7 @@ namespace Kosson.KORM.Tests
 			public int Value1 { get; set; }
 
 			[Column("INT")]
-			public float Value2 { get; set; }
+			public object Value2 { get; set; }
 		}
 	}
 }
