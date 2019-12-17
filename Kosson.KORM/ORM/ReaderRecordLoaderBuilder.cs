@@ -1,5 +1,6 @@
 ﻿using Kosson.KORM;
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -51,35 +52,41 @@ namespace Kosson.KORM.ORM
 		public LoaderFromReaderByIndexDelegate<TRecord> Build<TRecord>()
 			where TRecord : IRecord
 		{
+			var meta = metaBuilder.Get(typeof(TRecord));
+			var indices = new Dictionary<string, int>();
+			int fieldIndex = 0;
+			PrepareIndices(meta, "this", ref fieldIndex, indices);
+
 			var dm = new DynamicMethod("Load", null, new[] { typeof(TRecord), typeof(DbDataReader), typeof(IConverter), typeof(IFactory) }, true);
 			il = dm.GetILGenerator();
-			var meta = metaBuilder.Get(typeof(TRecord));
 
 			var localRecord = il.DeclareLocal(typeof(TRecord));
 			il.Emit(OpCodes.Ldarg_0);
 			il.Emit(OpCodes.Stloc, localRecord);
 
-			int fieldIndex = 0;
-			Build(meta, ref fieldIndex, localRecord);
+			Build(meta, "this", indices, localRecord);
 
 			il.Emit(OpCodes.Ret);
 			return (LoaderFromReaderByIndexDelegate<TRecord>)dm.CreateDelegate(typeof(LoaderFromReaderByIndexDelegate<TRecord>));
 		}
 
-		private void Build(IMetaRecord meta, ref int fieldIndex, LocalBuilder localRecord)
+		private void PrepareIndices(IMetaRecord meta, string prefix, ref int fieldIndex, Dictionary<string, int> indices)
 		{
-			// keep order in sync with DBORMSelect.PrepareTemplate
+			// keep order in sync with DBORMSelect.PrepareTemplate and DBSelect.AppendColumns
 			foreach (var field in meta.Fields)
 			{
 				if (!field.IsFromDB) continue;
+				if (field.SubqueryBuilder != null) continue;
+				var fieldName = prefix + "." + field.Name;
 
 				if (field.IsInline)
 				{
-					BuildForeign(field, ref fieldIndex, localRecord);
+					var foreignMeta = metaBuilder.Get(field.Type);
+					PrepareIndices(foreignMeta, fieldName, ref fieldIndex, indices);
 				}
 				else
 				{
-					ReadField(field, fieldIndex, localRecord);
+					indices[fieldName] = fieldIndex;
 					fieldIndex++;
 				}
 			}
@@ -88,11 +95,41 @@ namespace Kosson.KORM.ORM
 			{
 				if (!field.IsFromDB) continue;
 				if (!field.IsEagerLookup) continue;
-				BuildForeign(field, ref fieldIndex, localRecord);
+				var fieldName = prefix + "." + field.Name;
+				var foreignMeta = metaBuilder.Get(field.Type);
+				PrepareIndices(foreignMeta, fieldName, ref fieldIndex, indices);
+			}
+
+			foreach (var field in meta.Fields)
+			{
+				if (!field.IsFromDB) continue;
+				if (field.SubqueryBuilder == null) continue;
+				var fieldName = prefix + "." + field.Name;
+				indices[fieldName] = fieldIndex;
+				fieldIndex++;
 			}
 		}
 
-		private void BuildForeign(IMetaRecordField field, ref int fieldIndex, LocalBuilder localRecord)
+		private void Build(IMetaRecord meta, string prefix, Dictionary<string, int> indices, LocalBuilder localRecord)
+		{
+			// keep order in sync with DBORMSelect.PrepareTemplate
+			foreach (var field in meta.Fields)
+			{
+				if (!field.IsFromDB) continue;
+				var fieldName = prefix + "." + field.Name;
+
+				if (field.IsInline || field.IsEagerLookup)
+				{
+					BuildForeign(field, fieldName, indices, localRecord);
+				}
+				else
+				{
+					ReadField(field, indices[fieldName], localRecord);
+				}
+			}
+		}
+
+		private void BuildForeign(IMetaRecordField field, string fieldName, Dictionary<string, int> indices, LocalBuilder localRecord)
 		{
 			var type = field.Type;
 			var labForeignEnd = il.DefineLabel();
@@ -102,9 +139,9 @@ namespace Kosson.KORM.ORM
 			if (field.IsEagerLookup)
 			{
 				il.Emit(OpCodes.Ldarg_1); // ST: reader
-				il.Emit(OpCodes.Ldc_I4, fieldIndex); // ST: reader, fieldIndex
-				il.EmitCall(OpCodes.Callvirt, miGetInt64, null); // ST: long
-				il.Emit(OpCodes.Brfalse, labForeignNull);
+				il.Emit(OpCodes.Ldc_I4, indices[fieldName]); // ST: reader, fieldIndex
+				il.EmitCall(OpCodes.Callvirt, miIsDBNull, null); // ST: long
+				il.Emit(OpCodes.Brtrue, labForeignNull);
 			}
 
 			// _tmp = local.(field.Name);
@@ -136,7 +173,7 @@ namespace Kosson.KORM.ORM
 			il.MarkLabel(labForeignEnd); // ST: <0>
 
 			var foreignMeta = metaBuilder.Get(field.Type);
-			Build(foreignMeta, ref fieldIndex, foreignRecord);
+			Build(foreignMeta, fieldName, indices, foreignRecord);
 
 			// null:
 			il.MarkLabel(labForeignNull); // ST: <0>
