@@ -15,7 +15,6 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddSingleton<IFactory, Kosson.KORM.Factory.DynamicMethodFactory>();
 			services.AddSingleton<IPropertyBinder, Kosson.KORM.PropertyBinder.ReflectionPropertyBinder>();
 			services.AddSingleton<IMetaBuilder, Kosson.KORM.Meta.ReflectionMetaBuilder>();
-			services.AddSingleton<IRecordLoader, Kosson.KORM.RecordLoader.DynamicRecordLoader>();
 			services.AddTransient<IBackupProvider, Kosson.KORM.Backup.BackupProvider>();
 			services.AddSingleton<IRecordCloner, Kosson.KORM.RecordCloner.FactoryRecordCloner>();
 			services.AddTransient<IBackupRestorer, Kosson.KORM.Backup.BackupRestorer>();

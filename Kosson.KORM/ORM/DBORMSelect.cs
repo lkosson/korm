@@ -8,15 +8,13 @@ namespace Kosson.KORM.ORM
 	class DBQuerySelect<TRecord> : DBORMCommandBase<TRecord, IDBSelect>, IORMSelect<TRecord> where TRecord : class, IRecord, new()
 	{
 		private IConverter converter;
-		private IRecordLoader recordLoader;
 		private IFactory factory;
 		private LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader;
 
-		public DBQuerySelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IRecordLoader recordLoader, IFactory factory, LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader) 
+		public DBQuerySelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IFactory factory, LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader) 
 			: base(db, metaBuilder)
 		{
 			this.converter = converter;
-			this.recordLoader = recordLoader;
 			this.factory = factory;
 			this.loaderFromReader = loaderFromReader;
 		}
