@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.KORM;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace Kosson.KORM.Tests
 {
@@ -19,6 +21,17 @@ namespace Kosson.KORM.Tests
 			Assert.IsFalse(record.OnInsertCalled);
 			Assert.IsFalse(record.OnInsertedCalled);
 			ORM.Insert(record);
+			Assert.IsTrue(record.OnInsertCalled);
+			Assert.IsTrue(record.OnInsertedCalled);
+		}
+
+		[TestMethod]
+		public async Task InsertNotificationsCalledAsync()
+		{
+			var record = new Table();
+			Assert.IsFalse(record.OnInsertCalled);
+			Assert.IsFalse(record.OnInsertedCalled);
+			await ORM.InsertAsync(record);
 			Assert.IsTrue(record.OnInsertCalled);
 			Assert.IsTrue(record.OnInsertedCalled);
 		}
@@ -69,6 +82,17 @@ namespace Kosson.KORM.Tests
 			Assert.IsFalse(record.OnUpdateCalled);
 			Assert.IsFalse(record.OnUpdatedCalled);
 			ORM.Update(record);
+			Assert.IsTrue(record.OnUpdateCalled);
+			Assert.IsTrue(record.OnUpdatedCalled);
+		}
+
+		public async Task UpdateNotificationsCalledAsync()
+		{
+			var record = new Table();
+			ORM.Insert(record);
+			Assert.IsFalse(record.OnUpdateCalled);
+			Assert.IsFalse(record.OnUpdatedCalled);
+			await ORM.UpdateAsync(record);
 			Assert.IsTrue(record.OnUpdateCalled);
 			Assert.IsTrue(record.OnUpdatedCalled);
 		}
@@ -128,6 +152,17 @@ namespace Kosson.KORM.Tests
 			Assert.IsTrue(record.OnDeletedCalled);
 		}
 
+		public async Task DeleteNotificationsCalledAsync()
+		{
+			var record = new Table();
+			ORM.Insert(record);
+			Assert.IsFalse(record.OnDeleteCalled);
+			Assert.IsFalse(record.OnDeletedCalled);
+			await ORM.DeleteAsync(record);
+			Assert.IsTrue(record.OnDeleteCalled);
+			Assert.IsTrue(record.OnDeletedCalled);
+		}
+
 		[TestMethod]
 		[ExpectedException(typeof(KORMDeleteFailedException))]
 		public void DeleteBeforeNotificationsResultThrowsException()
@@ -172,13 +207,53 @@ namespace Kosson.KORM.Tests
 		#endregion
 		#region Select notifications
 		[TestMethod]
-		public void SelectNotificationCalled()
+		public void SelectExecuteNotificationCalled()
 		{
 			var record = new Table();
 			ORM.Insert(record);
 			Assert.IsFalse(record.OnSelectCalled);
 			Assert.IsFalse(record.OnSelectedCalled);
-			record = ORM.Select<Table>().ByID(record.ID);
+			record = ORM.Select<Table>().WhereID(record.ID).Execute().First();
+			Assert.IsTrue(record.OnSelectCalled);
+			Assert.IsTrue(record.OnSelectedCalled);
+		}
+
+		[TestMethod]
+		public async Task SelectExecuteNotificationCalledAsync()
+		{
+			var record = new Table();
+			ORM.Insert(record);
+			Assert.IsFalse(record.OnSelectCalled);
+			Assert.IsFalse(record.OnSelectedCalled);
+			record = (await ORM.Select<Table>().WhereID(record.ID).ExecuteAsync()).First();
+			Assert.IsTrue(record.OnSelectCalled);
+			Assert.IsTrue(record.OnSelectedCalled);
+		}
+
+		[TestMethod]
+		public void SelectExecuteReaderNotificationCalled()
+		{
+			var record = new Table();
+			ORM.Insert(record);
+			Assert.IsFalse(record.OnSelectCalled);
+			Assert.IsFalse(record.OnSelectedCalled);
+			var reader = ORM.Select<Table>().WhereID(record.ID).ExecuteReader();
+			reader.MoveNext();
+			record = reader.Read();
+			Assert.IsTrue(record.OnSelectCalled);
+			Assert.IsTrue(record.OnSelectedCalled);
+		}
+
+		[TestMethod]
+		public async Task SelectExecuteReaderNotificationCalledAsync()
+		{
+			var record = new Table();
+			ORM.Insert(record);
+			Assert.IsFalse(record.OnSelectCalled);
+			Assert.IsFalse(record.OnSelectedCalled);
+			var reader = await ORM.Select<Table>().WhereID(record.ID).ExecuteReaderAsync();
+			await reader.MoveNextAsync();
+			record = reader.Read();
 			Assert.IsTrue(record.OnSelectCalled);
 			Assert.IsTrue(record.OnSelectedCalled);
 		}
