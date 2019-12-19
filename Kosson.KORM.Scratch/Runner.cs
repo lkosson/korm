@@ -37,6 +37,17 @@ namespace Kosson.KORM.Scratch
 
 			db.BeginTransaction();
 
+			var a1 = GC.GetTotalAllocatedBytes(true);
+			var sw1 = StatStopwatch.StartNew();
+			for (var i = 0; i < 10000; i++)
+			{
+				orm.Select<User>().ByID(60);
+				sw1.AddMeasurement();
+			}
+			var a2 = GC.GetTotalAllocatedBytes(true);
+			Console.WriteLine(sw1.ToString());
+			Console.WriteLine(a2 - a1);
+
 			using (var fs = new FileStream("backup.sql", FileMode.Create))
 			{
 				databaseScripting.GenerateScript(fs, new[] { typeof(User), typeof(Membership), typeof(Role) });

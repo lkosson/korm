@@ -16,7 +16,7 @@ namespace Kosson.KORM.Backup
 			this.metaBuilder = metaBuilder;
 		}
 
-		void IDatabaseCopier.CopyTo<TDB>(KORMConfiguration targetConfiguration, IEnumerable<Type> tables)
+		void IDatabaseCopier.CopyTo<TDB>(KORMOptions targetConfiguration, IEnumerable<Type> tables)
 		{
 			using (var targetDB = ActivatorUtilities.CreateInstance<TDB>(serviceProvider, targetConfiguration))
 			{

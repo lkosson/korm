@@ -1,13 +1,14 @@
 ﻿using Kosson.KORM;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static void AddKORMServices<TDB>(this IServiceCollection services)
+		public static void AddKORMServices<TDB>(this IServiceCollection services, string connectionString = null, ILogger logger = null)
 			where TDB : class, IDB
 		{
-			services.AddSingleton<KORMConfiguration>();
+			services.AddOptions<KORMOptions>();
 			services.AddSingleton<IConverter, Kosson.KORM.Converter.DefaultConverter>();
 			services.AddSingleton<IFactory, Kosson.KORM.Factory.DynamicMethodFactory>();
 			services.AddSingleton<IPropertyBinder, Kosson.KORM.PropertyBinder.ReflectionPropertyBinder>();
@@ -21,6 +22,11 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddScoped<IORM, Kosson.KORM.ORM.DBORM>();
 			services.AddScoped<IDB, TDB>();
 			services.AddTransient<Kosson.KORM.XMLBackup>();
+			services.Configure<KORMOptions>(options => 
+			{ 
+				if (connectionString != null) options.ConnectionString = connectionString;
+				if (logger != null) options.Logger = logger;
+			});
 		}
 	}
 }

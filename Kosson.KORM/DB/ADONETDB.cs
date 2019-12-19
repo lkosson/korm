@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -79,13 +80,20 @@ namespace Kosson.KORM.DB
 		/// <summary>
 		/// Creates new instance of ADONETDB.
 		/// </summary>
-		public ADONETDB(ILogger logger, KORMConfiguration configuration)
+		public ADONETDB(IOptionsMonitor<KORMOptions> optionsMonitor)
 		{
 			IsolationLevel = IsolationLevel.Unspecified;
-			ConnectionString = configuration.ConnectionString;
 			commandBuilder = CreateCommandBuilder();
-			if (log == null) log = new Logging(logger);
+			optionsMonitor.OnChange(ApplyOptions);
+			ApplyOptions(optionsMonitor.CurrentValue);
 		}
+
+		private void ApplyOptions(KORMOptions options)
+		{
+			ConnectionString = options.ConnectionString;
+			log = new Logging(options.Logger);
+		}
+
 		#region Synchronization
 		private IDisposable AcquireLock()
 		{

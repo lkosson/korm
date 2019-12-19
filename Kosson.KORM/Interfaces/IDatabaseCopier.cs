@@ -14,7 +14,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TDB">Target database.</typeparam>
 		/// <param name="targetConfiguration">Connection parameters to target database.</param>
 		/// <param name="tables">Tables to copy records from.</param>
-		void CopyTo<TDB>(KORMConfiguration targetConfiguration, IEnumerable<Type> tables)
+		void CopyTo<TDB>(KORMOptions targetConfiguration, IEnumerable<Type> tables)
 			where TDB : IDB;
 	}
 }

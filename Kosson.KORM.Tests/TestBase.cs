@@ -30,7 +30,7 @@ namespace Kosson.KORM.Tests
 
 			ServiceProvider = scope.ServiceProvider;
 
-			var configuration = ServiceProvider.GetRequiredService<KORMConfiguration>();
+			var configuration = ServiceProvider.GetRequiredService<KORMOptions>();
 			configuration.ConnectionString = "server=(local);database=kosson-tests;integrated security=true";
 
 			DB = ServiceProvider.GetRequiredService<IDB>();

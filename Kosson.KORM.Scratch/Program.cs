@@ -9,16 +9,14 @@ namespace Kosson.KORM.Scratch
 		static void Main(string[] args)
 		{
 			var services = new ServiceCollection();
-			services.AddKORMServices<MSSQL.SQLDB>();
+			services.AddKORMServices<MSSQL.SQLDB>("server=(local);database=kosson;integrated security=true");
 			services.AddScoped<Runner>();
-			services.AddSingleton<ILogger, ConsoleLogger>();
+			//services.AddSingleton<ILogger, ConsoleLogger>();
 
 			var sp = services.BuildServiceProvider();
 
 			using (var scope = sp.CreateScope())
 			{
-				var configuration = scope.ServiceProvider.GetRequiredService<KORMConfiguration>();
-				configuration.ConnectionString = "server=(local);database=kosson;integrated security=true";
 				var runner = scope.ServiceProvider.GetRequiredService<Runner>();
 				runner.Run();
 			}

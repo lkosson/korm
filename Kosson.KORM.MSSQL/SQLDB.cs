@@ -4,13 +4,14 @@ using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Kosson.KORM.DB;
+using Microsoft.Extensions.Options;
 
 namespace Kosson.KORM.MSSQL
 {
 	public class SQLDB : ADONETDB
 	{
-		public SQLDB(ILogger logger, KORMConfiguration configuration)
-			: base(logger, configuration)
+		public SQLDB(IOptionsMonitor<KORMOptions> optionsMonitor)
+			: base(optionsMonitor)
 		{
 		}
 
