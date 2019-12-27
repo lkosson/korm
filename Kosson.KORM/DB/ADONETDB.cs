@@ -144,11 +144,12 @@ namespace Kosson.KORM.DB
 		}
 		#endregion
 		#region Connection management
-		void IDB.BeginTransaction(IsolationLevel isolationLevel)
+		ITransaction IDB.BeginTransaction(IsolationLevel isolationLevel)
 		{
-			if (IsTransactionOpen) throw new KORMInvalidOperationException("Transaction already open.");
+			if (IsTransactionOpen) throw new KORMInvalidOperationException(IsImplicitTransaction ? "Implicit transaction already open." : "Transaction already open.");
 			IsolationLevel = isolationLevel;
 			Open(false);
+			return new Transaction(this);
 		}
 
 		/// <summary>
@@ -157,13 +158,11 @@ namespace Kosson.KORM.DB
 		/// <param name="isImplicit">Determines whether the method is called from CreateCommand to start implicit transaction if no transaction is active at the moment.</param>
 		protected void Open(bool isImplicit)
 		{
-			if (dbtran != null) return;
 			using (AcquireLock())
 			{
 				if (dbconn == null) dbconn = CreateConnection();
 				if (dbtran == null)
 				{
-					if (!isImplicit && IsImplicitTransaction) throw new KORMInvalidOperationException("Implicit transaction already open.");
 					dbtran = dbconn.BeginTransaction(IsolationLevel);
 					this.isImplicit = isImplicit;
 				}

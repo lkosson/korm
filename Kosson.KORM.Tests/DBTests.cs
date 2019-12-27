@@ -171,5 +171,31 @@ namespace Kosson.KORM.Tests
 			Assert.IsTrue(DB.IsTransactionOpen);
 			DB.Rollback();
 		}
+
+		[TestMethod]
+		[ExpectedException(typeof(KORMInvalidOperationException))]
+		public void ImplicitTransactionCannotBeReOpened()
+		{
+			DB.CreateCommand("SELECT 1");
+			DB.BeginTransaction();
+		}
+
+		[TestMethod]
+		public void DisposeClosesTransaction()
+		{
+			using (var tx = DB.BeginTransaction())
+			{
+			}
+			Assert.IsFalse(DB.IsTransactionOpen);
+		}
+
+		[TestMethod]
+		public void DisposeAfterCommitCompletes()
+		{
+			using (var tx = DB.BeginTransaction())
+			{
+				tx.Commit();
+			}
+		}
 	}
 }

@@ -47,18 +47,18 @@ namespace Kosson.KORM
 		void CreateDatabase();
 
 		/// <summary>
-		/// Explicitly opens new database transaction. Performs no operation if transaction is already open.
+		/// Explicitly opens new database transaction. Fails if transaction is already open.
 		/// </summary>
 		/// <param name="isolationLevel">Isolation level to use for transaction.</param>
-		void BeginTransaction(IsolationLevel isolationLevel = System.Data.IsolationLevel.Unspecified);
+		ITransaction BeginTransaction(IsolationLevel isolationLevel = System.Data.IsolationLevel.Unspecified);
 
 		/// <summary>
-		/// Commits current database transaction. Performs no operation if transaction has been opened in different context, but requires owning context to also perform commit.
+		/// Commits current database transaction. Fails if transaction has been opened in different context, but requires owning context to also perform commit.
 		/// </summary>
 		void Commit();
 
 		/// <summary>
-		/// Rolls back current database transaction. Performs no operation if transaction has been opened in different context, but requires owning context to also perform rollback.
+		/// Rolls back current database transaction. Fails if transaction has been opened in different context, but requires owning context to also perform rollback.
 		/// </summary>
 		void Rollback();
 
