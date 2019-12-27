@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Kosson.KORM
 {
@@ -7,6 +8,7 @@ namespace Kosson.KORM
 	/// </summary>
 	/// <typeparam name="T">Type of referenced record</typeparam>
 	[Serializable]
+	[TypeConverter(typeof(RecordRefTypeConverter))]
 	public struct RecordRef<T> : IRecordRef<T>, IConvertible where T : IRecord
 	{
 		/// <summary>
@@ -135,7 +137,7 @@ namespace Kosson.KORM
 		/// <returns>String representation of a record reference.</returns>
 		public override string ToString()
 		{
-			return "@" + ID;
+			return typeof(T).Name + "@" + ID;
 		}
 
 		#region IConvertible implementation
