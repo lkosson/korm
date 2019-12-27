@@ -22,16 +22,13 @@ namespace Kosson.KORM.Tests
 		public virtual void Init()
 		{
 			var services = new ServiceCollection();
-			services.AddKORMServices<KORM.MSSQL.SQLDB>();
+			services.AddKORMServices<KORM.MSSQL.SQLDB>("server=(local);database=kosson-tests;integrated security=true");
 			services.AddSingleton<ILogger>(Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
 
 			serviceProvider = services.BuildServiceProvider();
 			scope = serviceProvider.CreateScope();
 
 			ServiceProvider = scope.ServiceProvider;
-
-			var configuration = ServiceProvider.GetRequiredService<KORMOptions>();
-			configuration.ConnectionString = "server=(local);database=kosson-tests;integrated security=true";
 
 			DB = ServiceProvider.GetRequiredService<IDB>();
 			MetaBuilder = ServiceProvider.GetRequiredService<IMetaBuilder>();
