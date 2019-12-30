@@ -80,4 +80,45 @@ namespace Kosson.KORM
 			ColumnDefinition = columnDefinition;
 		}
 	}
+
+	/// <summary>
+	/// Marks a property as backed by database column. It will be stored and retrieved from database using ORM operations.
+	/// </summary>
+	public static class Column
+	{
+		/// <summary>
+		/// Marks a property as backed by NOT NULL database column.
+		/// </summary>
+		public sealed class NotNullAttribute : ColumnAttribute
+		{
+			/// <summary>
+			/// Marks a property as backed by NOT NULL database column.
+			/// </summary>
+			public NotNullAttribute(int length = 0, int precision = 0)
+				: base()
+			{
+				IsNotNull = true;
+				Length = length;
+				Precision = precision;
+			}
+		}
+
+		/// <summary>
+		/// Marks a property as backed by NOT NULL database column with a default value.
+		/// </summary>
+		public sealed class NotNullDefaultValueAttribute : ColumnAttribute
+		{
+			/// <summary>
+			/// Marks a property as backed by NOT NULL database column.
+			/// </summary>
+			public NotNullDefaultValueAttribute(int length = 0, int precision = 0)
+				: base()
+			{
+				IsNotNull = true;
+				HasDefaultValue = true;
+				Length = length;
+				Precision = precision;
+			}
+		}
+	}
 }
