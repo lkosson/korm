@@ -13,6 +13,16 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void RenamedColumnExists()
+		{
+			var cb = DB.CommandBuilder;
+			var select = cb.Select();
+			select.From(cb.Identifier("NewNameTestTable"));
+			select.Column(cb.Identifier("RenamedColumn"));
+			DB.ExecuteQuery(select.ToString());
+		}
+
+		[TestMethod]
 		public void RenamedRetrieve()
 		{
 			var record = new Table();
@@ -70,6 +80,41 @@ namespace Kosson.KORM.Tests
 			DB.ExecuteQuery(select.ToString());
 		}
 
+		[TestMethod]
+		public void AliasColumnRetrievesValue()
+		{
+			var record = new Table();
+			record.Value = INTMARKER;
+			ORM.Insert(record);
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
+			Assert.AreEqual(retrieved.ID, retrieved.IDAlias);
+			Assert.AreEqual(retrieved.Value, retrieved.ValueAlias);
+		}
+
+		[TestMethod]
+		public void AliasColumnIgnoresUpdate()
+		{
+			var record = new Table();
+			record.Value = INTMARKER;
+			ORM.Insert(record);
+			record.ValueAlias = INTMARKER + 1;
+			ORM.Update(record);
+			var retrieved = ORM.Select<Table>().ByID(record.ID);
+			Assert.AreEqual(INTMARKER, retrieved.Value);
+			Assert.AreEqual(retrieved.Value, retrieved.ValueAlias);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(KORMException))]
+		public void AliasColumnDoesNotExist()
+		{
+			var cb = DB.CommandBuilder;
+			var select = cb.Select();
+			select.From(cb.Identifier("NewNameTestTable"));
+			select.Column(cb.Identifier("rttt_ValueAlias"));
+			DB.ExecuteQuery(select.ToString());
+		}
+
 		[Table]
 		[DBName("NewNameTestTable")]
 		class Table : Record
@@ -77,6 +122,12 @@ namespace Kosson.KORM.Tests
 			[Column]
 			[DBName("RenamedColumn")]
 			public int Value { get; set; }
+
+			[DBAlias(nameof(ID))]
+			public long IDAlias { get; set; }
+
+			[DBAlias(nameof(Value))]
+			public int ValueAlias { get; set; }
 		}
 	}
 }
