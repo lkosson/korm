@@ -5,6 +5,7 @@
     <Authors>Łukasz Kosson</Authors>
     <Company />
     <Product>Kosson KORM</Product>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
