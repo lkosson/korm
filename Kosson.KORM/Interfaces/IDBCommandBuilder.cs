@@ -84,6 +84,12 @@ namespace Kosson.KORM
 		IDBInsert Insert();
 
 		/// <summary>
+		/// Creates a new CREATE SCHEMA command builder for a given database dialect. The constructed command does nothing if schema already exists.
+		/// </summary>
+		/// <returns>New CREATE SCHEMA command builder.</returns>
+		IDBCreateSchema CreateSchema();
+
+		/// <summary>
 		/// Creates a new CREATE TABLE command builder for a given database dialect. The constructed command does nothing if table already exists.
 		/// </summary>
 		/// <returns>New CREATE TABLE command builder.</returns>
@@ -506,7 +512,19 @@ namespace Kosson.KORM
 	}
 
 	/// <summary>
-	/// Database CREATE TABLE command.
+	/// Database CREATE SCHEMA command.
+	/// </summary>
+	public interface IDBCreateSchema : IDBCommand
+	{
+		/// <summary>
+		/// Sets schema name.
+		/// </summary>
+		/// <param name="table">Identifier of schema to create.</param>
+		void Schema(IDBIdentifier schema);
+	}
+
+	/// <summary>
+	/// Database ALTER TABLE CREATE COLUMN command.
 	/// </summary>
 	public interface IDBCreateColumn : IDBCommand, IDBForeignKey
 	{

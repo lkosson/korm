@@ -16,13 +16,13 @@ namespace Kosson.KORM.ORM
 			commandText = command.ToString();
 			var cb = db.CommandBuilder;
 			command = cb.Update();
-			command.Table(cb.Identifier(meta.DBName));
+			command.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 		}
 
 		protected override IDBUpdate BuildCommand(IDBCommandBuilder cb)
 		{
 			var template = cb.Update();
-			template.Table(cb.Identifier(meta.DBName));
+			template.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 			PrepareTemplate(cb, template, meta);
 			return template;
 		}

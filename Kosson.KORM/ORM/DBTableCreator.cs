@@ -36,7 +36,9 @@ namespace Kosson.KORM.ORM
 		public void Create(IEnumerable<Type> types)
 		{
 			var metas = types.Select(t => metaBuilder.Get(t)).ToArray();
+			var schemas = metas.GroupBy(m => m.DBSchema).Where(g => g.Key != null).Select(g => g.First()).ToArray();
 
+			foreach (var meta in schemas) CreateSchema(meta);
 			foreach (var meta in metas) CreateTable(meta);
 			foreach (var meta in metas) CreateColumns(meta);
 			foreach (var meta in metas) CreateIndices(meta);
@@ -45,16 +47,25 @@ namespace Kosson.KORM.ORM
 
 		public void Create(IMetaRecord meta)
 		{
+			CreateSchema(meta);
 			CreateTable(meta);
 			CreateColumns(meta);
 			CreateIndices(meta);
 			CreateForeignKeys(meta);
 		}
 
+		internal void CreateSchema(IMetaRecord meta)
+		{
+			if (meta.DBSchema == null) return;
+			var schema = cb.CreateSchema();
+			schema.Schema(cb.Identifier(meta.DBSchema));
+			executor(schema);
+		}
+
 		internal void CreateTable(IMetaRecord meta)
 		{
 			var table = cb.CreateTable();
-			table.Table(cb.Identifier(meta.DBName));
+			table.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 			table.PrimaryKey(cb.Identifier(meta.PrimaryKey.DBName));
 			if (!meta.IsManualID) table.AutoIncrement();
 			executor(table);
@@ -78,7 +89,7 @@ namespace Kosson.KORM.ORM
 		private void CreateColumn(IMetaRecord meta, IMetaRecordField field)
 		{
 			var column = cb.CreateColumn();
-			column.Table(cb.Identifier(meta.DBName));
+			column.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 			column.Name(cb.Identifier(field.DBName));
 			if (String.IsNullOrEmpty(field.ColumnDefinition))
 			{
@@ -105,7 +116,7 @@ namespace Kosson.KORM.ORM
 		private void CreateIndex(IMetaRecord meta, IMetaRecordIndex index)
 		{
 			var create = cb.CreateIndex();
-			create.Table(cb.Identifier(meta.DBName));
+			create.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 			create.Name(cb.Identifier(String.Format(index.DBName, meta.DBName)));
 			if (index.IsUnique) create.Unique();
 			foreach (var field in index.KeyFields)
@@ -133,7 +144,7 @@ namespace Kosson.KORM.ORM
 		{
 			var remotemeta = metaBuilder.Get(field.Type);
 			fk.ConstraintName(cb.Identifier("FK_" + field.Record.DBName + "_" + field.DBName + "_" + remotemeta.DBName));
-			fk.TargetTable(cb.Identifier(remotemeta.DBName));
+			fk.TargetTable(cb.Identifier(remotemeta.DBSchema, remotemeta.DBName));
 			fk.TargetColumn(cb.Identifier(remotemeta.PrimaryKey.DBName));
 			if (field.IsCascade) fk.Cascade();
 			if (field.IsSetNull) fk.SetNull();
@@ -142,7 +153,7 @@ namespace Kosson.KORM.ORM
 		private void CreateForeignKey(IMetaRecord meta, IMetaRecordField field)
 		{
 			var fk = cb.CreateForeignKey();
-			fk.Table(cb.Identifier(meta.DBName));
+			fk.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 			fk.Column(cb.Identifier(field.DBName));
 			PrepareForeignKey(fk, field);
 			executor(fk);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace Kosson.KORM.ORM
 		protected override IDBInsert BuildCommand(IDBCommandBuilder cb)
 		{
 			var template = cb.Insert();
-			template.Table(cb.Identifier(meta.DBName));
+			template.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 			template.PrimaryKeyReturn(cb.Identifier(meta.PrimaryKey.DBName));
 
 			PrepareTemplate(cb, template, meta);

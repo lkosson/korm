@@ -49,6 +49,11 @@ namespace Kosson.KORM
 		string DBName { get; }
 
 		/// <summary>
+		/// Database schema name (if any) of the table backing the record.
+		/// </summary>
+		string DBSchema { get; }
+
+		/// <summary>
 		/// Prefix for database identifiers used as names for columns backing properties of the record.
 		/// </summary>
 		string DBPrefix { get; }

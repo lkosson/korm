@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ namespace Kosson.KORM.ORM
 		protected override IDBDelete BuildCommand(IDBCommandBuilder cb)
 		{
 			var template = cb.Delete();
-			template.Table(cb.Identifier(meta.DBName));
+			template.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 			return template;
 		}
 

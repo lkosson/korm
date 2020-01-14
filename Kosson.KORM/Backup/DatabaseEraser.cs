@@ -26,7 +26,7 @@ namespace Kosson.KORM.Backup
 		private void Clear(IEnumerable<Type> types, Type type)
 		{
 			var meta = metaBuilder.Get(type);
-			var table = meta.DBName;
+			var table = meta.DBSchema + "." + meta.DBName;
 			if (tablesCleared.Contains(table)) return;
 			if (tablesInProgress.Contains(table))
 			{

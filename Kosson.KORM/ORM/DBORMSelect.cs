@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Kosson.KORM.ORM
@@ -21,7 +22,7 @@ namespace Kosson.KORM.ORM
 		{
 			var template = cb.Select();
 			if (meta.DBQuery == null)
-				template.From(cb.Identifier(meta.DBName), cb.Identifier(meta.Name));
+				template.From(cb.Identifier(meta.DBSchema, meta.DBName), cb.Identifier(meta.Name));
 			else
 				template.FromSubquery(cb.Expression(meta.DBQuery), cb.Identifier(meta.Name));
 			PrepareTemplate(cb, template, meta, meta.Name, meta.Name, null, new Stack<long>());
@@ -78,7 +79,7 @@ namespace Kosson.KORM.ORM
 
 				if (descentPath.Contains(field.ID)) throw new KORMInvalidOperationException("Cyclic eager lookups detected on " + meta.Name + "." + field.Name + ".");
 				descentPath.Push(field.ID);
-				template.Join(cb.Identifier(eagerMeta.DBName), cb.Equal(localName, remoteName), cb.Identifier(remoteAlias));
+				template.Join(cb.Identifier(eagerMeta.DBSchema, eagerMeta.DBName), cb.Equal(localName, remoteName), cb.Identifier(remoteAlias));
 				PrepareTemplate(cb, template, eagerMeta, remoteAlias, remoteAlias, remotePrefix, descentPath);
 				descentPath.Pop();
 			}

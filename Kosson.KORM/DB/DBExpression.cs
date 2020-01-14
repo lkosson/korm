@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Kosson.KORM.DB
@@ -185,9 +186,21 @@ namespace Kosson.KORM.DB
 		public DBDottedIdentifier(IDBCommandBuilder builder, string[] fragments)
 			: base(builder)
 		{
+			var hasNull = false;
 			foreach (var fragment in fragments)
 			{
-				if (fragment.Contains(builder.IdentifierQuoteRight)) throw new ArgumentException("Identifier fragment contains invalid character: " + builder.IdentifierQuoteRight, "identifier");
+				if (fragment == null) hasNull = true;
+				else if (fragment.Contains(builder.IdentifierQuoteRight)) throw new ArgumentException("Identifier fragment contains invalid character: " + builder.IdentifierQuoteRight, "identifier");
+			}
+			if (hasNull)
+			{
+				var nonNullFragments = new List<string>(fragments.Length - 1);
+				foreach (var fragment in fragments)
+				{
+					if (fragment == null) continue;
+					nonNullFragments.Add(fragment);
+				}
+				fragments = nonNullFragments.ToArray();
 			}
 			this.Fragments = fragments;
 		}

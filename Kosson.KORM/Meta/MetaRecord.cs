@@ -17,6 +17,7 @@ namespace Kosson.KORM.Meta
 		public bool IsTable { get; private set; }
 		public string Name { get; private set; }
 		public string DBName { get; private set; }
+		public string DBSchema { get; private set; }
 		public string DBPrefix { get; private set; }
 		public string DBQuery { get; private set; }
 		public bool IsManualID { get; private set; }
@@ -49,6 +50,7 @@ namespace Kosson.KORM.Meta
 			else
 			{
 				DBName = inlineParent.Record.DBName;
+				DBSchema = inlineParent.Record.DBSchema;
 				DBPrefix = inlineParent.InlinePrefix;
 				InliningField = inlineParent;
 			}
@@ -85,6 +87,7 @@ namespace Kosson.KORM.Meta
 		{
 			ProcessRecursive(record, ProcessTableAttribute);
 			ProcessRecursive(record, ProcessDBNameAttribute);
+			ProcessRecursive(record, ProcessDBSchemaAttribute);
 
 			// Properties processing requires complete (incl. derived types) record metadata for prefix generation
 			ProcessRecursive(record, type => ProcessProperties(type, factory));
@@ -105,6 +108,13 @@ namespace Kosson.KORM.Meta
 			var dbname = (DBNameAttribute)record.GetTypeInfo().GetCustomAttribute(typeof(DBNameAttribute), false);
 			if (dbname == null) return;
 			DBName = dbname.Name;
+		}
+
+		private void ProcessDBSchemaAttribute(Type record)
+		{
+			var dbschema = (DBSchemaAttribute)record.GetTypeInfo().GetCustomAttribute(typeof(DBSchemaAttribute), false);
+			if (dbschema == null) return;
+			DBSchema = dbschema.Name;
 		}
 
 		private void ProcessTableAttribute(Type record)

@@ -13,9 +13,29 @@ namespace Kosson.KORM.MSSQL
 
 		protected override void AppendHeader(StringBuilder sb)
 		{
-			sb.Append("IF NOT EXISTS(SELECT name FROM sysobjects WHERE name='");
-			sb.Append(table.RawValue);
-			sb.AppendLine("' AND type='U')");
+			if (table is IDBDottedIdentifier dottedTable)
+			{
+				sb.Append("IF NOT EXISTS(SELECT name FROM sys.tables WHERE name='");
+				if (dottedTable.Fragments.Length == 1)
+				{
+					sb.Append(dottedTable.Fragments[0]);
+					sb.Append("'");
+				}
+				else
+				{
+					sb.Append(dottedTable.Fragments[1]);
+					sb.Append("' AND schema_id = (SELECT schema_id FROM sys.schemas WHERE name = '");
+					sb.Append(dottedTable.Fragments[0]);
+					sb.Append("')");
+				}
+				sb.Append(")");
+			}
+			else
+			{
+				sb.Append("IF NOT EXISTS(SELECT name FROM sys.tables WHERE name='");
+				sb.Append(table.RawValue);
+				sb.Append("')");
+			}
 			base.AppendHeader(sb);
 		}
 

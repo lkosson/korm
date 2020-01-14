@@ -54,7 +54,7 @@ namespace Kosson.KORM.Backup
 			var typeName = type.FullName;
 			if (!tableStates.TryGetValue(typeName, out tableState))
 			{
-				var tableName = metaBuilder.Get(type).DBName;
+				var tableName = metaBuilder.Get(type).DBSchema + metaBuilder.Get(type).DBName;
 				if (!tableStates.TryGetValue(tableName, out tableState))
 				{
 					tableState = new TableState(orm, factory, type);

@@ -117,6 +117,12 @@ namespace Kosson.KORM.Tests
 	}
 
 	[TestClass]
+	public class MSSQLSchemaTests : SchemaTests
+	{
+		protected override string Provider { get { return "mssql"; } }
+	}
+
+	[TestClass]
 	public class MSSQLSelectTests : SelectTests
 	{
 		protected override string Provider { get { return "mssql"; } }

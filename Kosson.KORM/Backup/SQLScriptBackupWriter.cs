@@ -78,7 +78,7 @@ namespace Kosson.KORM.Backup
 		private void WriteInsert(IMetaRecord meta, bool includePK, IRecord record)
 		{
 			var insert = cb.Insert();
-			insert.Table(cb.Identifier(meta.DBName));
+			insert.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 			BuildInsert(insert, meta, includePK, record);
 			sw.WriteLine(insert.ToString());
 		}
@@ -112,7 +112,7 @@ namespace Kosson.KORM.Backup
 		private void WriteUpdate(IMetaRecord meta, IRecord record)
 		{
 			var update = cb.Update();
-			update.Table(cb.Identifier(meta.DBName));
+			update.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 			BuildUpdate(update, meta, record);
 			sw.WriteLine(update.ToString());
 		}

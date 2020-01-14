@@ -49,6 +49,9 @@ namespace Kosson.KORM.DB.CommandBuilder
 		public virtual IDBInsert Insert() => new DBInsert(this);
 
 		/// <inheritdoc/>
+		public virtual IDBCreateSchema CreateSchema() => new DBCreateSchema(this);
+
+		/// <inheritdoc/>
 		public virtual IDBCreateTable CreateTable() => new DBCreateTable(this);
 
 		/// <inheritdoc/>
