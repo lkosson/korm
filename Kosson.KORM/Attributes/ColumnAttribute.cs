@@ -46,6 +46,11 @@ namespace Kosson.KORM
 		public bool Trim { get; set; }
 
 		/// <summary>
+		/// Determines whether the value read from database needs to be converted to the property type.
+		/// </summary>
+		public bool IsConverted { get; set; }
+
+		/// <summary>
 		/// Gets or sets database engine-specific data type for backing column of a property.
 		/// </summary>
 		public string ColumnDefinition { get; set; }

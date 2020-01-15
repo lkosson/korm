@@ -180,7 +180,9 @@ namespace Kosson.KORM.ORM
 
 		private void ReadField(IMetaRecordField field, int fieldIndex, LocalBuilder localRecord)
 		{
-			if (field.Type == typeof(bool)) ReadFieldPrimitive(field, fieldIndex, miGetBoolean, localRecord);
+			if (field.IsEagerLookup) return; // loaded in 2nd pass by BuildForeign
+			else if (field.IsConverted) ReadFieldConvert(field, fieldIndex, localRecord);
+			else if (field.Type == typeof(bool)) ReadFieldPrimitive(field, fieldIndex, miGetBoolean, localRecord);
 			else if (field.Type == typeof(byte)) ReadFieldPrimitive(field, fieldIndex, miGetByte, localRecord);
 			else if (field.Type == typeof(short)) ReadFieldPrimitive(field, fieldIndex, miGetInt16, localRecord);
 			else if (field.Type == typeof(int)) ReadFieldPrimitive(field, fieldIndex, miGetInt32, localRecord);
@@ -192,7 +194,6 @@ namespace Kosson.KORM.ORM
 			else if (field.Type == typeof(Guid)) ReadFieldPrimitive(field, fieldIndex, miGetGuid, localRecord);
 			else if (field.Type == typeof(string)) ReadFieldPrimitive(field, fieldIndex, miGetString, localRecord);
 			else if (field.IsRecordRef) ReadFieldRecordRef(field, fieldIndex, localRecord);
-			else if (field.IsEagerLookup) return; // loaded in 2nd pass by BuildForeign
 			else ReadFieldConvert(field, fieldIndex, localRecord);
 		}
 

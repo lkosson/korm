@@ -39,6 +39,11 @@ namespace Kosson.KORM
 		bool IsTable { get; }
 
 		/// <summary>
+		/// Determines whether the values read from database columns of table associated with this class need to be converted to their property types.
+		/// </summary>
+		bool IsConverted { get; }
+
+		/// <summary>
 		/// .NET name of the record type.
 		/// </summary>
 		string Name { get; }
@@ -190,6 +195,11 @@ namespace Kosson.KORM
 		/// Determines whether value of this property should be truncated to maximum data length declared for backing column.
 		/// </summary>
 		bool Trim { get; }
+
+		/// <summary>
+		/// Determines whether the value read from database needs to be converted to the property type.
+		/// </summary>
+		bool IsConverted { get; }
 
 		/// <summary>
 		/// Determines whether backing column for this property should have generated FOREIGN KEY database constraint.

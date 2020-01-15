@@ -24,6 +24,11 @@ namespace Kosson.KORM
 		public bool IsManualID { get; set; }
 
 		/// <summary>
+		/// Determines whether the values read from database columns of table associated with this class need to be converted to their property types.
+		/// </summary>
+		public bool IsConverted { get; set; }
+
+		/// <summary>
 		/// Declares type as backed by database table.
 		/// </summary>
 		/// <param name="tablePrefix">Prefix to prepend to all automatically generated backing column names of the table.</param>

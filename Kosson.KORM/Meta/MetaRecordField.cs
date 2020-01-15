@@ -25,6 +25,7 @@ namespace Kosson.KORM.Meta
 		public int Length { get; private set; }
 		public int Precision { get; private set; }
 		public bool Trim { get; private set; }
+		public bool IsConverted { get; private set; }
 
 		public bool IsForeignKey { get; private set; }
 		public bool IsCascade { get; private set; }
@@ -87,6 +88,7 @@ namespace Kosson.KORM.Meta
 			Length = column.Length;
 			Precision = column.Precision;
 			Trim = column.Trim;
+			IsConverted = column.IsConverted || Record.IsConverted;
 			ColumnDefinition = column.ColumnDefinition;
 			IsReadOnly = column.IsReadOnly || (IsPrimaryKey && !Record.IsManualID);
 			SubqueryBuilder = null;

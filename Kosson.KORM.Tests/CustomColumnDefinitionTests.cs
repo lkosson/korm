@@ -9,6 +9,9 @@ namespace Kosson.KORM.Tests
 		protected override System.Collections.Generic.IEnumerable<Type> Tables()
 		{
 			yield return typeof(Table);
+			yield return typeof(TableWithConvertedField);
+			yield return typeof(ConvertedTable);
+			yield return typeof(NonConvertedTable);
 		}
 
 		[TestMethod]
@@ -27,6 +30,47 @@ namespace Kosson.KORM.Tests
 			Assert.AreEqual(123, retrieved.Value2);
 		}
 
+		[TestMethod]
+		public void MarkedFieldsAreConverted()
+		{
+			var record = new TableWithConvertedField
+			{
+				IntAsString = INTMARKER.ToString(),
+				StringAsInt = INTMARKER + 1
+			};
+			ORM.Store(record);
+			var retrieved = ORM.Get(record.Ref());
+			Assert.AreEqual(record.IntAsString, retrieved.IntAsString);
+			Assert.AreEqual(record.StringAsInt, retrieved.StringAsInt);
+		}
+
+		[TestMethod]
+		public void MarkedTableIsConverted()
+		{
+			var record = new ConvertedTable
+			{
+				IntAsString = INTMARKER.ToString(),
+				StringAsInt = INTMARKER + 1
+			};
+			ORM.Store(record);
+			var retrieved = ORM.Get(record.Ref());
+			Assert.AreEqual(record.IntAsString, retrieved.IntAsString);
+			Assert.AreEqual(record.StringAsInt, retrieved.StringAsInt);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidCastException))]
+		public void NonConvertedTableReadFails()
+		{
+			var record = new NonConvertedTable
+			{
+				IntAsString = INTMARKER.ToString(),
+				StringAsInt = INTMARKER + 1
+			};
+			ORM.Store(record);
+			ORM.Get(record.Ref());
+		}
+
 		[Table]
 		class Table : Record
 		{
@@ -35,6 +79,36 @@ namespace Kosson.KORM.Tests
 
 			[Column("INT")]
 			public object Value2 { get; set; }
+		}
+
+		[Table]
+		class TableWithConvertedField : Record
+		{
+			[Column("INT", IsConverted = true)]
+			public string IntAsString { get; set; }
+
+			[Column("VARCHAR(10)", IsConverted = true)]
+			public int StringAsInt { get; set; }
+		}
+
+		[Table(IsConverted = true)]
+		class ConvertedTable : Record
+		{
+			[Column("INT")]
+			public string IntAsString { get; set; }
+
+			[Column("VARCHAR(10)")]
+			public int StringAsInt { get; set; }
+		}
+
+		[Table(IsConverted = false)]
+		class NonConvertedTable : Record
+		{
+			[Column("INT")]
+			public string IntAsString { get; set; }
+
+			[Column("VARCHAR(10)")]
+			public int StringAsInt { get; set; }
 		}
 	}
 }

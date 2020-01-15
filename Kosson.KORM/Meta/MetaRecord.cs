@@ -21,6 +21,7 @@ namespace Kosson.KORM.Meta
 		public string DBPrefix { get; private set; }
 		public string DBQuery { get; private set; }
 		public bool IsManualID { get; private set; }
+		public bool IsConverted { get; private set; }
 		public IMetaRecordField InliningField { get; private set; }
 		public IReadOnlyCollection<IMetaRecordField> Fields => fields;
 		public IReadOnlyCollection<IMetaRecordIndex> Indices => indices;
@@ -128,6 +129,7 @@ namespace Kosson.KORM.Meta
 			DBPrefix = table.Prefix ?? GeneratePrefix(DBName);
 			IsManualID = table.IsManualID;
 			DBQuery = table.Query;
+			IsConverted = table.IsConverted;
 		}
 
 		private string GenerateName(Type type)
