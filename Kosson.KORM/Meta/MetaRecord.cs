@@ -129,7 +129,7 @@ namespace Kosson.KORM.Meta
 			DBPrefix = table.Prefix ?? GeneratePrefix(DBName);
 			IsManualID = table.IsManualID;
 			DBQuery = table.Query;
-			IsConverted = table.IsConverted;
+			IsConverted |= table.IsConverted;
 		}
 
 		private string GenerateName(Type type)
