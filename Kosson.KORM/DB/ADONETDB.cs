@@ -196,7 +196,7 @@ namespace Kosson.KORM.DB
 		/// <summary>
 		/// Closes current DbConnection and DbTransaction if they exist.
 		/// </summary>
-		protected void Close()
+		protected void Close(bool dontThrow)
 		{
 			using (AcquireLock())
 			{
@@ -210,8 +210,15 @@ namespace Kosson.KORM.DB
 				}
 				catch (Exception exc)
 				{
-					HandleException(exc, null);
-					throw;
+					if (dontThrow)
+					{
+						log.Log(exc, null, default(TraceToken));
+					}
+					else
+					{
+						HandleException(exc, null);
+						throw;
+					}
 				}
 
 				try
@@ -224,8 +231,16 @@ namespace Kosson.KORM.DB
 				}
 				catch (Exception exc)
 				{
-					HandleException(exc, null);
-					throw;
+					if (dontThrow)
+					{
+						log.Log(exc, null, default(TraceToken));
+					}
+					else
+					{
+						HandleException(exc, null);
+						throw;
+					}
+
 				}
 			}
 		}
@@ -233,7 +248,7 @@ namespace Kosson.KORM.DB
 		/// <inheritdoc/>
 		void IDisposable.Dispose()
 		{
-			Close();
+			Close(true);
 			syncroot.Dispose();
 		}
 		#endregion
