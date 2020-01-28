@@ -12,15 +12,9 @@ namespace Kosson.KORM
 		/// </summary>
 		public string ConnectionString { get; set; }
 
-		/// <summary>
-		/// Database activity logger.
-		/// </summary>
-		public ILogger Logger { get; set; }
-
 		public KORMOptions()
 		{
 			ConnectionString = "server=(local)";
-			Logger = Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
 		}
 	}
 }

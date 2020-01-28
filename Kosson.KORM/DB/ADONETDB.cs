@@ -14,7 +14,7 @@ namespace Kosson.KORM.DB
 	/// </summary>
 	public abstract class ADONETDB : IDB
 	{
-		private static Logging log;
+		private Logging log;
 		private IDBCommandBuilder commandBuilder;
 		private bool isImplicit;
 
@@ -80,18 +80,20 @@ namespace Kosson.KORM.DB
 		/// <summary>
 		/// Creates new instance of ADONETDB.
 		/// </summary>
-		public ADONETDB(IOptionsMonitor<KORMOptions> optionsMonitor)
+		public ADONETDB(IOptionsMonitor<KORMOptions> optionsMonitor, ILoggerProvider loggerProvider)
 		{
 			IsolationLevel = IsolationLevel.Unspecified;
 			commandBuilder = CreateCommandBuilder();
 			optionsMonitor.OnChange(ApplyOptions);
 			ApplyOptions(optionsMonitor.CurrentValue);
+			var logger = loggerProvider?.CreateLogger("Kosson.KORM");
+			if (logger.IsEnabled(LogLevel.Critical)) log = new Logging(logger);
+			else log = new Logging(null);
 		}
 
 		private void ApplyOptions(KORMOptions options)
 		{
 			ConnectionString = options.ConnectionString;
-			log = new Logging(options.Logger);
 		}
 
 		#region Synchronization

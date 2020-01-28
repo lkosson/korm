@@ -10,7 +10,7 @@ namespace Kosson.KORM.DB
 		public override string ConnectionString => "";
 
 		public EmptyDB()
-			: base(null)
+			: base(null, null)
 		{
 		}
 

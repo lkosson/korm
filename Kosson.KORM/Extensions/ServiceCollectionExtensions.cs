@@ -5,7 +5,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static void AddKORMServices<TDB>(this IServiceCollection services, string connectionString = null, ILogger logger = null)
+		public static void AddKORMServices<TDB>(this IServiceCollection services, string connectionString = null)
 			where TDB : class, IDB
 		{
 			services.AddOptions<KORMOptions>();
@@ -25,7 +25,6 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.Configure<KORMOptions>(options => 
 			{ 
 				if (connectionString != null) options.ConnectionString = connectionString;
-				if (logger != null) options.Logger = logger;
 			});
 		}
 	}
