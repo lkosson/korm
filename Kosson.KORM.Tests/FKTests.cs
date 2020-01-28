@@ -36,6 +36,17 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void RetrievalByNullRefConvertsToIsNull()
+		{
+			var record = new Table1();
+			record.FKRef = null;
+			ORM.Insert(record);
+			var retrieved = ORM.Select<Table1>().WhereFieldEquals(nameof(Table1.FKRef), record.FKRef).ExecuteFirst();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(record, retrieved);
+		}
+
+		[TestMethod]
 		public void ForeignKeyCascades()
 		{
 			var record1 = new Table1();

@@ -70,7 +70,7 @@ namespace Kosson.KORM
 			where TCommand : IORMNarrowableCommand<TCommand>
 		{
 			var cb = query.DB.CommandBuilder;
-			var pexpr = value == null ? null : query.Parameter(value);
+			var pexpr = value == null || value is IRecordRef recordRef && recordRef.ID == 0 ? null : query.Parameter(value);
 			var eexpr = cb.Comparison(query.Field(field), comparison, pexpr);
 			return query.Where(eexpr);
 		}
