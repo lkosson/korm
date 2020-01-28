@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Kosson.KORM.Scratch
 {
-	class ConsoleLogger : ILogger
+	class ConsoleLogger<T> : ILogger<T>, ILogger
 	{
 		IDisposable ILogger.BeginScope<TState>(TState state) => null;
 		bool ILogger.IsEnabled(LogLevel logLevel) => true;
@@ -21,18 +21,6 @@ namespace Kosson.KORM.Scratch
 			else if (logLevel == LogLevel.Trace) Console.ForegroundColor = ConsoleColor.DarkGray;
 			Console.WriteLine(formatter(state, exception));
 			Console.ForegroundColor = c;
-		}
-	}
-
-	class ConsoleLoggerProvider : ILoggerProvider
-	{
-		public ILogger CreateLogger(string categoryName)
-		{
-			return new ConsoleLogger();
-		}
-
-		public void Dispose()
-		{
 		}
 	}
 }

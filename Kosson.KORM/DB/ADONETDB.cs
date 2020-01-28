@@ -80,13 +80,12 @@ namespace Kosson.KORM.DB
 		/// <summary>
 		/// Creates new instance of ADONETDB.
 		/// </summary>
-		public ADONETDB(IOptionsMonitor<KORMOptions> optionsMonitor, ILoggerProvider loggerProvider)
+		public ADONETDB(IOptionsMonitor<KORMOptions> optionsMonitor, ILogger logger)
 		{
 			IsolationLevel = IsolationLevel.Unspecified;
 			commandBuilder = CreateCommandBuilder();
 			optionsMonitor.OnChange(ApplyOptions);
 			ApplyOptions(optionsMonitor.CurrentValue);
-			var logger = loggerProvider?.CreateLogger("Kosson.KORM");
 			if (logger.IsEnabled(LogLevel.Critical)) log = new Logging(logger);
 			else log = new Logging(null);
 		}

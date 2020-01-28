@@ -10,8 +10,8 @@ namespace Kosson.KORM.MSSQL
 {
 	public class SQLDB : ADONETDB
 	{
-		public SQLDB(IOptionsMonitor<KORMOptions> optionsMonitor, ILoggerProvider loggerProvider)
-			: base(optionsMonitor, loggerProvider)
+		public SQLDB(IOptionsMonitor<KORMOptions> optionsMonitor, ILogger<Kosson.KORM.MSSQL.SQLDB> logger)
+			: base(optionsMonitor, logger)
 		{
 		}
 
