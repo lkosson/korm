@@ -23,7 +23,7 @@ namespace Kosson.KORM.Tests
 		{
 			var services = new ServiceCollection();
 			services.AddKORMServices<KORM.MSSQL.SQLDB>("server=(local);database=kosson-tests;integrated security=true");
-			services.AddSingleton<ILogger>(Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
+			services.AddSingleton(typeof(ILogger<>), typeof(Microsoft.Extensions.Logging.Abstractions.NullLogger<>));
 
 			serviceProvider = services.BuildServiceProvider();
 			scope = serviceProvider.CreateScope();
