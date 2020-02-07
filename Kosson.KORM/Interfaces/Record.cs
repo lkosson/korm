@@ -26,7 +26,7 @@ namespace Kosson.KORM
 			var otherObj = obj as Record;
 			if (otherObj != null)
 			{
-				if (otherObj.GetType() != GetType()) return false;
+				if (!otherObj.GetType().IsAssignableFrom(GetType()) && !GetType().IsAssignableFrom(otherObj.GetType())) return false;
 				return otherObj.ID == ID;
 			}
 
@@ -34,7 +34,7 @@ namespace Kosson.KORM
 			if (otherRef != null)
 			{
 				var refType = otherRef.GetType().GetGenericArguments().FirstOrDefault();
-				if (refType != GetType()) return false;
+				if (refType == null || (!refType.IsAssignableFrom(GetType()) && !GetType().IsAssignableFrom(refType))) return false;
 				return otherRef.ID == ID;
 			}
 
