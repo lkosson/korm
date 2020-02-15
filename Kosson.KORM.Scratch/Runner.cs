@@ -94,12 +94,12 @@ namespace Kosson.KORM.Scratch
 				backupProvider.Restore(br);
 			}
 
-			using (var fs = new FileStream("backup.xml", FileMode.Create))
-			using (var bw = xmlBackup.CreateWriter(fs))
-			{
-				var bs = backupProvider.CreateBackupSet(bw);
-				bs.AddRecords<Membership>();
-			}
+			//using (var fs = new FileStream("backup.xml", FileMode.Create))
+			//using (var bw = xmlBackup.CreateWriter(fs))
+			//{
+			//	var bs = backupProvider.CreateBackupSet(bw);
+			//	bs.AddRecords<Membership>();
+			//}
 
 			//databaseCopier.CopyTo<SQLite>(new KORMConfiguration { ConnectionString = "data source=backup.sqlite3;version=3" }, new[] { typeof(User), typeof(Role), typeof(Membership) });
 

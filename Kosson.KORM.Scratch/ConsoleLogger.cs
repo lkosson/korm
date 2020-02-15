@@ -12,6 +12,7 @@ namespace Kosson.KORM.Scratch
 
 		void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
 		{
+			if (logLevel < LogLevel.Warning) return;
 			var c = Console.ForegroundColor;
 			if (logLevel == LogLevel.Critical) Console.ForegroundColor = ConsoleColor.Red;
 			else if (logLevel == LogLevel.Error) Console.ForegroundColor = ConsoleColor.Red;
