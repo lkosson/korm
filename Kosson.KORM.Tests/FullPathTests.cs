@@ -39,7 +39,7 @@ namespace Kosson.KORM.Tests
 
 			var ct = cb.CreateTable();
 			ct.Table(cb.Identifier(TABLE));
-			ct.PrimaryKey(cb.Identifier(PK));
+			ct.PrimaryKey(cb.Identifier(PK), cb.Type(DbType.Int64));
 			ct.AutoIncrement();
 			var sql = ct.ToString();
 			DB.ExecuteNonQuery(sql);
@@ -102,7 +102,7 @@ namespace Kosson.KORM.Tests
 
 			var ct = cb.CreateTable();
 			ct.Table(cb.Identifier(TABLE_FK));
-			ct.PrimaryKey(cb.Identifier(PK));
+			ct.PrimaryKey(cb.Identifier(PK), cb.Type(DbType.Int64));
 			ct.AutoIncrement();
 			var sql = ct.ToString();
 			DB.ExecuteNonQuery(sql);

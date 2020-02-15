@@ -13,6 +13,11 @@ namespace Kosson.KORM.DB.CommandBuilder
 		protected IDBIdentifier primaryKey;
 
 		/// <summary>
+		/// Primary key's column database type.
+		/// </summary>
+		protected IDBExpression type;
+
+		/// <summary>
 		/// Determines whether table's primary key values are assigned by database engine.
 		/// </summary>
 		protected bool autoincrement;
@@ -29,10 +34,11 @@ namespace Kosson.KORM.DB.CommandBuilder
 			this.table = table;
 		}
 
-		void IDBCreateTable.PrimaryKey(IDBIdentifier column)
+		void IDBCreateTable.PrimaryKey(IDBIdentifier column, IDBExpression type)
 		{
 			if (column == null) throw new ArgumentNullException("column");
 			this.primaryKey = column;
+			this.type = type;
 		}
 
 		void IDBCreateTable.AutoIncrement()
@@ -60,7 +66,6 @@ namespace Kosson.KORM.DB.CommandBuilder
 			if (primaryKey == null) throw new ArgumentNullException("primaryKey");
 			primaryKey.Append(sb);
 			sb.Append(" ");
-			var type = Builder.Type(DbType.Int64);
 			type.Append(sb);
 			sb.Append(" PRIMARY KEY");
 			if (autoincrement) AppendAutoIncrement(sb);

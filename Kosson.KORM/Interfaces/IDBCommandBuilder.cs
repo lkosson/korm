@@ -503,7 +503,8 @@ namespace Kosson.KORM
 		/// Sets primary key (ID) column name.
 		/// </summary>
 		/// <param name="column">Primary key (ID) column name.</param>
-		void PrimaryKey(IDBIdentifier column);
+		/// <param name="type">Identifier of primary key data type</param>
+		void PrimaryKey(IDBIdentifier column, IDBExpression type);
 
 		/// <summary>
 		/// Marks primary key (ID) column as auto-incremented by database engine.

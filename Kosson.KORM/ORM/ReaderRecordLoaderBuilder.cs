@@ -245,7 +245,10 @@ namespace Kosson.KORM.ORM
 
 			il.Emit(OpCodes.Ldarg_1); // ST: record, reader
 			il.Emit(OpCodes.Ldc_I4, fieldIndex); // ST: record, reader, fieldIndex
-			il.EmitCall(OpCodes.Callvirt, miGetInt64, null); // ST: record, long
+			if (field.DBType == System.Data.DbType.Int32) il.EmitCall(OpCodes.Callvirt, miGetInt32, null); // ST: record, int
+			else if (field.DBType == System.Data.DbType.Int16) il.EmitCall(OpCodes.Callvirt, miGetInt16, null); // ST: record, short
+			else if (field.DBType == System.Data.DbType.Byte) il.EmitCall(OpCodes.Callvirt, miGetByte, null); // ST: record, byte
+			else il.EmitCall(OpCodes.Callvirt, miGetInt64, null); // ST: record, long
 			il.Emit(OpCodes.Br_S, labSet); // ST: record, long
 
 			il.MarkLabel(labIsNull); // ST: record

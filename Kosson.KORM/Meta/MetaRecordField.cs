@@ -151,6 +151,10 @@ namespace Kosson.KORM.Meta
 			{
 				ForeignType = Type;
 			}
+
+			if (typeof(Record32).IsAssignableFrom(ForeignType) && DBType == DbType.Int64) DBType = DbType.Int32;
+			if (typeof(Record16).IsAssignableFrom(ForeignType) && DBType == DbType.Int64) DBType = DbType.Int16;
+			if (typeof(Record8).IsAssignableFrom(ForeignType) && DBType == DbType.Int64) DBType = DbType.Byte;
 		}
 
 		private void ProcessSubqueryAttribute(PropertyInfo property)

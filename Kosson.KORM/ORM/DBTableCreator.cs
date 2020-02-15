@@ -66,7 +66,7 @@ namespace Kosson.KORM.ORM
 		{
 			var table = cb.CreateTable();
 			table.Table(cb.Identifier(meta.DBSchema, meta.DBName));
-			table.PrimaryKey(cb.Identifier(meta.PrimaryKey.DBName));
+			table.PrimaryKey(cb.Identifier(meta.PrimaryKey.DBName), CreateColumnTypeExpression(meta.PrimaryKey));
 			if (!meta.IsManualID) table.AutoIncrement();
 			executor(table);
 		}
@@ -86,20 +86,22 @@ namespace Kosson.KORM.ORM
 			}
 		}
 
+		private IDBExpression CreateColumnTypeExpression(IMetaRecordField field)
+		{
+			if (!String.IsNullOrEmpty(field.ColumnDefinition)) return cb.Expression(field.ColumnDefinition);
+			return cb.Type(field.DBType, field.Length, field.Precision);
+		}
+
 		private void CreateColumn(IMetaRecord meta, IMetaRecordField field)
 		{
 			var column = cb.CreateColumn();
 			column.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 			column.Name(cb.Identifier(field.DBName));
+			column.Type(CreateColumnTypeExpression(field));
 			if (String.IsNullOrEmpty(field.ColumnDefinition))
 			{
-				column.Type(cb.Type(field.DBType, field.Length, field.Precision));
 				if (field.IsNotNull) column.NotNull();
 				if (field.DefaultValue != null) column.DefaultValue(cb.Const(field.DefaultValue));
-			}
-			else
-			{
-				column.Type(cb.Expression(field.ColumnDefinition));
 			}
 			if (field.IsForeignKey) PrepareForeignKey(column, field);
 			executor(column);

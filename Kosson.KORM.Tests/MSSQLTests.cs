@@ -105,6 +105,24 @@ namespace Kosson.KORM.Tests
 	}
 
 	[TestClass]
+	public class MSSQLRecord8Tests : Record8Tests
+	{
+		protected override string Provider { get { return "mssql"; } }
+	}
+
+	[TestClass]
+	public class MSSQLRecord16Tests : Record16Tests
+	{
+		protected override string Provider { get { return "mssql"; } }
+	}
+
+	[TestClass]
+	public class MSSQLRecord32Tests : Record32Tests
+	{
+		protected override string Provider { get { return "mssql"; } }
+	}
+
+	[TestClass]
 	public class MSSQLRenamedTableTests : RenamedTableTests
 	{
 		protected override string Provider { get { return "mssql"; } }
