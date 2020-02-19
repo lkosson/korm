@@ -8,19 +8,24 @@ namespace Kosson.KORM.DB
 {
 	class Logging
 	{
-		private readonly LRU<string, int> lastQueries;
+		private static readonly LRU<string, int> lastQueries;
 		private readonly Stopwatch queryTimer;
 		private readonly ILogger logger;
-		private int nextTraceId = 1;
+		private static int nextTraceId;
 		public bool TraceEnabled => logger != null && logger.IsEnabled(LogLevel.Critical);
 		public bool TraceInformationEnabled => logger != null && logger.IsEnabled(LogLevel.Information);
 		public bool TraceDebugEnabled => logger != null && logger.IsEnabled(LogLevel.Debug);
+
+		static Logging()
+		{
+			lastQueries = new LRU<string, int>(100);
+			nextTraceId = -1;
+		}
 
 		public Logging(ILogger logger)
 		{
 			this.logger = logger;
 			queryTimer = Stopwatch.StartNew();
-			lastQueries = new LRU<string, int>(100);
 		}
 
 		private void Trace(LogLevel level, int id, string msg)
