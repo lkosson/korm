@@ -106,7 +106,7 @@ namespace Kosson.KORM.Tests
 
 		[TestMethod]
 		[ExpectedException(typeof(KORMException))]
-		public void AliasColumnDoesNotExist()
+		public virtual void AliasColumnDoesNotExist()
 		{
 			var cb = DB.CommandBuilder;
 			var select = cb.Select();
