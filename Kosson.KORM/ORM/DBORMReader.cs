@@ -17,6 +17,7 @@ namespace Kosson.KORM.ORM
 		private readonly Func<TRecord> constructor;
 		private readonly Func<TRecord> builder;
 		private readonly IConverter converter;
+		private DbCommand command;
 		private DbDataReader reader;
 		private bool aborted;
 
@@ -32,14 +33,22 @@ namespace Kosson.KORM.ORM
 			this.builder = typeof(IRecordNotifySelect).IsAssignableFrom(typeof(TRecord)) ? (Func<TRecord>)BuildRecordWithNotify : BuildRecord;
 		}
 
+		private void PrepareCommand()
+		{
+			command = db.CreateCommand(sql);
+			db.AddParameters(command, parameters);
+		}
+
 		public void PrepareReader()
 		{
-			reader = db.ExecuteReader(sql, parameters);
+			PrepareCommand();
+			reader = db.ExecuteReader(command);
 		}
 
 		public async Task PrepareReaderAsync()
 		{
-			reader = await db.ExecuteReaderAsync(sql, parameters);
+			PrepareCommand();
+			reader = await db.ExecuteReaderAsync(command);
 		}
 
 		private TRecord BuildRecord()
@@ -97,6 +106,8 @@ namespace Kosson.KORM.ORM
 			if (reader == null) return;
 			reader.Dispose();
 			reader = null;
+			command.Dispose();
+			command = null;
 		}
 
 		bool IORMReader<TRecord>.MoveNext()

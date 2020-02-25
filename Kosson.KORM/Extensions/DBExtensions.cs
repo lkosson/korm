@@ -156,46 +156,6 @@ namespace Kosson.KORM
 		public static Task<IReadOnlyList<IRow>> ExecuteQueryAsync(this IDB db, string command, IEnumerable<object> parameters)
 			=> CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteQueryAllAsync);
 
-		/// <summary>
-		/// Creates and executes DB query with parameters @P0, @P1, ..., @Pn with given values and returns one-time reader of rows of a result.
-		/// </summary>
-		/// <param name="db">IDB provider for DB command creation, manipulation and execution.</param>
-		/// <param name="command">Text of a DB query to execute.</param>
-		/// <param name="parameters">Parameters for the command.</param>
-		/// <returns>One-time reader of rows of a query result.</returns>
-		public static DbDataReader ExecuteReader(this IDB db, string command, params object[] parameters)
-			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteReader);
-
-		/// <summary>
-		/// Creates and executes DB query with parameters @P0, @P1, ..., @Pn with given values and returns one-time reader of rows of a result.
-		/// </summary>
-		/// <param name="db">IDB provider for DB command creation, manipulation and execution.</param>
-		/// <param name="command">Text of a DB query to execute.</param>
-		/// <param name="parameters">Parameters for the command.</param>
-		/// <returns>One-time reader of rows of a query result.</returns>
-		public static DbDataReader ExecuteReader(this IDB db, string command, IEnumerable<object> parameters)
-			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteReader);
-
-		/// <summary>
-		/// Asynchronous version of ExecuteReader.
-		/// Creates and executes DB query with parameters @P0, @P1, ..., @Pn with given values and returns one-time reader of rows of a result.
-		/// </summary>
-		/// <param name="db">IDB provider for DB command creation, manipulation and execution.</param>
-		/// <param name="command">Text of a DB query to execute.</param>
-		/// <param name="parameters">Parameters for the command.</param>
-		/// <returns>A task representing asynchronous operation returning an one-time reader of rows of a query result.</returns>
-		public static Task<DbDataReader> ExecuteReaderAsync(this IDB db, string command, params object[] parameters)
-			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteReaderAsync);
-
-		/// <summary>
-		/// Asynchronous version of ExecuteReader.
-		/// Creates and executes DB query with parameters @P0, @P1, ..., @Pn with given values and returns one-time reader of rows of a result.
-		/// </summary>
-		/// <param name="db">IDB provider for DB command creation, manipulation and execution.</param>
-		/// <param name="command">Text of a DB query to execute.</param>
-		/// <param name="parameters">Parameters for the command.</param>
-		/// <returns>A task representing asynchronous operation returning an one-time reader of rows of a query result.</returns>
-		public static Task<DbDataReader> ExecuteReaderAsync(this IDB db, string command, IEnumerable<object> parameters)
-			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteReaderAsync);
+		// Removed ExecuteReader helpers due to DbCommand early dispose in CreateAndExecuteCommand
 	}
 }
