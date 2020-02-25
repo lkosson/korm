@@ -1,16 +1,18 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
 
 namespace Kosson.KORM.DB
 {
-	class EmptyDB : ADONETDB
+	public class EmptyDB : ADONETDB
 	{
 		public override string ConnectionString => "";
 
-		public EmptyDB()
-			: base(null, null)
+		public EmptyDB(IOptionsMonitor<KORMOptions> optionsMonitor, ILogger<EmptyDB> logger)
+			: base(optionsMonitor, logger)
 		{
 		}
 
