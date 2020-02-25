@@ -100,6 +100,7 @@ namespace Kosson.KORM
 		{
 			if (values == null) throw new ArgumentNullException("values");
 			if (values.Length == 0) throw new ArgumentOutOfRangeException("values", "Values cannot be empty.");
+			if (values.Length == 1 && values[0] is object[] nested) values = nested;
 
 			var cb = query.DB.CommandBuilder;
 			var pexpr = query.Array(values);
