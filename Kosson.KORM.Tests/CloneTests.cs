@@ -11,15 +11,14 @@ namespace Kosson.KORM.Tests
 {
 	// Not an abstract class - no need for per-provider tests.
 	[TestClass]
-	public class CloneTests : ORMTestsBase
+	public class CloneTests : TestBase
 	{
 		protected override bool NeedsDatabase { get { return false; } }
-		protected override string Provider { get { return "empty"; } }
 		protected IRecordCloner RecordCloner { get; private set; }
 
-		protected override IEnumerable<Type> Tables()
+		protected override void PrepareKORMServices(IServiceCollection services)
 		{
-			return Enumerable.Empty<Type>();
+			services.AddKORMServices<Kosson.KORM.DB.EmptyDB>();
 		}
 
 		[TestInitialize]

@@ -10,7 +10,6 @@ namespace Kosson.KORM.Tests
 	[TestClass]
 	public abstract class TestBase
 	{
-		protected abstract string Provider { get; }
 		protected virtual bool NeedsDatabase { get { return true; } }
 		private IServiceScope scope;
 		private IServiceProvider serviceProvider;
@@ -18,11 +17,13 @@ namespace Kosson.KORM.Tests
 		protected IMetaBuilder MetaBuilder { get; private set; }
 		protected IServiceProvider ServiceProvider { get; private set; }
 
+		protected abstract void PrepareKORMServices(IServiceCollection services);
+
 		[TestInitialize]
 		public virtual void Init()
 		{
 			var services = new ServiceCollection();
-			services.AddKORMServices<KORM.MSSQL.SQLDB>("server=(local);database=kosson-tests;integrated security=true");
+			PrepareKORMServices(services);
 			services.AddSingleton(typeof(ILogger<>), typeof(Microsoft.Extensions.Logging.Abstractions.NullLogger<>));
 
 			serviceProvider = services.BuildServiceProvider();
