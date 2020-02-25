@@ -9,7 +9,9 @@ namespace Kosson.KORM.Scratch
 		static void Main(string[] args)
 		{
 			var services = new ServiceCollection();
-			services.AddKORMServices<MSSQL.SQLDB>("server=(local);database=kosson;integrated security=true");
+			//services.AddKORMServices<MSSQL.SQLDB>("server=(local);database=kosson;integrated security=true");
+			//services.AddKORMServices<SQLite.SQLiteDB>("data source=:memory:");
+			services.AddKORMServices<SQLite.SQLiteDB>("data source=korm.sqlite3");
 			services.AddScoped<Runner>();
 			services.AddSingleton(typeof(ILogger<>), typeof(ConsoleLogger<>));
 

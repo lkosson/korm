@@ -36,12 +36,16 @@ namespace Kosson.KORM.Scratch
 			db.CreateDatabase();
 
 			db.BeginTransaction();
+			//orm.CreateTables(new[] { typeof(User), typeof(Role), typeof(Membership) });
+			//db.Commit();
+
+			var first = orm.Select<User>().ExecuteFirst();
 
 			var a1 = GC.GetTotalAllocatedBytes(true);
 			var sw1 = StatStopwatch.StartNew();
 			for (var i = 0; i < 10000; i++)
 			{
-				orm.Select<User>().ByID(60);
+				orm.Select<User>().ByID(first.ID);
 				sw1.AddMeasurement();
 			}
 			var a2 = GC.GetTotalAllocatedBytes(true);
@@ -88,11 +92,11 @@ namespace Kosson.KORM.Scratch
 
 			orm.Delete(ux);
 
-			using (var fs = new FileStream("backup.xml", FileMode.Open))
-			using (var br = xmlBackup.CreateReader(fs))
-			{
-				backupProvider.Restore(br);
-			}
+			//using (var fs = new FileStream("backup.xml", FileMode.Open))
+			//using (var br = xmlBackup.CreateReader(fs))
+			//{
+			//	backupProvider.Restore(br);
+			//}
 
 			//using (var fs = new FileStream("backup.xml", FileMode.Create))
 			//using (var bw = xmlBackup.CreateWriter(fs))
