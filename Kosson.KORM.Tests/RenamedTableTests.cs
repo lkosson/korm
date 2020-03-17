@@ -19,7 +19,7 @@ namespace Kosson.KORM.Tests
 			var select = cb.Select();
 			select.From(cb.Identifier("NewNameTestTable"));
 			select.Column(cb.Identifier("RenamedColumn"));
-			DB.ExecuteQuery(select.ToString());
+			DB.ExecuteQueryRaw(select.ToString());
 		}
 
 		[TestMethod]
@@ -77,7 +77,7 @@ namespace Kosson.KORM.Tests
 			var select = cb.Select();
 			select.From(cb.Identifier("NewNameTestTable"));
 			select.Column(cb.Const(1));
-			DB.ExecuteQuery(select.ToString());
+			DB.ExecuteQueryRaw(select.ToString());
 		}
 
 		[TestMethod]
@@ -112,7 +112,7 @@ namespace Kosson.KORM.Tests
 			var select = cb.Select();
 			select.From(cb.Identifier("NewNameTestTable"));
 			select.Column(cb.Identifier("rttt_ValueAlias"));
-			DB.ExecuteQuery(select.ToString());
+			DB.ExecuteQueryRaw(select.ToString());
 		}
 
 		[Table]

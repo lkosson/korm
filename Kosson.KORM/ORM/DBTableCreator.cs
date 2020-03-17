@@ -25,7 +25,7 @@ namespace Kosson.KORM.ORM
 			{
 				var cmdtext = cmd.ToString();
 				if (String.IsNullOrWhiteSpace(cmdtext)) return;
-				db.ExecuteNonQuery(cmdtext);
+				db.ExecuteNonQueryRaw(cmdtext);
 			}
 			catch (KORMObjectExistsException)
 			{

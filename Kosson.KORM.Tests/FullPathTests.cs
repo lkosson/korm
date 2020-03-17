@@ -42,7 +42,7 @@ namespace Kosson.KORM.Tests
 			ct.PrimaryKey(cb.Identifier(PK), cb.Type(DbType.Int64));
 			ct.AutoIncrement();
 			var sql = ct.ToString();
-			DB.ExecuteNonQuery(sql);
+			DB.ExecuteNonQueryRaw(sql);
 		}
 
 		private void CreateBasicColumns()
@@ -54,13 +54,13 @@ namespace Kosson.KORM.Tests
 			cc1.Name(cb.Identifier(COLINT));
 			cc1.Type(cb.Type(DbType.Int32));
 			cc1.DefaultValue(cb.Const(DEFVAL));
-			DB.ExecuteNonQuery(cc1.ToString());
+			DB.ExecuteNonQueryRaw(cc1.ToString());
 
 			var cc2 = cb.CreateColumn();
 			cc2.Table(cb.Identifier(TABLE));
 			cc2.Name(cb.Identifier(COLTEXT));
 			cc2.Type(cb.Type(DbType.String, 100));
-			DB.ExecuteNonQuery(cc2.ToString());
+			DB.ExecuteNonQueryRaw(cc2.ToString());
 		}
 
 		private void CreateAllColumns()
@@ -73,7 +73,7 @@ namespace Kosson.KORM.Tests
 				cc.Table(cb.Identifier(TABLE));
 				cc.Name(cb.Identifier("Col" + i));
 				cc.Type(cb.Type(TypesToTest[i], 8));
-				DB.ExecuteNonQuery(cc.ToString());
+				DB.ExecuteNonQueryRaw(cc.ToString());
 			}
 		}
 
@@ -86,14 +86,14 @@ namespace Kosson.KORM.Tests
 			ci1.Name(cb.Identifier("Idx1"));
 			ci1.Column(cb.Identifier(COLINT));
 			ci1.Include(cb.Identifier(COLTEXT));
-			DB.ExecuteNonQuery(ci1.ToString());
+			DB.ExecuteNonQueryRaw(ci1.ToString());
 
 			var ci2 = cb.CreateIndex();
 			ci2.Table(cb.Identifier(TABLE));
 			ci2.Name(cb.Identifier("Idx2"));
 			ci2.Column(cb.Identifier(COLTEXT));
 			ci2.Unique();
-			DB.ExecuteNonQuery(ci2.ToString());
+			DB.ExecuteNonQueryRaw(ci2.ToString());
 		}
 
 		private void CreateFK()
@@ -105,13 +105,13 @@ namespace Kosson.KORM.Tests
 			ct.PrimaryKey(cb.Identifier(PK), cb.Type(DbType.Int64));
 			ct.AutoIncrement();
 			var sql = ct.ToString();
-			DB.ExecuteNonQuery(sql);
+			DB.ExecuteNonQueryRaw(sql);
 
 			var cc = cb.CreateColumn();
 			cc.Table(cb.Identifier(TABLE_FK));
 			cc.Name(cb.Identifier(FK));
 			cc.Type(cb.Type(DbType.Int64));
-			DB.ExecuteNonQuery(cc.ToString());
+			DB.ExecuteNonQueryRaw(cc.ToString());
 
 			var cf = cb.CreateForeignKey();
 			cf.ConstraintName(cb.Identifier("FK"));
@@ -120,7 +120,7 @@ namespace Kosson.KORM.Tests
 			cf.TargetTable(cb.Identifier(TABLE));
 			cf.TargetColumn(cb.Identifier(PK));
 			cf.Cascade();
-			DB.ExecuteNonQuery(cf.ToString());
+			DB.ExecuteNonQueryRaw(cf.ToString());
 		}
 
 		private void Insert()
@@ -149,7 +149,7 @@ namespace Kosson.KORM.Tests
 			del.Table(cb.Identifier(TABLE));
 			del.Where(cb.Equal(cb.Identifier(PK), cb.Const(123)));
 
-			DB.ExecuteNonQuery(del.ToString());
+			DB.ExecuteNonQueryRaw(del.ToString());
 		}
 	}
 }

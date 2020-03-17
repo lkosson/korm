@@ -79,7 +79,7 @@ namespace Kosson.KORM.ORM
 
 		public int Execute()
 		{
-			return DB.ExecuteNonQuery(command.ToString(), Parameters);
+			return DB.ExecuteNonQueryRaw(command.ToString(), Parameters);
 		}
 
 		private void ApplyRowVersion(IRecordWithRowVersion record, DbParameter rowVersionParameter)
@@ -121,7 +121,7 @@ namespace Kosson.KORM.ORM
 
 		public Task<int> ExecuteAsync()
 		{
-			return DB.ExecuteNonQueryAsync(command.ToString(), Parameters);
+			return DB.ExecuteNonQueryRawAsync(command.ToString(), Parameters);
 		}
 
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)

@@ -73,7 +73,7 @@ namespace Kosson.KORM.Tests
 			insert.PrimaryKeyReturn(cb.Identifier(meta.PrimaryKey.DBName));
 			insert.Column(cb.Identifier(meta.GetField("Value").DBName), cb.Const(INTMARKER));
 			insert.Column(cb.Identifier(meta.GetField("NotNullValue").DBName), cb.Const(""));
-			DB.ExecuteNonQuery(insert.ToString());
+			DB.ExecuteNonQueryRaw(insert.ToString());
 
 			var retrieved = ORM.Select<MainTestTable>().WhereFieldEquals("Value", INTMARKER).ExecuteFirst();
 			Assert.IsNotNull(retrieved);
