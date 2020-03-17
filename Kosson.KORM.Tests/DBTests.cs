@@ -201,7 +201,7 @@ namespace Kosson.KORM.Tests
 		[TestMethod]
 		public void QueryByRawSQLRetrievesValue()
 		{
-			var rows = DB.ExecuteQuery("SELECT " + MainTestTable.DEFAULTVALUE);
+			var rows = DB.ExecuteQueryRaw("SELECT " + MainTestTable.DEFAULTVALUE);
 			Assert.IsNotNull(rows);
 			Assert.AreEqual(1, rows.Count);
 			Assert.IsNotNull(rows[0][0]);
@@ -216,6 +216,17 @@ namespace Kosson.KORM.Tests
 			Assert.AreEqual(1, rows.Count);
 			Assert.IsNotNull(rows[0][0]);
 			Assert.AreEqual(MainTestTable.DEFAULTVALUE.ToString(), rows[0][0].ToString());
+		}
+
+		[TestMethod]
+		public void QueryByInterpolatedSQLIsParametrized()
+		{
+			var injectionTest = "' \" [ ]] @P5 -- \\'";
+			var rows = DB.ExecuteQuery($"SELECT {injectionTest}");
+			Assert.IsNotNull(rows);
+			Assert.AreEqual(1, rows.Count);
+			Assert.IsNotNull(rows[0][0]);
+			Assert.AreEqual(injectionTest, rows[0][0]);
 		}
 	}
 }
