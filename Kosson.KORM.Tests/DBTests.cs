@@ -197,5 +197,25 @@ namespace Kosson.KORM.Tests
 				tx.Commit();
 			}
 		}
+
+		[TestMethod]
+		public void QueryByRawSQLRetrievesValue()
+		{
+			var rows = DB.ExecuteQuery("SELECT " + MainTestTable.DEFAULTVALUE);
+			Assert.IsNotNull(rows);
+			Assert.AreEqual(1, rows.Count);
+			Assert.IsNotNull(rows[0][0]);
+			Assert.AreEqual(MainTestTable.DEFAULTVALUE.ToString(), rows[0][0].ToString());
+		}
+
+		[TestMethod]
+		public void QueryByInterpolatedSQLRetrievesValue()
+		{
+			var rows = DB.ExecuteQuery($"SELECT {MainTestTable.DEFAULTVALUE}");
+			Assert.IsNotNull(rows);
+			Assert.AreEqual(1, rows.Count);
+			Assert.IsNotNull(rows[0][0]);
+			Assert.AreEqual(MainTestTable.DEFAULTVALUE.ToString(), rows[0][0].ToString());
+		}
 	}
 }

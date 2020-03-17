@@ -116,17 +116,9 @@ namespace Kosson.KORM.ORM
 
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record, ref parameters);
 
-					if (cmdGetLastID == null)
-					{
-						var row = await DB.ExecuteQueryFirstAsync(cmdInsert);
-						if (!manualid) record.ID = converter.Convert<long>(row[0]);
-					}
-					else
-					{
-						await DB.ExecuteNonQueryAsync(cmdInsert);
-						var row = await DB.ExecuteQueryFirstAsync(cmdGetLastID);
-						if (!manualid) record.ID = converter.Convert<long>(row[0]);
-					}
+					if (cmdGetLastID != null) await DB.ExecuteNonQueryAsync(cmdInsert);
+					var rows = await DB.ExecuteQueryAsync(cmdGetLastID ?? cmdInsert, 1);
+					if (!manualid && rows.Any()) record.ID = converter.Convert<long>(rows.First()[0]);
 
 					count++;
 					if (notify != null) result = notify.OnInserted();

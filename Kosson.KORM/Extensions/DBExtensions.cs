@@ -47,6 +47,14 @@ namespace Kosson.KORM
 			}
 		}
 
+		private static T FormatQueryAndExecute<T>(IDB db, FormattableString command, Func<IDB, string, object[], T> executor)
+		{
+			var args = new string[command.ArgumentCount];
+			for (int i = 0; i < args.Length; i++) args[i] = "@P" + i;
+			var sql = String.Format(command.Format, args);
+			return executor(db, sql, args);
+		}
+
 		/// <summary>
 		/// Creates and executes non-query DB command with parameters @P0, @P1, ..., @Pn with given values.
 		/// </summary>
@@ -68,6 +76,15 @@ namespace Kosson.KORM
 			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteNonQuery);
 
 		/// <summary>
+		/// Creates and executes non-query DB command based on interpolated string.
+		/// </summary>
+		/// <param name="db">IDB provider for DB command creation, manipulation and execution.</param>
+		/// <param name="command">Text of a command to execute.</param>
+		/// <returns>Number of affected database rows or result code from DB command.</returns>
+		public static int ExecuteNonQuery(this IDB db, FormattableString command)
+			=> FormatQueryAndExecute(db, command, ExecuteNonQuery);
+
+		/// <summary>
 		/// Asynchronous version of ExecuteQuery.
 		/// Creates and executes non-query DB command with parameters @P0, @P1, ..., @Pn with given values.
 		/// </summary>
@@ -79,7 +96,7 @@ namespace Kosson.KORM
 			=> CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteNonQueryAsync);
 
 		/// <summary>
-		/// Asynchronous version of ExecuteQuery.
+		/// Asynchronous version of ExecuteNonQuery.
 		/// Creates and executes non-query DB command with parameters @P0, @P1, ..., @Pn with given values.
 		/// </summary>
 		/// <param name="db">IDB provider for DB command creation, manipulation and execution.</param>
@@ -90,17 +107,14 @@ namespace Kosson.KORM
 			=> CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteNonQueryAsync);
 
 		/// <summary>
-		/// Asynchronous version of ExecuteQueryFirst.
-		/// Executes DB query and returns first row of a result.
+		/// Asynchronous version of ExecuteNonQuery.
+		/// Creates and executes non-query DB command based on interpolated string.
 		/// </summary>
 		/// <param name="db">IDB provider for DB command creation, manipulation and execution.</param>
-		/// <param name="command">DB command to execute.</param>
-		/// <returns>Task representing asynchronous operation returning first row of a result or null when query produces no result.</returns>
-		public static async Task<IRow> ExecuteQueryFirstAsync(this IDB db, DbCommand command)
-		{
-			var result = await db.ExecuteQueryAsync(command, 1);
-			return result.FirstOrDefault();
-		}
+		/// <param name="command">Text of a command to execute.</param>
+		/// <returns>Number of affected database rows or result code from DB command.</returns>
+		public static Task<int> ExecuteNonQueryAsync(this IDB db, FormattableString command)
+			=> FormatQueryAndExecute(db, command, ExecuteNonQueryAsync);
 
 		/// <summary>
 		/// Executes DB query and returns array of rows representing the query result.
@@ -135,6 +149,15 @@ namespace Kosson.KORM
 			=> CreateAndExecuteCommand(db, command, parameters, db.ExecuteQueryAll);
 
 		/// <summary>
+		/// Creates and executes DB query based on interpolated string and returns array of rows of a result.
+		/// </summary>
+		/// <param name="db">IDB provider for DB command creation, manipulation and execution.</param>
+		/// <param name="command">Text of a DB query to execute.</param>
+		/// <returns>Array (possibly empty) of a query result.</returns>
+		public static IReadOnlyList<IRow> ExecuteQuery(this IDB db, FormattableString command)
+			=> FormatQueryAndExecute(db, command, ExecuteQuery);
+
+		/// <summary>
 		/// Asynchronous version of ExecuteQuery.
 		/// Creates and executes DB query with parameters @P0, @P1, ..., @Pn with given values and returns array of rows of a result.
 		/// </summary>
@@ -155,6 +178,16 @@ namespace Kosson.KORM
 		/// <returns>A task representing asynchronous operation returning an array (possibly empty) of a query result.</returns>
 		public static Task<IReadOnlyList<IRow>> ExecuteQueryAsync(this IDB db, string command, IEnumerable<object> parameters)
 			=> CreateAndExecuteCommandAsync(db, command, parameters, db.ExecuteQueryAllAsync);
+
+		/// <summary>
+		/// Asynchronous version of ExecuteQuery.
+		/// Creates and executes DB query based on interpolated string and returns array of rows of a result.
+		/// </summary>
+		/// <param name="db">IDB provider for DB command creation, manipulation and execution.</param>
+		/// <param name="command">Text of a DB query to execute.</param>
+		/// <returns>A task representing asynchronous operation returning an array (possibly empty) of a query result.</returns>
+		public static Task<IReadOnlyList<IRow>> ExecuteQueryAsync(this IDB db, FormattableString command)
+			=> FormatQueryAndExecute(db, command, ExecuteQueryAsync);
 
 		// Removed ExecuteReader helpers due to DbCommand early dispose in CreateAndExecuteCommand
 	}
