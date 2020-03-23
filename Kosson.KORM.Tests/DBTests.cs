@@ -228,5 +228,12 @@ namespace Kosson.KORM.Tests
 			Assert.IsNotNull(rows[0][0]);
 			Assert.AreEqual(injectionTest, rows[0][0]);
 		}
+
+		[TestMethod]
+		[ExpectedException(typeof(KORMInvalidOperationException))]
+		public void ExecuteNonQueryInImplicitTransactionFails()
+		{
+			DB.ExecuteNonQuery($"SELECT 1");
+		}
 	}
 }

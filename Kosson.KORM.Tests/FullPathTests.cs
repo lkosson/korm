@@ -22,6 +22,7 @@ namespace Kosson.KORM.Tests
 		[TestMethod]
 		public void FullPathTest()
 		{
+			DB.BeginTransaction();
 			CreateTable();
 			CreateBasicColumns();
 			CreateAllColumns();
@@ -29,8 +30,6 @@ namespace Kosson.KORM.Tests
 			CreateFK();
 			Insert();
 			Delete();
-
-			//db.Commit();
 		}
 
 		private void CreateTable()

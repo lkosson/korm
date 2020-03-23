@@ -20,10 +20,10 @@ namespace Kosson.KORM.Tests
 		public override void Init()
 		{
  			base.Init();
+			DB.BeginTransaction();
 			ORM = ServiceProvider.GetRequiredService<IORM>();
 			ORM.CreateTables(Tables());
 		}
-
 	}
 
 	[Table]

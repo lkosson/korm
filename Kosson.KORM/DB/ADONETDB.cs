@@ -357,6 +357,7 @@ namespace Kosson.KORM.DB
 		#region Command execution
 		int IDB.ExecuteNonQuery(DbCommand command)
 		{
+			if (IsImplicitTransaction) throw new KORMInvalidOperationException("ExecuteNonQuery not allowed in implcit transaction.");
 			var token = log.Start(command);
 			try
 			{
@@ -378,6 +379,7 @@ namespace Kosson.KORM.DB
 
 		async Task<int> IDB.ExecuteNonQueryAsync(DbCommand command)
 		{
+			if (IsImplicitTransaction) throw new KORMInvalidOperationException("ExecuteNonQueryAsync not allowed in implcit transaction.");
 			var token = log.Start(command);
 			try
 			{
