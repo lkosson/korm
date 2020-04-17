@@ -10,6 +10,7 @@ namespace Kosson.KORM.Tests
 		{
 			yield return typeof(MainTestTable);
 			yield return typeof(Table);
+			yield return typeof(ForeignSubqueryTable);
 		}
 
 		[TestMethod]
@@ -37,6 +38,37 @@ namespace Kosson.KORM.Tests
             Assert.AreEqual(INTMARKER + 1, retrieved.MaxConstructed);
 			Assert.AreEqual(INTMARKER - 1, retrieved.FirstConstructed);
 			Assert.AreEqual(INTMARKER + 1, retrieved.LastConstructed);
+		}
+
+		[TestMethod]
+		public void ForeignSubqueryIsSelected()
+		{
+			ORM.Insert(new MainTestTable() { Value = INTMARKER - 1 });
+			ORM.Insert(new MainTestTable() { Value = INTMARKER });
+			ORM.Insert(new MainTestTable() { Value = INTMARKER });
+			ORM.Insert(new MainTestTable() { Value = INTMARKER + 1 });
+
+			var foreign = new Table();
+			foreign.Value = INTMARKER;
+			foreign.DefaultValue = new MainTestTable().DefaultValue;
+			ORM.Insert(foreign);
+
+			var record = new ForeignSubqueryTable();
+			record.Subtable = foreign;
+			ORM.Insert(record);
+
+			var retrieved = ORM.Select<ForeignSubqueryTable>().ByID(record.ID);
+			var retrievedforeign = retrieved.Subtable;
+
+			Assert.AreEqual(2, retrievedforeign.Count);
+			Assert.AreEqual(2, retrievedforeign.CountConstructed);
+			Assert.AreEqual(1, retrievedforeign.CountDistinctConstructed);
+			Assert.AreEqual(MainTestTable.DEFAULTVALUE * 2, retrievedforeign.SumConstructed);
+			Assert.AreEqual(INTMARKER, retrievedforeign.AvgConstructed);
+			Assert.AreEqual(INTMARKER - 1, retrievedforeign.MinConstructed);
+			Assert.AreEqual(INTMARKER + 1, retrievedforeign.MaxConstructed);
+			Assert.AreEqual(INTMARKER - 1, retrievedforeign.FirstConstructed);
+			Assert.AreEqual(INTMARKER + 1, retrievedforeign.LastConstructed);
 		}
 
 		[Table]
@@ -74,6 +106,21 @@ namespace Kosson.KORM.Tests
 
             [Column]
             public int DefaultValue { get; set; }
+		}
+
+		class ForeignSubqueryTable : Record
+		{
+			[Column]
+			public int Ignored1 { get; set; }
+
+			[Column]
+			public Table Subtable { get; set; }
+
+			[Column]
+			public MainTestTable Ignored2 { get; set; }
+
+			[Column]
+			public int Ignored3 { get; set; }
 		}
 	}
 }

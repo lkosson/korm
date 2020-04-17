@@ -71,6 +71,12 @@ namespace Kosson.KORM.ORM
 
 		private void PrepareIndices(IMetaRecord meta, string prefix, ref int fieldIndex, Dictionary<string, int> indices)
 		{
+			PrepareIndices1(meta, prefix, ref fieldIndex, indices);
+			PrepareIndices2(meta, prefix, ref fieldIndex, indices);
+		}
+
+		private void PrepareIndices1(IMetaRecord meta, string prefix, ref int fieldIndex, Dictionary<string, int> indices)
+		{
 			// keep order in sync with DBORMSelect.PrepareTemplate and DBSelect.AppendColumns
 			foreach (var field in meta.Fields)
 			{
@@ -96,9 +102,13 @@ namespace Kosson.KORM.ORM
 				if (!field.IsEagerLookup) continue;
 				var fieldName = prefix + "." + field.Name;
 				var foreignMeta = metaBuilder.Get(field.Type);
-				PrepareIndices(foreignMeta, fieldName, ref fieldIndex, indices);
+				PrepareIndices1(foreignMeta, fieldName, ref fieldIndex, indices);
 			}
+		}
 
+		private void PrepareIndices2(IMetaRecord meta, string prefix, ref int fieldIndex, Dictionary<string, int> indices)
+		{
+			// keep order in sync with DBORMSelect.PrepareTemplate and DBSelect.AppendColumns
 			foreach (var field in meta.Fields)
 			{
 				if (!field.IsFromDB) continue;
@@ -106,6 +116,15 @@ namespace Kosson.KORM.ORM
 				var fieldName = prefix + "." + field.Name;
 				indices[fieldName] = fieldIndex;
 				fieldIndex++;
+			}
+
+			foreach (var field in meta.Fields)
+			{
+				if (!field.IsFromDB) continue;
+				if (!field.IsEagerLookup) continue;
+				var fieldName = prefix + "." + field.Name;
+				var foreignMeta = metaBuilder.Get(field.Type);
+				PrepareIndices2(foreignMeta, fieldName, ref fieldIndex, indices);
 			}
 		}
 
