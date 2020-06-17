@@ -12,6 +12,7 @@ namespace Kosson.KORM.DB
 		private readonly ILogger logger;
 		private static int nextTraceId;
 		public bool TraceEnabled => logger != null && logger.IsEnabled(LogLevel.Critical);
+		public bool TraceWarningEnabled => logger != null && logger.IsEnabled(LogLevel.Warning);
 		public bool TraceInformationEnabled => logger != null && logger.IsEnabled(LogLevel.Information);
 		public bool TraceDebugEnabled => logger != null && logger.IsEnabled(LogLevel.Debug);
 
@@ -38,19 +39,20 @@ namespace Kosson.KORM.DB
 
 		public TraceToken Start(string msg)
 		{
-			if (!TraceInformationEnabled) return default(TraceToken);
+			if (!TraceWarningEnabled) return default(TraceToken);
 			int id = Interlocked.Increment(ref nextTraceId);
 			// Keep LogLevel.Information in sync with Log(Exception) method
 			Trace(LogLevel.Information, id, msg);
 			TraceToken token = new TraceToken();
 			token.id = id;
 			token.start = queryTimer.ElapsedMilliseconds;
+			token.query = msg;
 			return token;
 		}
 
 		public TraceToken Start(DbCommand command)
 		{
-			if (!TraceInformationEnabled) return default(TraceToken);
+			if (!TraceWarningEnabled) return default(TraceToken);
 			var sql = command.CommandText;
 			var token = Start(sql);
 			TraceQueryParameters(LogLevel.Debug, token, command);
@@ -73,19 +75,27 @@ namespace Kosson.KORM.DB
 		public void Stop(TraceToken token, int rows = -1)
 		{
 			if (token.id == 0) return;
-			if (!TraceInformationEnabled) return;
-			if (rows == -1)
-				Trace(LogLevel.Information, token.id, (queryTimer.ElapsedMilliseconds - token.start).ToString() + " ms");
-			else
-				Trace(LogLevel.Information, token.id, (queryTimer.ElapsedMilliseconds - token.start).ToString() + " ms\t" + rows.ToString() + " rows");
+			if (!TraceWarningEnabled) return;
+			var time = queryTimer.ElapsedMilliseconds - token.start;
+			var level = time >= 1000 ? LogLevel.Warning : LogLevel.Information;
+			if (!TraceInformationEnabled)
+			{
+				if (level == LogLevel.Information) return;
+				// on Warning LogLevel queries are not logged at start
+				Trace(LogLevel.Warning, token.id, token.query);
+			}
+			var msg = rows == -1 ? time + " ms" : time + " ms\t" + rows.ToString() + " rows";
+			Trace(level, token.id, msg);
 		}
 
 		public void StopStart(ref TraceToken token, string msg)
 		{
 			if (token.id == 0) return;
-			if (!TraceInformationEnabled) return;
+			if (!TraceWarningEnabled) return;
 			Stop(token);
+			if (!TraceInformationEnabled) return;
 			token.start = queryTimer.ElapsedMilliseconds;
+			token.query = msg;
 			Trace(LogLevel.Information, token.id, msg);
 		}
 
@@ -108,5 +118,6 @@ namespace Kosson.KORM.DB
 	{
 		public int id;
 		public long start;
+		public string query;
 	}
 }
