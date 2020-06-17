@@ -8,7 +8,6 @@ namespace Kosson.KORM.DB
 {
 	class Logging
 	{
-		private static readonly LRU<string, int> lastQueries;
 		private readonly Stopwatch queryTimer;
 		private readonly ILogger logger;
 		private static int nextTraceId;
@@ -18,7 +17,6 @@ namespace Kosson.KORM.DB
 
 		static Logging()
 		{
-			lastQueries = new LRU<string, int>(100);
 			nextTraceId = -1;
 		}
 
@@ -54,24 +52,7 @@ namespace Kosson.KORM.DB
 		{
 			if (!TraceInformationEnabled) return default(TraceToken);
 			var sql = command.CommandText;
-			TraceToken token;
-			if (lastQueries == null)
-			{
-				token = Start(sql);
-			}
-			else
-			{
-				var sqlToken = lastQueries[sql];
-				if (sqlToken == 0)
-				{
-					token = Start(sql);
-					if (token.id != 0) lastQueries[sql] = token.id;
-				}
-				else
-				{
-					token = Start(sqlToken.ToString("X8"));
-				}
-			}
+			var token = Start(sql);
 			TraceQueryParameters(LogLevel.Debug, token, command);
 			return token;
 		}
