@@ -17,6 +17,7 @@ namespace Kosson.KORM.DB
 		private Logging log;
 		private IDBCommandBuilder commandBuilder;
 		private bool isImplicit;
+		private IDisposable optionsMonitorDisposer;
 
 		/// <summary>
 		/// Synchronization root for accessing ADO.NET objects.
@@ -84,7 +85,7 @@ namespace Kosson.KORM.DB
 		{
 			IsolationLevel = IsolationLevel.Unspecified;
 			commandBuilder = CreateCommandBuilder();
-			optionsMonitor.OnChange(ApplyOptions);
+			optionsMonitorDisposer = optionsMonitor.OnChange(ApplyOptions);
 			ApplyOptions(optionsMonitor.CurrentValue);
 			if (logger.IsEnabled(LogLevel.Critical)) log = new Logging(logger);
 			else log = new Logging(null);
@@ -251,6 +252,7 @@ namespace Kosson.KORM.DB
 		{
 			Close(true);
 			syncroot.Dispose();
+			optionsMonitorDisposer.Dispose();
 		}
 		#endregion
 		#region Parameters handling
