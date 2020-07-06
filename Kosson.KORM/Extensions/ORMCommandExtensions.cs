@@ -18,7 +18,7 @@ namespace Kosson.KORM
 		/// <param name="condition">SQL WHERE condition.</param>
 		/// <param name="values">Query parameter values.</param>
 		/// <returns>Original command with comparison added to it.</returns>
-		public static TCommand Where<TCommand>(this TCommand query, string condition, params object[] values)
+		public static TCommand WhereRaw<TCommand>(this TCommand query, string condition, params object[] values)
 			where TCommand : IORMNarrowableCommand<TCommand>
 		{
 			var cb = query.DB.CommandBuilder;
@@ -29,6 +29,28 @@ namespace Kosson.KORM
 				parameters[i] = parameter.ToString();
 			}
 			var expr = cb.Expression(String.Format(condition, parameters));
+			return query.Where(expr);
+		}
+
+		/// <summary>
+		/// Adds WHERE condition based on given SQL condition and parameters. Condition is joined with existing conditions by AND.
+		/// </summary>
+		/// <typeparam name="TCommand">Type of command to add condition to.</typeparam>
+		/// <param name="query">Command or query to add comparison to.</param>
+		/// <param name="condition">SQL WHERE condition.</param>
+		/// <returns>Original command with comparison added to it.</returns>
+		public static TCommand Where<TCommand>(this TCommand query, FormattableString condition)
+			where TCommand : IORMNarrowableCommand<TCommand>
+		{
+			var cb = query.DB.CommandBuilder;
+			var parameters = new string[condition.ArgumentCount];
+			for (int i = 0; i < condition.ArgumentCount; i++)
+			{
+				var value = condition.GetArgument(i);
+				var parameter = query.Parameter(value);
+				parameters[i] = parameter.ToString();
+			}
+			var expr = cb.Expression(String.Format(condition.Format, parameters));
 			return query.Where(expr);
 		}
 

@@ -128,9 +128,24 @@ namespace Kosson.KORM.Tests
 			var inserted = new MainTestTable();
 			inserted.Value = INTMARKER + 1;
 			ORM.Insert(inserted);
-			var retrieved = ORM.Select<MainTestTable>().Where("0 < {0}", INTMARKER).Execute();
+			var retrieved = ORM.Select<MainTestTable>().WhereRaw("0 < {0}", INTMARKER).Execute();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(2, retrieved.Count);
+		}
+
+		[TestMethod]
+		public void RetrieveByFormattedCondition()
+		{
+			ORM.Delete<MainTestTable>().Execute();
+			var other = new MainTestTable();
+			other.Value = INTMARKER;
+			ORM.Insert(other);
+			var inserted = new MainTestTable();
+			inserted.Value = INTMARKER + 1;
+			ORM.Insert(inserted);
+			var retrieved = ORM.Select<MainTestTable>().Where($"mtt_Value = {INTMARKER}").Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(1, retrieved.Count);
 		}
 
 		[TestMethod]
