@@ -260,7 +260,12 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Set equality (IN) comparison.
 		/// </summary>
-		In
+		In,
+
+		/// <summary>
+		/// String pattern (LIKE) comparison.
+		/// </summary>
+		Like
 	}
 
 	/// <summary>

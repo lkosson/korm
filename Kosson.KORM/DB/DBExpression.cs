@@ -263,6 +263,7 @@ namespace Kosson.KORM.DB
 				else if (comparison == DBExpressionComparison.Less) sb.Append("<");
 				else if (comparison == DBExpressionComparison.LessOrEqual) sb.Append("<=");
 				else if (comparison == DBExpressionComparison.In) sb.Append("IN");
+				else if (comparison == DBExpressionComparison.Like) sb.Append("LIKE");
 
 				// Parentheses required for IN operator.
 				sb.Append(" (");
