@@ -1,5 +1,6 @@
 ﻿using Kosson.KORM.Meta;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Kosson.KORM
@@ -170,6 +171,19 @@ namespace Kosson.KORM
 		public static TCommand WhereID<TCommand>(this TCommand query, long id)
 			where TCommand : IORMNarrowableCommand<TCommand>
 			=> query.WhereFieldEquals(MetaRecord.PKNAME, id);
+
+		/// <summary>
+		/// Adds WHERE condition comparing table's primary key to a result of a subquery with given parameters. 
+		/// Parameter names for provided values are substituted for {0}..{n} placeholders.
+		/// Condition is joined with existing conditions by AND.
+		/// </summary>
+		/// <typeparam name="TCommand">Type of command to add condition to.</typeparam>
+		/// <param name="subquery">Subquery returning primary key values as a single column.</param>
+		/// <param name="values">Subquery parameter values.</param>
+		/// <returns>Original command with comparison added to it.</returns>
+		public static TCommand WhereIDIn<TCommand>(this TCommand query, string subquery, params object[] values)
+			where TCommand : IORMNarrowableCommand<TCommand>
+			=> query.WhereField(MetaRecord.PKNAME, "{0} IN (" + String.Format(subquery, Enumerable.Range(1, values.Length).Select(e => "{" + e + "}").ToArray()) + ")", values);
 
 		/// <summary>
 		/// Executes UPDATE command after adding to it equality comparison between primary key (ID) and given constant value.

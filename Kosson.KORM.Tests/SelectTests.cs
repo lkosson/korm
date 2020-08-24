@@ -165,6 +165,22 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void RetrieveBySubquery()
+		{
+			ORM.Delete<MainTestTable>().Execute();
+			for (int i = 0; i < 10; i++)
+			{
+				var item = new MainTestTable();
+				item.Value = INTMARKER + i - 5;
+				ORM.Insert(item);
+			}
+			var retrieved = ORM.Select<MainTestTable>().WhereIDIn("SELECT mtt_ID FROM MainTestTable WHERE mtt_Value < {0}", INTMARKER).Execute();
+			Assert.AreEqual(5, retrieved.Count);
+			Assert.AreEqual(INTMARKER - 5, retrieved.Min(v => v.Value));
+			Assert.AreEqual(INTMARKER - 1, retrieved.Max(v => v.Value));
+		}
+
+		[TestMethod]
 		public void RetrieveByOr()
 		{
 			ORM.Delete<MainTestTable>().Execute();
