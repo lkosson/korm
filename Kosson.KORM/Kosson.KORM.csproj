@@ -6,6 +6,7 @@
     <Company />
     <Product>Kosson KORM</Product>
     <Version>1.2.5</Version>
+    <Description>Code-first ORM</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
