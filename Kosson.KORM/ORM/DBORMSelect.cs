@@ -90,14 +90,16 @@ namespace Kosson.KORM.ORM
 			//var sql = command.ToString();
 			//var rows = DB.ExecuteQuery(sql, Parameters);
 			//return rows.Load<TRecord>(converter, recordLoader, factory);
-			var reader = ExecuteReader();
-			var result = new List<TRecord>();
-			while (reader.MoveNext())
+			using (var reader = ExecuteReader())
 			{
-				var record = reader.Read();
-				result.Add(record);
+				var result = new List<TRecord>();
+				while (reader.MoveNext())
+				{
+					var record = reader.Read();
+					result.Add(record);
+				}
+				return result;
 			}
-			return result;
 		}
 
 		public async Task<IReadOnlyCollection<TRecord>> ExecuteAsync()
@@ -105,14 +107,16 @@ namespace Kosson.KORM.ORM
 			//var sql = command.ToString();
 			//var rows = await DB.ExecuteQueryAsync(sql, Parameters);
 			//return rows.Load<TRecord>(converter, recordLoader, factory);
-			var reader = await ExecuteReaderAsync();
-			var result = new List<TRecord>();
-			while (await reader.MoveNextAsync())
+			using (var reader = await ExecuteReaderAsync())
 			{
-				var record = reader.Read();
-				result.Add(record);
+				var result = new List<TRecord>();
+				while (await reader.MoveNextAsync())
+				{
+					var record = reader.Read();
+					result.Add(record);
+				}
+				return result;
 			}
-			return result;
 		}
 
 		public IORMReader<TRecord> ExecuteReader()

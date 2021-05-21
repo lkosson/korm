@@ -293,6 +293,24 @@ namespace Kosson.KORM.Tests
 			await ORM.Select<DivideByZeroTable>().ExecuteAsync();
 		}
 
+		[TestMethod]
+		public void FailedSelectDisposesReader()
+		{
+			var record = new MainTestTable();
+			ORM.Insert(record);
+			Assert.ThrowsException<KORMException>(ORM.Select<DivideByZeroTable>().Execute);
+			ORM.Select<MainTestTable>().Execute();
+		}
+
+		[TestMethod]
+		public async Task AsyncFailedSelectDisposesReader()
+		{
+			var record = new MainTestTable();
+			ORM.Insert(record);
+			await Assert.ThrowsExceptionAsync<KORMException>(ORM.Select<DivideByZeroTable>().ExecuteAsync);
+			await ORM.Select<MainTestTable>().ExecuteAsync();
+		}
+
 		[Table(Prefix = "dbzt", Query = "SELECT 1/0 as \"dbzt_ID\" FROM \"MainTestTable\"")]
 		class DivideByZeroTable : Record
 		{
