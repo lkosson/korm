@@ -277,7 +277,7 @@ namespace Kosson.KORM.Tests
 
 		[TestMethod]
 		[ExpectedException(typeof(KORMException))]
-		public void FailedSelectThrowsException()
+		public virtual void FailedSelectThrowsException()
 		{
 			var record = new MainTestTable();
 			ORM.Insert(record);
@@ -286,7 +286,7 @@ namespace Kosson.KORM.Tests
 
 		[TestMethod]
 		[ExpectedException(typeof(KORMException))]
-		public async Task FailedSelectAsyncThrowsException()
+		public virtual async Task FailedSelectAsyncThrowsException()
 		{
 			var record = new MainTestTable();
 			ORM.Insert(record);
@@ -294,7 +294,7 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
-		public void FailedSelectDisposesReader()
+		public virtual void FailedSelectDisposesReader()
 		{
 			var record = new MainTestTable();
 			ORM.Insert(record);
@@ -303,7 +303,7 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
-		public async Task AsyncFailedSelectDisposesReader()
+		public virtual async Task AsyncFailedSelectDisposesReader()
 		{
 			var record = new MainTestTable();
 			ORM.Insert(record);

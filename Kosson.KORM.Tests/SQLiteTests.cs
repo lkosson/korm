@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
 
 namespace Kosson.KORM.Tests
 {
@@ -148,6 +149,28 @@ namespace Kosson.KORM.Tests
 	public class SQLiteSelectTests : SelectTests
 	{
 		protected override void PrepareKORMServices(IServiceCollection services) => SQLiteTests.PrepareKORMServices(services);
+
+		public override Task AsyncFailedSelectDisposesReader()
+		{
+			// SQLite doesn't throw error on divide by zero
+			return Task.CompletedTask;
+		}
+
+		public override Task FailedSelectAsyncThrowsException()
+		{
+			// SQLite doesn't throw error on divide by zero
+			return Task.CompletedTask;
+		}
+
+		public override void FailedSelectDisposesReader()
+		{
+			// SQLite doesn't throw error on divide by zero
+		}
+
+		public override void FailedSelectThrowsException()
+		{
+			// SQLite doesn't throw error on divide by zero
+		}
 	}
 
 	[TestClass]
