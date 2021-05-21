@@ -12,6 +12,7 @@ namespace Kosson.KORM.Tests
 		protected override System.Collections.Generic.IEnumerable<Type> Tables()
 		{
 			yield return typeof(MainTestTable);
+			yield return typeof(DivideByZeroTable);
 		}
 
 		[TestMethod]
@@ -272,6 +273,29 @@ namespace Kosson.KORM.Tests
 			var retrieved = ORM.Select<MainTestTable>().Limit(2).Execute();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(2, retrieved.Count);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(KORMException))]
+		public void FailedSelectThrowsException()
+		{
+			var record = new MainTestTable();
+			ORM.Insert(record);
+			ORM.Select<DivideByZeroTable>().Execute();
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(KORMException))]
+		public async Task FailedSelectAsyncThrowsException()
+		{
+			var record = new MainTestTable();
+			ORM.Insert(record);
+			await ORM.Select<DivideByZeroTable>().ExecuteAsync();
+		}
+
+		[Table(Prefix = "dbzt", Query = "SELECT 1/0 as \"dbzt_ID\" FROM \"MainTestTable\"")]
+		class DivideByZeroTable : Record
+		{
 		}
 	}
 }

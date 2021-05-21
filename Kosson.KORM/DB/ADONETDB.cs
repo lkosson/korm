@@ -557,7 +557,7 @@ namespace Kosson.KORM.DB
 			return new KORMException(exc.Message, exc, cmd);
 		}
 
-		private void HandleException(Exception exc, DbCommand cmd, TraceToken token = default(TraceToken))
+		internal void HandleException(Exception exc, DbCommand cmd, TraceToken token = default(TraceToken))
 		{
 			var translated = TranslateException(exc, cmd);
 			if (translated == null) return; // untranslated exceptions will be rethrown by caller

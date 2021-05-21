@@ -113,17 +113,33 @@ namespace Kosson.KORM.ORM
 		bool IORMReader<TRecord>.MoveNext()
 		{
 			if (reader == null) ThrowDisposed();
-			var result = aborted ? false : reader.Read();
-			if (!result) Dispose();
-			return result;
+			try
+			{
+				var result = aborted ? false : reader.Read();
+				if (!result) Dispose();
+				return result;
+			}
+			catch (Exception exc)
+			{
+				if (db is Kosson.KORM.DB.ADONETDB adonetdb) adonetdb.HandleException(exc, command, default);
+				throw;
+			}
 		}
 
 		async Task<bool> IORMReader<TRecord>.MoveNextAsync()
 		{
 			if (reader == null) ThrowDisposed();
-			var result = aborted ? false : await reader.ReadAsync();
-			if (!result) Dispose();
-			return result;
+			try
+			{
+				var result = aborted ? false : await reader.ReadAsync();
+				if (!result) Dispose();
+				return result;
+			}
+			catch (Exception exc)
+			{
+				if (db is Kosson.KORM.DB.ADONETDB adonetdb) adonetdb.HandleException(exc, command, default);
+				throw;
+			}
 		}
 
 		TRecord IORMReader<TRecord>.Read()
