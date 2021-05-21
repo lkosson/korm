@@ -151,7 +151,7 @@ namespace Kosson.KORM.Meta
 				if (upper && !prevUpper) prefix += name[i].ToString();
 				prevUpper = upper;
 			}
-			if (prefix.Length < 2) prefix = name.Substring(0, 3);
+			if (prefix.Length < 2) prefix = name.Substring(0, Math.Min(name.Length, 3));
 			prefix = prefix.ToLower();
 			return prefix;
 		}
