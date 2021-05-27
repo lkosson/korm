@@ -214,7 +214,8 @@ namespace Kosson.KORM.DB
 				{
 					if (dontThrow)
 					{
-						log.Log(exc, null, default(TraceToken));
+						var translated = TranslateException(exc, null);
+						log.Log(translated, default(TraceToken));
 					}
 					else
 					{
@@ -235,7 +236,8 @@ namespace Kosson.KORM.DB
 				{
 					if (dontThrow)
 					{
-						log.Log(exc, null, default(TraceToken));
+						var translated = TranslateException(exc, null);
+						log.Log(translated, default(TraceToken));
 					}
 					else
 					{
@@ -549,7 +551,7 @@ namespace Kosson.KORM.DB
 		/// <param name="exc">Caught exception to translate.</param>
 		/// <param name="cmd">Command causing the exception.</param>
 		/// <returns>Provider-independent exception.</returns>
-		protected virtual Exception TranslateException(Exception exc, DbCommand cmd)
+		protected virtual KORMException TranslateException(Exception exc, DbCommand cmd)
 		{
 			if (exc is System.Data.Common.DbException) return new KORMException(exc.Message, exc, cmd);
 			else if (exc is InvalidOperationException) return new KORMException(exc.Message, exc, cmd);
@@ -561,7 +563,7 @@ namespace Kosson.KORM.DB
 		{
 			var translated = TranslateException(exc, cmd);
 			if (translated == null) return; // untranslated exceptions will be rethrown by caller
-			log.Log(translated, cmd, token);
+			log.Log(translated, token);
 			throw translated;
 		}
 		#endregion

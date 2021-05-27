@@ -99,17 +99,21 @@ namespace Kosson.KORM.DB
 			Trace(LogLevel.Information, token.id, msg);
 		}
 
-		public void Log(Exception exc, DbCommand cmd, TraceToken token)
+		public void Log(KORMException exc, TraceToken token)
 		{
 			if (!TraceEnabled) return;
 			var exceptionLevel = exc is KORMInvalidStructureException ? LogLevel.Warning : LogLevel.Error;
 			if (!logger.IsEnabled(exceptionLevel)) return;
-			Trace(exceptionLevel, token.id, exc.Message);
-			// On Information and Debug LogLevels queries are already logged at start
-			if (cmd != null && !logger.IsEnabled(LogLevel.Information))
+
+			Trace(exceptionLevel, token.id, exc.GetType().Name + ": " + exc.OriginalMessage);
+
+			if (exc.Command != null)
 			{
-				Trace(exceptionLevel, token.id, cmd.CommandText);
-				TraceQueryParameters(exceptionLevel, token, cmd);
+				// On Information LogLevel queries are logged at start
+				if (!TraceInformationEnabled) Trace(exceptionLevel, token.id, exc.Command.CommandText);
+
+				// On Debug LogLevel parameters are logged at start
+				if (!TraceDebugEnabled) TraceQueryParameters(exceptionLevel, token, exc.Command);
 			}
 		}
 	}

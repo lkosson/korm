@@ -45,7 +45,7 @@ namespace Kosson.KORM.SQLite
 			return base.NativeToSQL(val);
 		}
 
-		protected override Exception TranslateException(Exception exc, DbCommand cmd)
+		protected override KORMException TranslateException(Exception exc, DbCommand cmd)
 		{
 			var se = exc as SqliteException;
 			if (se != null)

@@ -9,12 +9,15 @@ namespace Kosson.KORM
 	[Serializable]
 	public class KORMException : Exception
 	{
-		private DbCommand cmd;
-
 		/// <summary>
 		/// Command that caused the exception.
 		/// </summary>
-		public DbCommand Command { get { return cmd; } }
+		public DbCommand Command { get; }
+
+		/// <summary>
+		/// Exception message without appended command text.
+		/// </summary>
+		public string OriginalMessage { get; }
 
 		/// <summary>
 		/// Creates a new KORMException with error message.
@@ -23,6 +26,7 @@ namespace Kosson.KORM
 		public KORMException(string msg)
 			: base(msg)
 		{
+			OriginalMessage = msg;
 		}
 
 		/// <summary>
@@ -33,6 +37,7 @@ namespace Kosson.KORM
 		public KORMException(string msg, Exception inner)
 			: base(msg, inner)
 		{
+			OriginalMessage = msg;
 		}
 
 		/// <summary>
@@ -44,7 +49,8 @@ namespace Kosson.KORM
 		public KORMException(string msg, Exception inner, DbCommand cmd)
 			: base(msg + (cmd == null ? "" : "\n\n" + cmd.CommandText), inner)
 		{
-			this.cmd = cmd;
+			Command = cmd;
+			OriginalMessage = msg;
 		}
 	}
 
@@ -90,8 +96,8 @@ namespace Kosson.KORM
 		/// Creates a new exception from underlying, database engine-specific exception.
 		/// </summary>
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
-		public KORMDuplicateValueException(Exception inner)
-			: base("Duplicate value in unique field.", inner)
+		public KORMDuplicateValueException(Exception inner, DbCommand cmd)
+			: base("Duplicate value in unique field.", inner, cmd)
 		{
 		}
 	}
@@ -106,8 +112,8 @@ namespace Kosson.KORM
 		/// Creates a new exception from underlying, database engine-specific exception.
 		/// </summary>
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
-		public KORMLockException(Exception inner)
-			: base("Row is locked in another transaction.", inner)
+		public KORMLockException(Exception inner, DbCommand cmd)
+			: base("Row is locked in another transaction.", inner, cmd)
 		{
 		}
 	}

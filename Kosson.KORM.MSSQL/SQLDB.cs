@@ -75,13 +75,13 @@ namespace Kosson.KORM.MSSQL
 			}
 		}
 
-		protected override Exception TranslateException(Exception exc, DbCommand cmd)
+		protected override KORMException TranslateException(Exception exc, DbCommand cmd)
 		{
 			SqlException se = exc as SqlException;
 			if (se != null)
 			{
-				if (se.Number == 1222) return new KORMLockException(exc);
-				else if (se.Number == 2627) return new KORMDuplicateValueException(exc);
+				if (se.Number == 1222) return new KORMLockException(exc, cmd);
+				else if (se.Number == 2627) return new KORMDuplicateValueException(exc, cmd);
 				else if (se.Number == 3701) return new KORMInvalidStructureException(exc, cmd);
 				else if (se.Number == 1785) return new KORMInvalidStructureException(exc, cmd); // multiple cascade paths
 				else if (se.Number == 2714) return new KORMObjectExistsException(exc, cmd); // object exists
