@@ -148,7 +148,13 @@ namespace Kosson.KORM.DB
 		#region Connection management
 		ITransaction IDB.BeginTransaction(IsolationLevel isolationLevel)
 		{
-			if (IsTransactionOpen) throw new KORMInvalidOperationException(IsImplicitTransaction ? "Implicit transaction already open." : "Transaction already open.");
+			if (IsTransactionOpen)
+			{
+				if (!IsImplicitTransaction) throw new KORMInvalidOperationException("Transaction already open.");
+				if (isolationLevel != IsolationLevel.Unspecified && isolationLevel != IsolationLevel) throw new KORMInvalidOperationException("Implicit transaction already open at isolation level " + IsolationLevel + ".");
+				isImplicit = false;
+				return new Transaction(this);
+			}
 			IsolationLevel = isolationLevel;
 			Open(false);
 			return new Transaction(this);

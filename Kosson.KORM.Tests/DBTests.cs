@@ -173,11 +173,27 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KORMInvalidOperationException))]
-		public void ImplicitTransactionCannotBeReOpened()
+		public void ImplicitTransactionCanBePromoted()
 		{
 			DB.CreateCommand("SELECT 1");
+			Assert.IsTrue(DB.IsImplicitTransaction);
 			DB.BeginTransaction();
+			Assert.IsFalse(DB.IsImplicitTransaction);
+			DB.Commit();
+			Assert.IsFalse(DB.IsTransactionOpen);
+		}
+
+		[TestMethod]
+		public void PromotedTransactionRevertsToImplicit()
+		{
+			DB.CreateCommand("SELECT 1");
+			Assert.IsTrue(DB.IsImplicitTransaction);
+			using (var tx = DB.BeginTransaction())
+			{
+			}
+			DB.CreateCommand("SELECT 1");
+			Assert.IsTrue(DB.IsImplicitTransaction);
+			Assert.IsTrue(DB.IsTransactionOpen);
 		}
 
 		[TestMethod]
