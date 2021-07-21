@@ -251,6 +251,27 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void RetrieveByOrOperatorPrecedence()
+		{
+			ORM.Delete<MainTestTable>().Execute();
+			var inserted = new MainTestTable();
+			inserted.Value = INTMARKER;
+			ORM.Insert(inserted);
+			var inserted2 = new MainTestTable();
+			inserted2.Value = INTMARKER + 1;
+			ORM.Insert(inserted2);
+			var inserted3 = new MainTestTable();
+			inserted3.Value = INTMARKER + 2;
+			ORM.Insert(inserted3);
+			var retrieved = ORM.Select<MainTestTable>().WhereFieldEquals("Value", inserted3.Value).WhereFieldEquals("ID", inserted2.ID).Or().WhereFieldEquals("ID", inserted.ID).Execute().Single();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(inserted.ID, retrieved.ID);
+			var retrieved2 = ORM.Select<MainTestTable>().WhereFieldEquals("ID", inserted2.ID).Or().WhereFieldEquals("Value", inserted3.Value).WhereFieldEquals("ID", inserted.ID).Execute().Single();
+			Assert.IsNotNull(retrieved2);
+			Assert.AreEqual(inserted2.ID, retrieved2.ID);
+		}
+
+		[TestMethod]
 		public void SelectForUpdateRetrievesRecord()
 		{
 			var inserted = new MainTestTable();
