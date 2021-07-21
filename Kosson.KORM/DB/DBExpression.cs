@@ -226,13 +226,13 @@ namespace Kosson.KORM.DB
 
 	class DBComparison : DBExpression, IDBExpression
 	{
-		private readonly IDBExpression lexpr;
+		private readonly IDBIdentifier lexpr;
 		private readonly IDBExpression rexpr;
 		private readonly DBExpressionComparison comparison;
 
 		public string RawValue { get { throw new NotSupportedException(); } }
 
-		public DBComparison(IDBCommandBuilder builder, IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr)
+		public DBComparison(IDBCommandBuilder builder, IDBIdentifier lexpr, DBExpressionComparison comparison, IDBExpression rexpr)
 			: base(builder)
 		{
 			if (lexpr == null) throw new ArgumentNullException("lexpr");

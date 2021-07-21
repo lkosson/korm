@@ -205,7 +205,7 @@ namespace Kosson.KORM
 		/// <param name="comparison">Type of comparison between values.</param>
 		/// <param name="rexpr">Right value of a comparison.</param>
 		/// <returns>New expression representing comparison between given expressions.</returns>
-		IDBExpression Comparison(IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr);
+		IDBExpression Comparison(IDBIdentifier lexpr, DBExpressionComparison comparison, IDBExpression rexpr);
 
 		/// <summary>
 		/// Creates a new expression representing a database command parameter.

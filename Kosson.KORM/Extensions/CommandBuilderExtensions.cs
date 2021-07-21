@@ -14,7 +14,7 @@ namespace Kosson.KORM
 		/// <param name="lexpr">First value to compare.</param>
 		/// <param name="rexpr">Second value to compare.</param>
 		/// <returns>Comparison expression testing for equality between lexpr and rexpr.</returns>
-		public static IDBExpression Equal(this IDBCommandBuilder builder, IDBExpression lexpr, IDBExpression rexpr)
+		public static IDBExpression Equal(this IDBCommandBuilder builder, IDBIdentifier lexpr, IDBExpression rexpr)
 			=> builder.Comparison(lexpr, DBExpressionComparison.Equal, rexpr);
 
 		/// <summary>
@@ -24,7 +24,7 @@ namespace Kosson.KORM
 		/// <param name="lexpr">First value to compare.</param>
 		/// <param name="rexpr">Second value to compare.</param>
 		/// <returns>Comparison expression testing for inequality between lexpr and rexpr.</returns>
-		public static IDBExpression NotEqual(this IDBCommandBuilder builder, IDBExpression lexpr, IDBExpression rexpr)
+		public static IDBExpression NotEqual(this IDBCommandBuilder builder, IDBIdentifier lexpr, IDBExpression rexpr)
 			=> builder.Comparison(lexpr, DBExpressionComparison.NotEqual, rexpr);
 
 		/// <summary>
@@ -33,7 +33,7 @@ namespace Kosson.KORM
 		/// <param name="builder">Builder to use for expression construction.</param>
 		/// <param name="expr">Value to compare to NULL.</param>
 		/// <returns>Comparison expression testing expr for NULL.</returns>
-		public static IDBExpression IsNull(this IDBCommandBuilder builder, IDBExpression expr)
+		public static IDBExpression IsNull(this IDBCommandBuilder builder, IDBIdentifier expr)
 			=> Equal(builder, expr, null);
 
 		/// <summary>
@@ -42,7 +42,7 @@ namespace Kosson.KORM
 		/// <param name="builder">Builder to use for expression construction.</param>
 		/// <param name="expr">Value to compare to NULL.</param>
 		/// <returns>Comparison expression testing expr for NOT NULL.</returns>
-		public static IDBExpression IsNotNull(this IDBCommandBuilder builder, IDBExpression expr)
+		public static IDBExpression IsNotNull(this IDBCommandBuilder builder, IDBIdentifier expr)
 			=> NotEqual(builder, expr, null);
 
 		/// <summary>
