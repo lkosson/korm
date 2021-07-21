@@ -85,10 +85,10 @@ namespace Kosson.KORM.DB.CommandBuilder
 				}
 				else
 				{
+					AppendCRLF(sb);
 					AppendWhereSeparator(sb);
 				}
 				AppendWhere(sb, where);
-				AppendCRLF(sb);
 			}
 			if (multipleGroups) AppendGroupEnd(sb);
 		}
@@ -137,7 +137,8 @@ namespace Kosson.KORM.DB.CommandBuilder
 		protected virtual void AppendWhereGroupSeparator(StringBuilder sb)
 		{
 			AppendGroupEnd(sb);
-			sb.Append(" OR ");
+			AppendCRLF(sb);
+			sb.Append("OR ");
 			AppendGroupStart(sb);
 		}
 	}

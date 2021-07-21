@@ -147,9 +147,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 			sb.Append("SELECT ");
 			AppendForUpdate(sb);
 			AppendColumns(sb);
-			AppendCRLF(sb);
 			AppendMainTable(sb);
-			AppendCRLF(sb);
 			AppendJoins(sb);
 			AppendWheres(sb);
 			AppendGroups(sb);
@@ -347,8 +345,8 @@ namespace Kosson.KORM.DB.CommandBuilder
 			if (joins == null) return;
 			foreach (var join in joins)
 			{
-				AppendJoin(sb, join);
 				AppendCRLF(sb);
+				AppendJoin(sb, join);
 			}
 		}
 
