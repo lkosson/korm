@@ -51,7 +51,17 @@ namespace Kosson.KORM.DB.CommandBuilder
 		{
 			if (wheres == null || wheres.Count == 0) return;
 			AppendCRLF(sb);
-			sb.Append("WHERE (");
+			sb.Append("WHERE ");
+			bool multipleGroups = false;
+			foreach (var where in wheres)
+			{
+				if (where == null)
+				{
+					multipleGroups = true;
+					break;
+				}
+			}
+			if (multipleGroups) AppendGroupStart(sb);
 			bool first = true;
 			bool newGroup = false;
 			foreach (var where in wheres)
@@ -80,7 +90,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 				AppendWhere(sb, where);
 				AppendCRLF(sb);
 			}
-			sb.Append(")");
+			if (multipleGroups) AppendGroupEnd(sb);
 		}
 
 		/// <summary>
@@ -103,12 +113,32 @@ namespace Kosson.KORM.DB.CommandBuilder
 		}
 
 		/// <summary>
+		/// Appends WHERE clause group beginning delimiter.
+		/// </summary>
+		/// <param name="sb">StringBuilder constructing a command text.</param>
+		protected virtual void AppendGroupStart(StringBuilder sb)
+		{
+			sb.Append("(");
+		}
+
+		/// <summary>
+		/// Appends WHERE clause group ending delimiter.
+		/// </summary>
+		/// <param name="sb">StringBuilder constructing a command text.</param>
+		protected virtual void AppendGroupEnd(StringBuilder sb)
+		{
+			sb.Append(")");
+		}
+
+		/// <summary>
 		/// Appends WHERE clause group separator to command text.
 		/// </summary>
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendWhereGroupSeparator(StringBuilder sb)
 		{
-			sb.Append(") OR (");
+			AppendGroupEnd(sb);
+			sb.Append(" OR ");
+			AppendGroupStart(sb);
 		}
 	}
 }

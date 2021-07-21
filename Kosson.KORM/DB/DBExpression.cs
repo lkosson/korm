@@ -244,33 +244,30 @@ namespace Kosson.KORM.DB
 
 		public virtual void Append(StringBuilder sb)
 		{
-			sb.Append("((");
 			lexpr.Append(sb);
-			sb.Append(") ");
 
 			if (rexpr == null)
 			{
-				if (comparison == DBExpressionComparison.Equal) sb.Append("IS NULL");
-				if (comparison == DBExpressionComparison.NotEqual) sb.Append("IS NOT NULL");
+				if (comparison == DBExpressionComparison.Equal) sb.Append(" IS NULL");
+				if (comparison == DBExpressionComparison.NotEqual) sb.Append(" IS NOT NULL");
 
 			}
 			else
 			{
-				if (comparison == DBExpressionComparison.Equal) sb.Append("=");
-				else if (comparison == DBExpressionComparison.NotEqual) sb.Append("<>");
-				else if (comparison == DBExpressionComparison.Greater) sb.Append(">");
-				else if (comparison == DBExpressionComparison.GreaterOrEqual) sb.Append(">=");
-				else if (comparison == DBExpressionComparison.Less) sb.Append("<");
-				else if (comparison == DBExpressionComparison.LessOrEqual) sb.Append("<=");
-				else if (comparison == DBExpressionComparison.In) sb.Append("IN");
-				else if (comparison == DBExpressionComparison.Like) sb.Append("LIKE");
+				if (comparison == DBExpressionComparison.Equal) sb.Append(" = ");
+				else if (comparison == DBExpressionComparison.NotEqual) sb.Append(" <> ");
+				else if (comparison == DBExpressionComparison.Greater) sb.Append(" > ");
+				else if (comparison == DBExpressionComparison.GreaterOrEqual) sb.Append(" >= ");
+				else if (comparison == DBExpressionComparison.Less) sb.Append(" < ");
+				else if (comparison == DBExpressionComparison.LessOrEqual) sb.Append(" <= ");
+				else if (comparison == DBExpressionComparison.In) sb.Append(" IN (");
+				else if (comparison == DBExpressionComparison.Like) sb.Append(" LIKE ");
+				else throw new ArgumentOutOfRangeException("comparison", comparison, "Unsupported comparison type.");
 
-				// Parentheses required for IN operator.
-				sb.Append(" (");
 				rexpr.Append(sb);
-				sb.Append(")");
+
+				if (comparison == DBExpressionComparison.In) sb.Append(")");
 			}
-			sb.Append(")");
 		}
 
 		public override string ToString()
