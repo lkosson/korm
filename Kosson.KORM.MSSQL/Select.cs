@@ -31,7 +31,7 @@ namespace Kosson.KORM.MSSQL
 
 		protected override void AppendColumns(StringBuilder sb)
 		{
-			if (limit > 0) sb.Append("TOP " + limit);
+			if (limit > 0) sb.Append("TOP " + limit + " ");
 			base.AppendColumns(sb);
 		}
 

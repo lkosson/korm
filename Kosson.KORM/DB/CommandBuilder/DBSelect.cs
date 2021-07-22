@@ -53,6 +53,11 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// </summary>
 		protected IDBIdentifier alias;
 
+		/// <summary>
+		/// Indicates whether the command is a subquery part of outer SELECT command.
+		/// </summary>
+		protected bool forSubquery;
+
 		/// <inheritdoc/>
 		public DBSelect(IDBCommandBuilder builder) : base(builder)
 		{
@@ -141,6 +146,11 @@ namespace Kosson.KORM.DB.CommandBuilder
 			orders.Add(new DBCommandOrder(expression, descending));
 		}
 
+		void IDBSelect.ForSubquery()
+		{
+			forSubquery = true;
+		}
+
 		/// <inheritdoc/>
 		protected override void AppendCommandText(StringBuilder sb)
 		{
@@ -178,14 +188,14 @@ namespace Kosson.KORM.DB.CommandBuilder
 					var columnIdentifier = column.Expression as IDBDottedIdentifier;
 					if (columnIdentifier == null)
 					{
-						AppendCRLF(sb);
+						if (!first) AppendCRLF(sb);
 					}
 					else
 					{
 						var columnTable = columnIdentifier.Fragments.FirstOrDefault();
 						if (previousTable != columnTable)
 						{
-							AppendCRLF(sb);
+							if (previousTable != null) AppendCRLF(sb);
 							previousTable = columnTable;
 						}
 					}
@@ -206,13 +216,13 @@ namespace Kosson.KORM.DB.CommandBuilder
 			{
 				foreach (var subquery in subqueries)
 				{
-					AppendCRLF(sb);
 					if (first)
 					{
 						first = false;
 					}
 					else
 					{
+						AppendCRLF(sb);
 						AppendColumnSeparator(sb);
 					}
 					AppendSubquery(sb, subquery);
@@ -486,6 +496,17 @@ namespace Kosson.KORM.DB.CommandBuilder
 		protected virtual void AppendOrderSeparator(StringBuilder sb)
 		{
 			sb.Append(", ");
+		}
+
+		/// <inheritdoc/>
+		protected override void AppendCRLF(StringBuilder sb)
+		{
+			if (forSubquery)
+			{
+				sb.Append(" ");
+				return;
+			}
+			base.AppendCRLF(sb);
 		}
 	}
 

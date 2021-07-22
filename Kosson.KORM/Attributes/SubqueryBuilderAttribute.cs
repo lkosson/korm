@@ -51,6 +51,7 @@ namespace Kosson.KORM
 		public override IDBExpression Build(string tableAlias, IMetaRecordField field, IDBCommandBuilder builder)
 		{
 			var select = builder.Select();
+			select.ForSubquery();
 			BuildSelect(select, tableAlias, field, builder);
 			var selectExpr = builder.Expression(select.ToString());
 			return selectExpr;

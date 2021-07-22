@@ -423,6 +423,11 @@ namespace Kosson.KORM
 		/// <param name="expression">Expression to sort by.</param>
 		/// <param name="descending">Determines whether sort order should be descending or ascending.</param>
 		void OrderBy(IDBExpression expression, bool descending = false);
+
+		/// <summary>
+		/// Marks SELECT command as a subquery expression of outer SELECT command.
+		/// </summary>
+		void ForSubquery();
 	}
 
 	/// <summary>
