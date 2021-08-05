@@ -27,6 +27,11 @@ namespace Kosson.KORM
 		public bool IsNull { get { return ID == 0; } }
 
 		/// <summary>
+		/// Determines whether there is a referenced record.
+		/// </summary>
+		public bool IsNotNull {  get { return !IsNull; } }
+
+		/// <summary>
 		/// Primary key of referenced record as nullable value.
 		/// </summary>
 		public long? IDOrNull { get { if (IsNull) return null; return ID; } set { ID = value.GetValueOrDefault(); } }
