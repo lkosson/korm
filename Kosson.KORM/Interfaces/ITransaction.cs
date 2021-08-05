@@ -8,5 +8,6 @@ namespace Kosson.KORM
 	{
 		void Commit();
 		void Rollback();
+		bool IsOpen { get; }
 	}
 }

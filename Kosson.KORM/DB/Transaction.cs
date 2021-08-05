@@ -8,6 +8,8 @@ namespace Kosson.KORM.DB
 	{
 		private readonly IDB db;
 
+		bool ITransaction.IsOpen => db.IsTransactionOpen && !db.IsImplicitTransaction;
+
 		public Transaction(IDB db)
 		{
 			this.db = db;

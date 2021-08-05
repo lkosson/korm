@@ -37,8 +37,9 @@ namespace Kosson.KORM.Tests
 		public void BeginTransactionCompletes()
 		{
 			Assert.IsFalse(DB.IsTransactionOpen);
-			DB.BeginTransaction();
+			var tx = DB.BeginTransaction();
 			Assert.IsTrue(DB.IsTransactionOpen);
+			Assert.IsTrue(tx.IsOpen);
 		}
 
 		[TestMethod]
@@ -114,20 +115,24 @@ namespace Kosson.KORM.Tests
 		public void CommitClosesTransaction()
 		{
 			Assert.IsFalse(DB.IsTransactionOpen);
-			DB.BeginTransaction();
+			var tx = DB.BeginTransaction();
 			Assert.IsTrue(DB.IsTransactionOpen);
+			Assert.IsTrue(tx.IsOpen);
 			DB.Commit();
 			Assert.IsFalse(DB.IsTransactionOpen);
+			Assert.IsFalse(tx.IsOpen);
 		}
 
 		[TestMethod]
 		public void RollbackClosesTransaction()
 		{
 			Assert.IsFalse(DB.IsTransactionOpen);
-			DB.BeginTransaction();
+			var tx = DB.BeginTransaction();
 			Assert.IsTrue(DB.IsTransactionOpen);
+			Assert.IsTrue(tx.IsOpen);
 			DB.Rollback();
 			Assert.IsFalse(DB.IsTransactionOpen);
+			Assert.IsFalse(tx.IsOpen);
 		}
 
 		[TestMethod]
@@ -177,10 +182,12 @@ namespace Kosson.KORM.Tests
 		{
 			DB.CreateCommand("SELECT 1");
 			Assert.IsTrue(DB.IsImplicitTransaction);
-			DB.BeginTransaction();
+			var tx = DB.BeginTransaction();
 			Assert.IsFalse(DB.IsImplicitTransaction);
+			Assert.IsTrue(tx.IsOpen);
 			DB.Commit();
 			Assert.IsFalse(DB.IsTransactionOpen);
+			Assert.IsFalse(tx.IsOpen);
 		}
 
 		[TestMethod]
