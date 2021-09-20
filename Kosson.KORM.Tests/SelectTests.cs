@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Kosson.KORM;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Kosson.KORM.Tests
 {
@@ -163,6 +164,22 @@ namespace Kosson.KORM.Tests
 			Assert.AreEqual(2, retrieved.Count);
 			Assert.AreEqual(INTMARKER + 5, retrieved.Min(v => v.Value));
 			Assert.AreEqual(INTMARKER + 8, retrieved.Max(v => v.Value));
+		}
+
+		[TestMethod]
+		public void RetrieveByMultipleIDs()
+		{
+			ORM.Delete<MainTestTable>().Execute();
+			var ids = new List<long>();
+			for (int i = 0; i < 10; i++)
+			{
+				var item = new MainTestTable();
+				item.Value = INTMARKER + i;
+				ORM.Insert(item);
+				if (i % 3 == 0) ids.Add(item.ID);
+			}
+			var retrieved = ORM.Select<MainTestTable>().ByIDs(ids);
+			Assert.AreEqual(ids.Count, retrieved.Count);
 		}
 
 		[TestMethod]

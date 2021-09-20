@@ -1,5 +1,6 @@
 ﻿using Kosson.KORM.Meta;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -187,6 +188,17 @@ namespace Kosson.KORM
 			=> query.WhereField(MetaRecord.PKNAME, "{0} IN (" + String.Format(subquery, Enumerable.Range(1, values.Length).Select(e => "{" + e + "}").ToArray()) + ")", values);
 
 		/// <summary>
+		/// Adds WHERE condition comparing table's primary key to an array of values. 
+		/// Condition is joined with existing conditions by AND.
+		/// </summary>
+		/// <typeparam name="TCommand">Type of command to add condition to.</typeparam>
+		/// <param name="values">Primary key values to use in condition.</param>
+		/// <returns>Original command with comparison added to it.</returns>
+		public static TCommand WhereIDIn<TCommand>(this TCommand query, IEnumerable<long> values)
+			where TCommand : IORMNarrowableCommand<TCommand>
+			=> query.WhereFieldIn(MetaRecord.PKNAME, values.ToArray());
+
+		/// <summary>
 		/// Adds a tag to the command.
 		/// </summary>
 		/// <typeparam name="TCommand">Type of tagged command.</typeparam>
@@ -322,6 +334,17 @@ namespace Kosson.KORM
 			=> query.WhereID(id).ExecuteFirst();
 
 		/// <summary>
+		/// Executes SELECT command after adding to it equality comparison between primary key (ID) and given set of constant values.
+		/// Returns any matching records or an empty collection.
+		/// </summary>
+		/// <typeparam name="TRecord">Type of record to return.</typeparam>
+		/// <param name="query">SELECT command to execute.</param>
+		/// <param name="ids">Primary KEY (ID) values of the records to select.</param>
+		/// <returns>Records with matching primary key values or empty collection.</returns>
+		public static IReadOnlyCollection<TRecord> ByIDs<TRecord>(this IORMSelect<TRecord> query, IEnumerable<long> ids) where TRecord : IRecord
+			=> query.WhereIDIn(ids).Execute();
+
+		/// <summary>
 		/// Executes SELECT command after adding to it equality comparison between primary key (ID) and given constant value.
 		/// Returns single record with a given ID value or null when no such record is found.
 		/// </summary>
@@ -331,6 +354,17 @@ namespace Kosson.KORM
 		/// <returns>Record returned by the query or null if no record matches the query condition.</returns>
 		public static TRecord ByRef<TRecord>(this IORMSelect<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
 			=> ByID(query, recordRef.ID);
+
+		/// <summary>
+		/// Executes SELECT command after adding to it equality comparison between primary key (ID) and given set of constant values.
+		/// Returns any matching records or an empty collection.
+		/// </summary>
+		/// <typeparam name="TRecord">Type of record to return.</typeparam>
+		/// <param name="query">SELECT command to execute.</param>
+		/// <param name="ids">Primary KEY (ID) values of the records to select.</param>
+		/// <returns>Records with matching primary key values or empty collection.</returns>
+		public static IReadOnlyCollection<TRecord> ByRefs<TRecord>(this IORMSelect<TRecord> query, IEnumerable<RecordRef<TRecord>> refs) where TRecord : IRecord
+			=> ByIDs(query, refs.Select(r => r.ID));
 
 		/// <summary>
 		/// Asynchronous version of ByID.
@@ -345,6 +379,18 @@ namespace Kosson.KORM
 			=> query.WhereID(id).ExecuteFirstAsync();
 
 		/// <summary>
+		/// Asynchronous version of ByIDs.
+		/// Executes SELECT command after adding to it equality comparison between primary key (ID) and given set of constant values.
+		/// Returns any matching records or an empty collection.
+		/// </summary>
+		/// <typeparam name="TRecord">Type of record to return.</typeparam>
+		/// <param name="query">SELECT command to execute.</param>
+		/// <param name="ids">Primary KEY (ID) values of the records to select.</param>
+		/// <returns>Records with matching primary key values or empty collection.</returns>
+		public static Task<IReadOnlyCollection<TRecord>> ByIDsAsync<TRecord>(this IORMSelect<TRecord> query, IEnumerable<long> ids) where TRecord : IRecord
+			=> query.WhereIDIn(ids).ExecuteAsync();
+
+		/// <summary>
 		/// Asynchronous version of ByRef.
 		/// Executes SELECT command after adding to it equality comparison between primary key (ID) and given constant value.
 		/// Returns single record with a given ID value or null when no such record is found.
@@ -355,6 +401,18 @@ namespace Kosson.KORM
 		/// <returns>Task representing asynchronous operation returning record returned by the query or null if no record matches the query condition.</returns>
 		public static Task<TRecord> ByRefAsync<TRecord>(this IORMSelect<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
 			=> ByIDAsync(query, recordRef.ID);
+
+		/// <summary>
+		/// Asynchronous version of ByRefs.
+		/// Executes SELECT command after adding to it equality comparison between primary key (ID) and given set of constant values.
+		/// Returns any matching records or an empty collection.
+		/// </summary>
+		/// <typeparam name="TRecord">Type of record to return.</typeparam>
+		/// <param name="query">SELECT command to execute.</param>
+		/// <param name="ids">Primary KEY (ID) values of the records to select.</param>
+		/// <returns>Records with matching primary key values or empty collection.</returns>
+		public static Task<IReadOnlyCollection<TRecord>> ByRefsAsync<TRecord>(this IORMSelect<TRecord> query, IEnumerable<RecordRef<TRecord>> refs) where TRecord : IRecord
+			=> ByIDsAsync(query, refs.Select(r => r.ID));
 
 		/// <summary>
 		/// Executes SELECT command and returns first record of the result or null when resultset is empty.
