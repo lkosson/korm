@@ -10,6 +10,7 @@ namespace Kosson.KORM
 	/// </summary>
 	public static class ORMCommandExtensions
 	{
+		#region Generic IORMNarrowableCommand extensions
 		/// <summary>
 		/// Adds WHERE condition based on given SQL condition and parameters. Condition is joined with existing conditions by AND. Parameter names for provided values
 		/// are substituted for {0}..{n} placeholders.
@@ -118,12 +119,12 @@ namespace Kosson.KORM
 		/// <param name="field">Column or property name for left side of the comparison.</param>
 		/// <param name="values">Values of set for right side of the comparison.</param>
 		/// <returns>Original command with comparison added to it.</returns>
-		public static TCommand WhereFieldIn<TCommand>(this TCommand query, string field, params object[] values)
+		public static TCommand WhereFieldIn<TCommand, TValue>(this TCommand query, string field, params TValue[] values)
 			where TCommand : IORMNarrowableCommand<TCommand>
 		{
 			if (values == null) throw new ArgumentNullException("values");
 			if (values.Length == 0) throw new ArgumentOutOfRangeException("values", "Values cannot be empty.");
-			if (values.Length == 1 && values[0] is object[] nested) values = nested;
+			if (values.Length == 1 && values[0] is TValue[] nested) values = nested;
 
 			var cb = query.DB.CommandBuilder;
 			var pexpr = query.Array(values);
@@ -186,6 +187,17 @@ namespace Kosson.KORM
 			=> query.WhereField(MetaRecord.PKNAME, "{0} IN (" + String.Format(subquery, Enumerable.Range(1, values.Length).Select(e => "{" + e + "}").ToArray()) + ")", values);
 
 		/// <summary>
+		/// Adds a tag to the command.
+		/// </summary>
+		/// <typeparam name="TCommand">Type of tagged command.</typeparam>
+		/// <param name="command">Command to tag.</param>
+		/// <param name="comment">Tag comment to add.</param>
+		/// <returns>Original command with tag applied</returns>
+		public static TCommand Tag<TCommand>(this TCommand command, string comment) where TCommand : IORMCommand<TCommand>
+			=> command.Tag(command.DB.CommandBuilder.Comment(comment));
+		#endregion
+		#region IORMUpdate-specific extensions
+		/// <summary>
 		/// Executes UPDATE command after adding to it equality comparison between primary key (ID) and given constant value.
 		/// Throws ORMException when execution does not modify exactly one database row.
 		/// </summary>
@@ -234,6 +246,22 @@ namespace Kosson.KORM
 			=> ByIDAsync(query, recordRef.ID);
 
 		/// <summary>
+		/// Adds SET clause to the UPDATE command. If the command already contains SET clause, additional assignment is added to it.
+		/// </summary>
+		/// <typeparam name="TRecord">Type of record on which the command is based.</typeparam>
+		/// <param name="query">UPDATE command to modify.</param>
+		/// <param name="field">Column or property name to set value of.</param>
+		/// <param name="value">Value to set.</param>
+		/// <returns>Original command with SET clause added to it.</returns>
+		public static IORMUpdate<TRecord> Set<TRecord>(this IORMUpdate<TRecord> query, string field, object value) where TRecord : IRecord
+		{
+			var fieldExpr = query.Field(field);
+			var valExpr = query.Parameter(value);
+			return query.Set(fieldExpr, valExpr);
+		}
+		#endregion
+		#region IORMDelete-specific extensions
+		/// <summary>
 		/// Executes DELETE command after adding to it equality comparison between primary key (ID) and given constant value.
 		/// Throws ORMException when execution does not delete exactly one database row.
 		/// </summary>
@@ -280,7 +308,8 @@ namespace Kosson.KORM
 		/// <param name="recordRef">Reference to a record to delete.</param>
 		public static Task ByRefAsync<TRecord>(this IORMDelete<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
 			=> ByIDAsync(query, recordRef.ID);
-
+		#endregion
+		#region IORMSelect-specific extensions
 		/// <summary>
 		/// Executes SELECT command after adding to it equality comparison between primary key (ID) and given constant value.
 		/// Returns single record with a given ID value or null when no such record is found.
@@ -389,30 +418,6 @@ namespace Kosson.KORM
 		/// <returns>Original command with ORDER BY DESC clause added to it.</returns>
 		public static IORMSelect<TRecord> OrderByDescending<TRecord>(this IORMSelect<TRecord> query, string field) where TRecord : IRecord
 			=> query.OrderBy(query.Field(field), true);
-
-		/// <summary>
-		/// Adds SET clause to the UPDATE command. If the command already contains SET clause, additional assignment is added to it.
-		/// </summary>
-		/// <typeparam name="TRecord">Type of record on which the command is based.</typeparam>
-		/// <param name="query">UPDATE command to modify.</param>
-		/// <param name="field">Column or property name to set value of.</param>
-		/// <param name="value">Value to set.</param>
-		/// <returns>Original command with SET clause added to it.</returns>
-		public static IORMUpdate<TRecord> Set<TRecord>(this IORMUpdate<TRecord> query, string field, object value) where TRecord : IRecord
-		{
-			var fieldExpr = query.Field(field);
-			var valExpr = query.Parameter(value);
-			return query.Set(fieldExpr, valExpr);
-		}
-
-		/// <summary>
-		/// Adds a tag to the command.
-		/// </summary>
-		/// <typeparam name="TCommand">Type of tagged command.</typeparam>
-		/// <param name="command">Command to tag.</param>
-		/// <param name="comment">Tag comment to add.</param>
-		/// <returns>Original command with tag applied</returns>
-		public static TCommand Tag<TCommand>(this TCommand command, string comment) where TCommand : IORMCommand<TCommand>
-			=> command.Tag(command.DB.CommandBuilder.Comment(comment));
+		#endregion
 	}
 }

@@ -66,7 +66,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="values">Elements of array to create.</param>
 		/// <returns>Expression represeting array of provided values.</returns>
-		IDBExpression Array(object[] values);
+		IDBExpression Array<T>(T[] values);
 
 		/// <summary>
 		/// Creates a new expression referencing specified database column name or property.

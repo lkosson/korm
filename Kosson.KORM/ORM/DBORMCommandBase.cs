@@ -31,7 +31,7 @@ namespace Kosson.KORM.ORM
 			return DB.CommandBuilder.Parameter(pname);
 		}
 
-		public IDBExpression Array(object[] values)
+		public IDBExpression Array<T>(T[] values)
 		{
 			var pvalues = new IDBExpression[values.Length];
 			for (int i = 0; i < values.Length; i++)
