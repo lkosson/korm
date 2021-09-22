@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,6 +78,11 @@ namespace Kosson.KORM.DB
 		/// </summary>
 		/// <returns>New ADO.NET DbConnection.</returns>
 		protected abstract DbConnection CreateConnection();
+
+		private StackTrace connectionStartStackTrace;
+		private StackTrace connectionEndStackTrace;
+		private StackTrace transactionStartStackTrace;
+		private StackTrace transactionEndStackTrace;
 
 		/// <summary>
 		/// Creates new instance of ADONETDB.
@@ -168,11 +174,16 @@ namespace Kosson.KORM.DB
 		{
 			using (AcquireLock())
 			{
-				if (dbconn == null) dbconn = CreateConnection();
+				if (dbconn == null)
+				{
+					dbconn = CreateConnection();
+					connectionStartStackTrace = new StackTrace();
+				}
 				if (dbtran == null)
 				{
 					dbtran = dbconn.BeginTransaction(IsolationLevel);
 					this.isImplicit = isImplicit;
+					transactionStartStackTrace = new StackTrace();
 				}
 			}
 		}
@@ -186,6 +197,7 @@ namespace Kosson.KORM.DB
 				dbtran.Commit();
 				dbtran.Dispose();
 				dbtran = null;
+				transactionEndStackTrace = new StackTrace();
 			}
 		}
 
@@ -198,6 +210,7 @@ namespace Kosson.KORM.DB
 				dbtran.Rollback();
 				dbtran.Dispose();
 				dbtran = null;
+				transactionEndStackTrace = new StackTrace();
 			}
 		}
 
@@ -250,8 +263,9 @@ namespace Kosson.KORM.DB
 						HandleException(exc, null);
 						throw;
 					}
-
 				}
+				transactionEndStackTrace = new StackTrace();
+				connectionEndStackTrace = new StackTrace();
 			}
 		}
 
