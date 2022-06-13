@@ -25,7 +25,7 @@ namespace Kosson.KORM.Backup
 			sw = new StreamWriter(stream, Encoding.UTF8, 65536, true);
 			tableStates = new Dictionary<Type, TableState>();
 			cb = db.CommandBuilder;
-			tc = new ORM.DBTableCreator(db, metaBuilder, WriteCreateTableCommand);
+			tc = new ORM.DBTableCreator(db, metaBuilder, null, WriteCreateTableCommand);
 			CreateStructure = true;
 			sw.WriteLine("BEGIN TRANSACTION");
 		}

@@ -25,7 +25,7 @@ namespace Kosson.KORM.Backup
 
 				targetDB.CreateDatabase();
 				targetDB.BeginTransaction();
-				new DBTableCreator(targetDB, metaBuilder).Create(tables);
+				new DBTableCreator(targetDB, metaBuilder, null).Create(tables);
 				targetEraser.Clear(tables);
 
 				using (var writer = ActivatorUtilities.CreateInstance<DatabaseBackupWriter>(serviceProvider, targetDB, targetORM))

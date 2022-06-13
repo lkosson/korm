@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,8 +12,8 @@ namespace Kosson.KORM.ORM
 	{
 		private IConverter converter;
 
-		public DBORMInsert(IDB db, IMetaBuilder metaBuilder, IConverter converter)
-			: base(db, metaBuilder)
+		public DBORMInsert(IDB db, IMetaBuilder metaBuilder, IConverter converter, ILogger logger)
+			: base(db, metaBuilder, logger)
 		{
 			this.converter = converter;
 		}
@@ -60,6 +62,8 @@ namespace Kosson.KORM.ORM
 
 		public int Records(IEnumerable<TRecord> records)
 		{
+			var sw = Stopwatch.StartNew();
+			logger?.LogInformation("ORM\tInsert\tRecords");
 			var getlastid = command.GetLastID;
 			var manualid = meta.IsManualID;
 			using (var cmdInsert = DB.CreateCommand(command.ToString()))
@@ -93,12 +97,15 @@ namespace Kosson.KORM.ORM
 					if (notify != null) result = notify.OnInserted();
 					if (result == RecordNotifyResult.Break) break;
 				}
+				logger?.LogDebug("ORM\tInsert\tRecords\t" + sw.ElapsedMilliseconds + " ms\t" + count);
 				return count;
 			}
 		}
 
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
+			var sw = Stopwatch.StartNew();
+			logger?.LogInformation("ORM\tInsert\tRecordsAsync");
 			var getlastid = command.GetLastID;
 			var manualid = meta.IsManualID;
 			using (var cmdInsert = DB.CreateCommand(command.ToString()))
@@ -124,6 +131,7 @@ namespace Kosson.KORM.ORM
 					if (notify != null) result = notify.OnInserted();
 					if (result == RecordNotifyResult.Break) break;
 				}
+				logger?.LogDebug("ORM\tInsert\tRecordsAsync\t" + sw.ElapsedMilliseconds + " ms\t" + count);
 				return count;
 			}
 		}

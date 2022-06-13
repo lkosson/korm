@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Kosson.KORM.ORM
@@ -10,8 +12,8 @@ namespace Kosson.KORM.ORM
 		protected override bool UseFullFieldNames { get { return false; } }
 		private string commandText;
 
-		public DBORMUpdate(IDB db, IMetaBuilder metaBuilder)
-			: base(db, metaBuilder)
+		public DBORMUpdate(IDB db, IMetaBuilder metaBuilder, ILogger logger)
+			: base(db, metaBuilder, logger)
 		{
 			commandText = command.ToString();
 			var cb = db.CommandBuilder;
@@ -79,7 +81,11 @@ namespace Kosson.KORM.ORM
 
 		public int Execute()
 		{
-			return DB.ExecuteNonQueryRaw(command.ToString(), Parameters);
+			var sw = Stopwatch.StartNew();
+			logger?.LogInformation("ORM\tUpdate\tExecute");
+			var result = DB.ExecuteNonQueryRaw(command.ToString(), Parameters);
+			logger?.LogDebug("ORM\tUpdate\tExecute\t" + sw.ElapsedMilliseconds + " ms\t" + result);
+			return result;
 		}
 
 		private void ApplyRowVersion(IRecordWithRowVersion record, DbParameter rowVersionParameter)
@@ -92,6 +98,8 @@ namespace Kosson.KORM.ORM
 
 		public int Records(IEnumerable<TRecord> records)
 		{
+			var sw = Stopwatch.StartNew();
+			logger?.LogInformation("ORM\tUpdate\tRecords");
 			using (var cmdUpdate = DB.CreateCommand(commandText))
 			{
 				int count = 0;
@@ -115,17 +123,24 @@ namespace Kosson.KORM.ORM
 					if (notify != null) result = notify.OnUpdated();
 					if (result == RecordNotifyResult.Break) break;
 				}
+				logger?.LogDebug("ORM\tUpdate\tRecords\t" + sw.ElapsedMilliseconds + " ms\t" + count);
 				return count;
 			}
 		}
 
-		public Task<int> ExecuteAsync()
+		public async Task<int> ExecuteAsync()
 		{
-			return DB.ExecuteNonQueryRawAsync(command.ToString(), Parameters);
+			var sw = Stopwatch.StartNew();
+			logger?.LogInformation("ORM\tUpdate\tExecuteAsync");
+			var result = await DB.ExecuteNonQueryRawAsync(command.ToString(), Parameters);
+			logger?.LogDebug("ORM\tUpdate\tExecuteAsync\t" + sw.ElapsedMilliseconds + " ms\t" + result);
+			return result;
 		}
 
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
+			var sw = Stopwatch.StartNew();
+			logger?.LogInformation("ORM\tUpdate\tRecordsAsync");
 			using (var cmdUpdate = DB.CreateCommand(commandText))
 			{
 				int count = 0;
@@ -149,6 +164,7 @@ namespace Kosson.KORM.ORM
 					if (notify != null) result = notify.OnUpdated();
 					if (result == RecordNotifyResult.Break) break;
 				}
+				logger?.LogDebug("ORM\tUpdate\tRecordsAsync\t" + sw.ElapsedMilliseconds + " ms\t" + count);
 				return count;
 			}
 		}

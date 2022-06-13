@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Kosson.KORM.ORM
@@ -10,11 +12,13 @@ namespace Kosson.KORM.ORM
 		private IDB db;
 		private IDBCommandBuilder cb;
 		private Action<IDBCommand> executor;
+		private readonly ILogger logger;
 
-		public DBTableCreator(IDB db, IMetaBuilder metaBuilder, Action<IDBCommand> customExecutor = null)
+		public DBTableCreator(IDB db, IMetaBuilder metaBuilder, ILogger logger, Action<IDBCommand> customExecutor = null)
 		{
 			this.db = db;
 			this.metaBuilder = metaBuilder;
+			this.logger = logger;
 			cb = db.CommandBuilder;
 			executor = customExecutor ?? DefaultExecute;
 		}
@@ -35,6 +39,8 @@ namespace Kosson.KORM.ORM
 
 		public void Create(IEnumerable<Type> types)
 		{
+			var sw = Stopwatch.StartNew();
+			logger?.LogInformation("ORM\tCreate");
 			var metas = types.Select(t => metaBuilder.Get(t)).ToArray();
 			var schemas = metas.GroupBy(m => m.DBSchema).Where(g => g.Key != null).Select(g => g.First()).ToArray();
 
@@ -43,6 +49,7 @@ namespace Kosson.KORM.ORM
 			foreach (var meta in metas) CreateColumns(meta);
 			foreach (var meta in metas) CreateIndices(meta);
 			foreach (var meta in metas) CreateForeignKeys(meta);
+			logger?.LogDebug("ORM\tCreate\t" + sw.ElapsedMilliseconds + " ms");
 		}
 
 		public void Create(IMetaRecord meta)

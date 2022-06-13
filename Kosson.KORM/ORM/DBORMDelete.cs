@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Kosson.KORM.ORM
@@ -9,8 +11,8 @@ namespace Kosson.KORM.ORM
 	{
 		protected override bool UseFullFieldNames { get { return false; } }
 
-		public DBORMDelete(IDB db, IMetaBuilder metaBuilder)
-			: base(db, metaBuilder)
+		public DBORMDelete(IDB db, IMetaBuilder metaBuilder, ILogger logger)
+			: base(db, metaBuilder, logger)
 		{
 		}
 
@@ -41,11 +43,17 @@ namespace Kosson.KORM.ORM
 
 		public int Execute()
 		{
-			return DB.ExecuteNonQueryRaw(command.ToString(), Parameters);
+			var sw = Stopwatch.StartNew();
+			logger?.LogInformation("ORM\tDelete\tExecute");
+			var result = DB.ExecuteNonQueryRaw(command.ToString(), Parameters);
+			logger?.LogDebug("ORM\tDelete\tExecute\t" + sw.ElapsedMilliseconds + " ms\t" + result);
+			return result;
 		}
 
 		public int Records(IEnumerable<TRecord> records)
 		{
+			var sw = Stopwatch.StartNew();
+			logger?.LogInformation("ORM\tDelete\tRecords");
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
 			var cb = DB.CommandBuilder;
@@ -75,17 +83,24 @@ namespace Kosson.KORM.ORM
 					if (notify != null) result = notify.OnDeleted();
 					if (result == RecordNotifyResult.Break) break;
 				}
+				logger?.LogDebug("ORM\tDelete\tRecords\t" + sw.ElapsedMilliseconds + " ms\t" + count);
 				return count;
 			}
 		}
 
-		public Task<int> ExecuteAsync()
+		public async Task<int> ExecuteAsync()
 		{
-			return DB.ExecuteNonQueryRawAsync(command.ToString(), Parameters);
+			var sw = Stopwatch.StartNew();
+			logger?.LogInformation("ORM\tDelete\tExecuteAsync");
+			var result = await DB.ExecuteNonQueryRawAsync(command.ToString(), Parameters);
+			logger?.LogDebug("ORM\tDelete\tExecuteAsync\t" + sw.ElapsedMilliseconds + " ms\t" + result);
+			return result;
 		}
 
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
+			var sw = Stopwatch.StartNew();
+			logger?.LogInformation("ORM\tDelete\tRecordsAsync");
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
 			var cb = DB.CommandBuilder;
@@ -115,6 +130,7 @@ namespace Kosson.KORM.ORM
 					if (notify != null) result = notify.OnDeleted();
 					if (result == RecordNotifyResult.Break) break;
 				}
+				logger?.LogDebug("ORM\tDelete\tRecordsAsync\t" + sw.ElapsedMilliseconds + " ms\t" + count);
 				return count;
 			}
 		}

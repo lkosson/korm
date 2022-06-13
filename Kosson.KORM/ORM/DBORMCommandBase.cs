@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Kosson.KORM.ORM
@@ -12,13 +13,15 @@ namespace Kosson.KORM.ORM
 		private List<object> parameters;
 		protected virtual bool UseFullFieldNames { get { return true; } }
 		protected IEnumerable<object> Parameters { get { return parameters ?? Enumerable.Empty<object>(); } }
+		protected readonly ILogger logger;
 
 		public IDB DB { get; }
 
-		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder)
+		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder, ILogger logger)
 		{
 			this.DB = db;
 			this.metaBuilder = metaBuilder;
+			this.logger = logger;
 			if (meta == null) meta = metaBuilder.Get(typeof(TRecord));
 		}
 
@@ -70,8 +73,8 @@ namespace Kosson.KORM.ORM
 
 		protected abstract TCommand BuildCommand(IDBCommandBuilder cb);
 
-		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder)
-			: base(db, metaBuilder)
+		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder, ILogger logger)
+			: base(db, metaBuilder, logger)
 		{
 			var cb = db.CommandBuilder;
 
