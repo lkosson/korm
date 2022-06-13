@@ -36,8 +36,11 @@ namespace Kosson.KORM.Scratch
 			db.CreateDatabase();
 
 			db.BeginTransaction();
-			//orm.CreateTables(new[] { typeof(User), typeof(Role), typeof(Membership) });
-			//db.Commit();
+			orm.CreateTables(new[] { typeof(User), typeof(Role), typeof(Membership) });
+			db.Commit();
+
+			db.BeginTransaction();
+			orm.InsertAll(Enumerable.Range(0, 1000).Select(i => new User { Name = "user" + i, UserDetails = new UserDetails { Group = i / 100 } }));
 
 			var first = orm.Select<User>().ExecuteFirst();
 
