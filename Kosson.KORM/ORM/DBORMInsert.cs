@@ -62,8 +62,7 @@ namespace Kosson.KORM.ORM
 
 		public int Records(IEnumerable<TRecord> records)
 		{
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tInsert\tRecords");
+			var token = LogStart();
 			var getlastid = command.GetLastID;
 			var manualid = meta.IsManualID;
 			using (var cmdInsert = DB.CreateCommand(command.ToString()))
@@ -95,17 +94,17 @@ namespace Kosson.KORM.ORM
 
 					count++;
 					if (notify != null) result = notify.OnInserted();
+					LogRecord(token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
-				logger?.LogDebug("ORM\tInsert\tRecords\t" + sw.ElapsedMilliseconds + " ms\t" + count);
+				LogEnd(token, count);
 				return count;
 			}
 		}
 
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tInsert\tRecordsAsync");
+			var token = LogStart();
 			var getlastid = command.GetLastID;
 			var manualid = meta.IsManualID;
 			using (var cmdInsert = DB.CreateCommand(command.ToString()))
@@ -129,9 +128,10 @@ namespace Kosson.KORM.ORM
 
 					count++;
 					if (notify != null) result = notify.OnInserted();
+					LogRecord(token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
-				logger?.LogDebug("ORM\tInsert\tRecordsAsync\t" + sw.ElapsedMilliseconds + " ms\t" + count);
+				LogEnd(token, count);
 				return count;
 			}
 		}

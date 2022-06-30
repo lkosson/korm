@@ -40,7 +40,7 @@ namespace Kosson.KORM.ORM
 		public void Create(IEnumerable<Type> types)
 		{
 			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tCreate");
+			logger?.LogInformation("Create");
 			var metas = types.Select(t => metaBuilder.Get(t)).ToArray();
 			var schemas = metas.GroupBy(m => m.DBSchema).Where(g => g.Key != null).Select(g => g.First()).ToArray();
 
@@ -49,7 +49,7 @@ namespace Kosson.KORM.ORM
 			foreach (var meta in metas) CreateColumns(meta);
 			foreach (var meta in metas) CreateIndices(meta);
 			foreach (var meta in metas) CreateForeignKeys(meta);
-			logger?.LogDebug("ORM\tCreate\t" + sw.ElapsedMilliseconds + " ms");
+			logger?.LogInformation("Create\t" + sw.ElapsedMilliseconds + " ms\t" + metas.Length);
 		}
 
 		public void Create(IMetaRecord meta)

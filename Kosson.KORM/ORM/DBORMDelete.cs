@@ -43,17 +43,17 @@ namespace Kosson.KORM.ORM
 
 		public int Execute()
 		{
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tDelete\tExecute");
-			var result = DB.ExecuteNonQueryRaw(command.ToString(), Parameters);
-			logger?.LogDebug("ORM\tDelete\tExecute\t" + sw.ElapsedMilliseconds + " ms\t" + result);
+			var token = LogStart();
+			var sql = command.ToString();
+			var result = DB.ExecuteNonQueryRaw(sql, Parameters);
+			LogRaw(token, sql, Parameters);
+			LogEnd(token, result);
 			return result;
 		}
 
 		public int Records(IEnumerable<TRecord> records)
 		{
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tDelete\tRecords");
+			var token = LogStart();
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
 			var cb = DB.CommandBuilder;
@@ -81,26 +81,28 @@ namespace Kosson.KORM.ORM
 
 					count += lcount;
 					if (notify != null) result = notify.OnDeleted();
+					LogRecord(token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
-				logger?.LogDebug("ORM\tDelete\tRecords\t" + sw.ElapsedMilliseconds + " ms\t" + count);
+				LogEnd(token, count);
 				return count;
 			}
 		}
 
 		public async Task<int> ExecuteAsync()
 		{
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tDelete\tExecuteAsync");
-			var result = await DB.ExecuteNonQueryRawAsync(command.ToString(), Parameters);
-			logger?.LogDebug("ORM\tDelete\tExecuteAsync\t" + sw.ElapsedMilliseconds + " ms\t" + result);
+			var token = LogStart();
+			var sql = command.ToString();
+			var result = await DB.ExecuteNonQueryRawAsync(sql, Parameters);
+			LogRaw(token, sql, Parameters);
+			LogEnd(token, result);
 			return result;
 		}
 
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
 			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tDelete\tRecordsAsync");
+			var token = LogStart();
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
 			var cb = DB.CommandBuilder;
@@ -128,9 +130,10 @@ namespace Kosson.KORM.ORM
 
 					count += lcount;
 					if (notify != null) result = notify.OnDeleted();
+					LogRecord(token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
-				logger?.LogDebug("ORM\tDelete\tRecordsAsync\t" + sw.ElapsedMilliseconds + " ms\t" + count);
+				LogEnd(token, count);
 				return count;
 			}
 		}

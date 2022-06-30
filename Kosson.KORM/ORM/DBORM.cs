@@ -30,7 +30,7 @@ namespace Kosson.KORM.ORM
 		}
 
 		void IORM.CreateTables(IEnumerable<Type> types) => new DBTableCreator(db, metaBuilder, logger).Create(types);
-		IORMSelect<TRecord> IORM.Select<TRecord>() => new DBQuerySelect<TRecord>(db, metaBuilder, converter, factory, cache.GetLoader<TRecord>(), logger);
+		IORMSelect<TRecord> IORM.Select<TRecord>() => new DBORMSelect<TRecord>(db, metaBuilder, converter, factory, cache.GetLoader<TRecord>(), logger);
 		IORMInsert<TRecord> IORM.Insert<TRecord>() => new DBORMInsert<TRecord>(db, metaBuilder, converter, logger);
 		IORMUpdate<TRecord> IORM.Update<TRecord>() => new DBORMUpdate<TRecord>(db, metaBuilder, logger);
 		IORMDelete<TRecord> IORM.Delete<TRecord>() => new DBORMDelete<TRecord>(db, metaBuilder, logger);

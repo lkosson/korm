@@ -81,10 +81,11 @@ namespace Kosson.KORM.ORM
 
 		public int Execute()
 		{
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tUpdate\tExecute");
-			var result = DB.ExecuteNonQueryRaw(command.ToString(), Parameters);
-			logger?.LogDebug("ORM\tUpdate\tExecute\t" + sw.ElapsedMilliseconds + " ms\t" + result);
+			var token = LogStart();
+			var sql = command.ToString();
+			var result = DB.ExecuteNonQueryRaw(sql, Parameters);
+			LogRaw(token, sql, Parameters);
+			LogEnd(token, result);
 			return result;
 		}
 
@@ -98,8 +99,7 @@ namespace Kosson.KORM.ORM
 
 		public int Records(IEnumerable<TRecord> records)
 		{
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tUpdate\tRecords");
+			var token = LogStart();
 			using (var cmdUpdate = DB.CreateCommand(commandText))
 			{
 				int count = 0;
@@ -121,26 +121,27 @@ namespace Kosson.KORM.ORM
 
 					count += lcount;
 					if (notify != null) result = notify.OnUpdated();
+					LogRecord(token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
-				logger?.LogDebug("ORM\tUpdate\tRecords\t" + sw.ElapsedMilliseconds + " ms\t" + count);
+				LogEnd(token, count);
 				return count;
 			}
 		}
 
 		public async Task<int> ExecuteAsync()
 		{
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tUpdate\tExecuteAsync");
-			var result = await DB.ExecuteNonQueryRawAsync(command.ToString(), Parameters);
-			logger?.LogDebug("ORM\tUpdate\tExecuteAsync\t" + sw.ElapsedMilliseconds + " ms\t" + result);
+			var token = LogStart();
+			var sql = command.ToString();
+			var result = await DB.ExecuteNonQueryRawAsync(sql, Parameters);
+			LogRaw(token, sql, Parameters);
+			LogEnd(token, result);
 			return result;
 		}
 
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tUpdate\tRecordsAsync");
+			var token = LogStart();
 			using (var cmdUpdate = DB.CreateCommand(commandText))
 			{
 				int count = 0;
@@ -162,9 +163,10 @@ namespace Kosson.KORM.ORM
 
 					count += lcount;
 					if (notify != null) result = notify.OnUpdated();
+					LogRecord(token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
-				logger?.LogDebug("ORM\tUpdate\tRecordsAsync\t" + sw.ElapsedMilliseconds + " ms\t" + count);
+				LogEnd(token, count);
 				return count;
 			}
 		}

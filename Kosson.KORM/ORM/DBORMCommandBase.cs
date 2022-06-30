@@ -1,6 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading;
 
 namespace Kosson.KORM.ORM
 {
@@ -13,7 +17,9 @@ namespace Kosson.KORM.ORM
 		private List<object> parameters;
 		protected virtual bool UseFullFieldNames { get { return true; } }
 		protected IEnumerable<object> Parameters { get { return parameters ?? Enumerable.Empty<object>(); } }
-		protected readonly ILogger logger;
+		private readonly ILogger logger;
+		private static int nextTraceId;
+		private static Stopwatch opStopwatch;
 
 		public IDB DB { get; }
 
@@ -23,6 +29,7 @@ namespace Kosson.KORM.ORM
 			this.metaBuilder = metaBuilder;
 			this.logger = logger;
 			if (meta == null) meta = metaBuilder.Get(typeof(TRecord));
+			if (opStopwatch == null) opStopwatch = Stopwatch.StartNew();
 		}
 
 		public IDBExpression Parameter(object value)
@@ -60,6 +67,80 @@ namespace Kosson.KORM.ORM
 					return DB.CommandBuilder.Identifier(metafield.DBName);
 				}
 			}
+		}
+
+		protected TraceToken LogStart([CallerMemberName] string method = "")
+		{
+			if (logger == null) return default;
+			if (!logger.IsEnabled(LogLevel.Information)) return default;
+			var command = GetType().Name;
+			command = command.Substring(5, command.IndexOf('`') - 5);
+			int id = Interlocked.Increment(ref nextTraceId);
+			TraceToken token = new TraceToken();
+			token.id = new EventId(id);
+			token.start = opStopwatch.ElapsedMilliseconds;
+			token.command = command;
+			token.method = method;
+
+			logger.LogInformation(token.id, $"{command}\t{typeof(TRecord).Name}\t{method}");
+			return token;
+		}
+
+		protected void LogEnd(TraceToken token, int? result = null)
+		{
+			if (logger == null) return;
+			if (token.id == 0) return;
+			logger.LogInformation(token.id, $"{token.command}\t{typeof(TRecord).Name}\t{token.method}\t{opStopwatch.ElapsedMilliseconds - token.start} ms\t{result}");
+		}
+
+		protected void LogRaw(TraceToken token, string sql, IEnumerable<object> parameters)
+		{
+			if (logger == null) return;
+			if (token.id == 0) return;
+			if (!logger.IsEnabled(LogLevel.Debug)) return;
+			logger.LogDebug(token.id, $"{token.command}\t{typeof(TRecord).Name}\t{sql}");
+			var i = 0;
+			foreach (var parameter in parameters)
+			{
+				logger.LogDebug(token.id, $"{token.command}\t{typeof(TRecord).Name}\tP{i}\t{parameter}");
+				i++;
+			}
+		}
+
+		protected void LogRecord(TraceToken token, TRecord record)
+		{
+			if (logger == null) return;
+			if (token.id == 0) return;
+			if (!logger.IsEnabled(LogLevel.Debug)) return;
+			var sb = new StringBuilder();
+			foreach (var field in meta.Fields)
+			{
+				if (!field.IsColumn) continue;
+				if (field.IsReadOnly) continue;
+				if (sb.Length > 0) sb.Append(", ");
+				sb.Append(field.Name);
+				sb.Append("=");
+				var value = field.Property.GetValue(record);
+				if (value == null)
+				{
+					sb.Append("null");
+				}
+				else
+				{
+					if (field.Type == typeof(string)) sb.Append("\"");
+					sb.Append(value);
+					if (field.Type == typeof(string)) sb.Append("\"");
+				}
+			}
+			logger.LogDebug(token.id, $"{token.command}\t{typeof(TRecord).Name}\t{token.method}\t{sb}");
+		}
+
+		protected struct TraceToken
+		{
+			public EventId id;
+			public long start;
+			public string command;
+			public string method;
 		}
 	}
 

@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Kosson.KORM.ORM
 {
-	class DBQuerySelect<TRecord> : DBORMCommandBase<TRecord, IDBSelect>, IORMSelect<TRecord> where TRecord : class, IRecord, new()
+	class DBORMSelect<TRecord> : DBORMCommandBase<TRecord, IDBSelect>, IORMSelect<TRecord> where TRecord : class, IRecord, new()
 	{
 		private IConverter converter;
 		private IFactory factory;
 		private LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader;
 
-		public DBQuerySelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IFactory factory, LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader, ILogger logger)
+		public DBORMSelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IFactory factory, LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader, ILogger logger)
 			: base(db, metaBuilder, logger)
 		{
 			this.converter = converter;
@@ -92,8 +92,7 @@ namespace Kosson.KORM.ORM
 			//var sql = command.ToString();
 			//var rows = DB.ExecuteQuery(sql, Parameters);
 			//return rows.Load<TRecord>(converter, recordLoader, factory);
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tSelect\tExecute");
+			var token = LogStart();
 			using (var reader = ExecuteReader())
 			{
 				var result = new List<TRecord>();
@@ -101,8 +100,9 @@ namespace Kosson.KORM.ORM
 				{
 					var record = reader.Read();
 					result.Add(record);
+					LogRecord(token, record);
 				}
-				logger?.LogDebug("ORM\tSelect\tExecute\t" + sw.ElapsedMilliseconds + " ms\t" + result.Count);
+				LogEnd(token, result.Count);
 				return result;
 			}
 		}
@@ -112,8 +112,7 @@ namespace Kosson.KORM.ORM
 			//var sql = command.ToString();
 			//var rows = await DB.ExecuteQueryAsync(sql, Parameters);
 			//return rows.Load<TRecord>(converter, recordLoader, factory);
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tSelect\tExecuteAsync");
+			var token = LogStart();
 			using (var reader = await ExecuteReaderAsync())
 			{
 				var result = new List<TRecord>();
@@ -121,31 +120,30 @@ namespace Kosson.KORM.ORM
 				{
 					var record = reader.Read();
 					result.Add(record);
+					LogRecord(token, record);
 				}
-				logger?.LogDebug("ORM\tSelect\tExecuteAsync\t" + sw.ElapsedMilliseconds + " ms\t" + result.Count);
+				LogEnd(token, result.Count);
 				return result;
 			}
 		}
 
 		public IORMReader<TRecord> ExecuteReader()
 		{
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tSelect\tExecuteReader");
+			var token = LogStart();
 			var sql = command.ToString();
 			var reader = new DBORMReader<TRecord>(DB, factory, converter, loaderFromReader, sql, Parameters);
 			reader.PrepareReader();
-			logger?.LogDebug("ORM\tSelect\tExecuteReader\t" + sw.ElapsedMilliseconds + " ms");
+			LogEnd(token);
 			return reader;
 		}
 
 		public async Task<IORMReader<TRecord>> ExecuteReaderAsync()
 		{
-			var sw = Stopwatch.StartNew();
-			logger?.LogInformation("ORM\tSelect\tExecuteReaderAsync");
+			var token = LogStart();
 			var sql = command.ToString();
 			var reader = new DBORMReader<TRecord>(DB, factory, converter, loaderFromReader, sql, Parameters);
 			await reader.PrepareReaderAsync();
-			logger?.LogDebug("ORM\tSelect\tExecuteReaderAsync\t" + sw.ElapsedMilliseconds + " ms");
+			LogEnd(token);
 			return reader;
 		}
 
