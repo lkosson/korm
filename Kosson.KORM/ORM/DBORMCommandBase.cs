@@ -116,7 +116,7 @@ namespace Kosson.KORM.ORM
 			foreach (var field in meta.Fields)
 			{
 				if (!field.IsColumn) continue;
-				if (field.IsReadOnly) continue;
+				if (field.IsReadOnly && !field.IsPrimaryKey) continue;
 				if (sb.Length > 0) sb.Append(", ");
 				sb.Append(field.Name);
 				sb.Append("=");
