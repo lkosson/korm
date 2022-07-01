@@ -112,27 +112,7 @@ namespace Kosson.KORM.ORM
 			if (logger == null) return;
 			if (token.id == 0) return;
 			if (!logger.IsEnabled(level)) return;
-			var sb = new StringBuilder();
-			foreach (var field in meta.Fields)
-			{
-				if (!field.IsColumn) continue;
-				if (field.IsReadOnly) continue;
-				if (sb.Length > 0) sb.Append(", ");
-				sb.Append(field.Name);
-				sb.Append("=");
-				var value = field.Property.GetValue(record);
-				if (value == null)
-				{
-					sb.Append("null");
-				}
-				else
-				{
-					if (field.Type == typeof(string)) sb.Append("\"");
-					sb.Append(value);
-					if (field.Type == typeof(string)) sb.Append("\"");
-				}
-			}
-			logger.Log(level, token.id, $"{token.command}\t{record.Ref()}\t{sb}");
+			logger.Log(level, token.id, $"{token.command}\t{record.Ref()}\t{record.ToStringByFields(meta)}");
 		}
 
 		protected struct TraceToken
