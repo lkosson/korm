@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace Kosson.KORM
 {
@@ -73,6 +74,50 @@ namespace Kosson.KORM
 		public static TRecord Clone<TRecord>(this IRecordCloner cloner, TRecord record) where TRecord : IRecord, new()
 		{
 			return cloner.Clone(record);
+		}
+
+		/// <summary>
+		/// Converts a record to string representation containing values of all database fields.
+		/// </summary>
+		/// <typeparam name="TRecord">Type of the record.</typeparam>
+		/// <param name="record">The record to convert.</param>
+		/// <param name="meta">Record metadata.</param>
+		/// <returns>Record string representation.</returns>
+		public static string ToStringByFields<TRecord>(this TRecord record, IMetaRecord meta) where TRecord : IRecord
+		{
+			var sb = new StringBuilder();
+			AppendFields(sb, record, meta);
+			return sb.ToString();
+		}
+
+		private static void AppendFields(StringBuilder sb, object record, IMetaRecord meta)
+		{
+			foreach (var field in meta.Fields)
+			{
+				if (!field.IsColumn) continue;
+				if (field.IsReadOnly && !field.IsPrimaryKey) continue;
+				var value = field.Property.GetValue(record);
+				if (field.IsInline)
+				{
+					AppendFields(sb, value, field.InlineRecord);
+				}
+				else
+				{
+					if (sb.Length > 0) sb.Append(", ");
+					sb.Append(field.Name);
+					sb.Append("=");
+					if (value == null)
+					{
+						sb.Append("null");
+					}
+					else
+					{
+						if (field.Type == typeof(string)) sb.Append("\"");
+						sb.Append(value);
+						if (field.Type == typeof(string)) sb.Append("\"");
+					}
+				}
+			}
 		}
 	}
 }
