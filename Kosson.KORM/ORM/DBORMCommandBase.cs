@@ -107,11 +107,11 @@ namespace Kosson.KORM.ORM
 			}
 		}
 
-		protected void LogRecord(TraceToken token, TRecord record)
+		protected void LogRecord(LogLevel level, TraceToken token, TRecord record)
 		{
 			if (logger == null) return;
 			if (token.id == 0) return;
-			if (!logger.IsEnabled(LogLevel.Debug)) return;
+			if (!logger.IsEnabled(level)) return;
 			var sb = new StringBuilder();
 			foreach (var field in meta.Fields)
 			{
@@ -132,7 +132,7 @@ namespace Kosson.KORM.ORM
 					if (field.Type == typeof(string)) sb.Append("\"");
 				}
 			}
-			logger.LogDebug(token.id, $"{token.command}\t{typeof(TRecord).Name}\t{token.method}\t{sb}");
+			logger.Log(level, token.id, $"{token.command}\t{typeof(TRecord).Name}\t{token.method}\t{sb}");
 		}
 
 		protected struct TraceToken

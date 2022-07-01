@@ -94,7 +94,7 @@ namespace Kosson.KORM.ORM
 
 					count++;
 					if (notify != null) result = notify.OnInserted();
-					LogRecord(token, record);
+					LogRecord(LogLevel.Debug, token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
 				LogEnd(token, count);
@@ -128,7 +128,7 @@ namespace Kosson.KORM.ORM
 
 					count++;
 					if (notify != null) result = notify.OnInserted();
-					LogRecord(token, record);
+					LogRecord(LogLevel.Debug, token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
 				LogEnd(token, count);

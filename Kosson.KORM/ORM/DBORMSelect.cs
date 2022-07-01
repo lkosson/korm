@@ -100,7 +100,7 @@ namespace Kosson.KORM.ORM
 				{
 					var record = reader.Read();
 					result.Add(record);
-					LogRecord(token, record);
+					LogRecord(LogLevel.Trace, token, record);
 				}
 				LogEnd(token, result.Count);
 				return result;
@@ -120,7 +120,7 @@ namespace Kosson.KORM.ORM
 				{
 					var record = reader.Read();
 					result.Add(record);
-					LogRecord(token, record);
+					LogRecord(LogLevel.Trace, token, record);
 				}
 				LogEnd(token, result.Count);
 				return result;
