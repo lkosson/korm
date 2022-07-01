@@ -116,7 +116,7 @@ namespace Kosson.KORM.ORM
 			foreach (var field in meta.Fields)
 			{
 				if (!field.IsColumn) continue;
-				if (field.IsReadOnly && !field.IsPrimaryKey) continue;
+				if (field.IsReadOnly) continue;
 				if (sb.Length > 0) sb.Append(", ");
 				sb.Append(field.Name);
 				sb.Append("=");
@@ -132,7 +132,7 @@ namespace Kosson.KORM.ORM
 					if (field.Type == typeof(string)) sb.Append("\"");
 				}
 			}
-			logger.Log(level, token.id, $"{token.command}\t{typeof(TRecord).Name}\t{token.method}\t{sb}");
+			logger.Log(level, token.id, $"{token.command}\t{record.Ref()}\t{sb}");
 		}
 
 		protected struct TraceToken
