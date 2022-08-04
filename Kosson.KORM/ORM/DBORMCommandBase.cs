@@ -8,18 +8,22 @@ using System.Threading;
 
 namespace Kosson.KORM.ORM
 {
-	class DBORMCommandBase<TRecord>
+	class DBORMCommandBase
+	{
+		internal static string[] parametersNameCache = new[] { "P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7" };
+		internal static int nextTraceId;
+		internal static Stopwatch opStopwatch = Stopwatch.StartNew();
+	}
+
+	class DBORMCommandBase<TRecord> : DBORMCommandBase
 		where TRecord : IRecord
 	{
 		protected static IMetaRecord meta;
-		private static string[] parametersNameCache = new[] { "P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7" };
 		protected readonly IMetaBuilder metaBuilder;
 		private List<object> parameters;
 		protected virtual bool UseFullFieldNames { get { return true; } }
 		protected IEnumerable<object> Parameters { get { return parameters ?? Enumerable.Empty<object>(); } }
 		private readonly ILogger logger;
-		private static int nextTraceId;
-		private static Stopwatch opStopwatch;
 
 		public IDB DB { get; }
 
