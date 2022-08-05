@@ -3,8 +3,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
+	/// <summary>
+	/// Extension methods for Microsoft.Extensions.DependencyInjection.IServiceCollection.
+	/// </summary>
 	public static class ServiceCollectionExtensions
 	{
+		/// <summary>
+		/// Registers required KORM services.
+		/// </summary>
+		/// <typeparam name="TDB">Database provider</typeparam>
+		/// <param name="services">Services collection</param>
+		/// <param name="connectionString">Hard-coded connectionstring to use.</param>
 		public static void AddKORMServices<TDB>(this IServiceCollection services, string connectionString = null)
 			where TDB : class, IDB
 		{

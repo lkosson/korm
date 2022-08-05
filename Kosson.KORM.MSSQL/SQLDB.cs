@@ -8,18 +8,26 @@ using Microsoft.Extensions.Options;
 
 namespace Kosson.KORM.MSSQL
 {
+	/// <summary>
+	/// Microsoft SQL Server database provider for KORM.
+	/// </summary>
 	public class SQLDB : ADONETDB
 	{
+		/// <summary>
+		/// Creates a new instance of Microsoft SQL Server provider.
+		/// </summary>
 		public SQLDB(IOptionsMonitor<KORMOptions> optionsMonitor, ILogger<Kosson.KORM.MSSQL.SQLDB> logger)
 			: base(optionsMonitor, logger)
 		{
 		}
 
+		/// <inheritdoc/>
 		protected override IDBCommandBuilder CreateCommandBuilder()
 		{
 			return new CommandBuilder();
 		}
 
+		/// <inheritdoc/>
 		protected override DbConnection CreateConnection()
 		{
 			SqlConnection conn = new SqlConnection(ConnectionString);
@@ -34,6 +42,7 @@ namespace Kosson.KORM.MSSQL
 			return conn;
 		}
 
+		/// <inheritdoc/>
 		protected override void CreateDatabaseImpl()
 		{
 			var csb = new SqlConnectionStringBuilder(ConnectionString);
@@ -51,6 +60,7 @@ namespace Kosson.KORM.MSSQL
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void FixParameter(DbParameter parameter)
 		{
 			base.FixParameter(parameter);
@@ -75,6 +85,7 @@ namespace Kosson.KORM.MSSQL
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override KORMException TranslateException(Exception exc, DbCommand cmd)
 		{
 			SqlException se = exc as SqlException;

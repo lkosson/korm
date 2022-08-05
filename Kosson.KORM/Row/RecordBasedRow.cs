@@ -16,6 +16,7 @@ namespace Kosson.KORM
 		/// Creates a new IRow for a given record;
 		/// </summary>
 		/// <typeparam name="TRecord">Type of record to create a IRow from.</typeparam>
+		/// <param name="metaRecord">Record metadata</param>
 		/// <param name="record">Record to create a IRow from</param>
 		/// <returns>IRow based on a given record</returns>
 		public static IRow Create<TRecord>(IMetaRecord metaRecord, TRecord record)
@@ -27,6 +28,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Creates a new IRow for a given record;
 		/// </summary>
+		/// <param name="meta">Record metadata</param>
 		/// <param name="record">Record to create a IRow from</param>
 		/// <returns>IRow based on a given record</returns>
 		public static IRow Create(IMetaRecord meta, IRecord record)

@@ -13,21 +13,30 @@ using Microsoft.Data.Sqlite;
 
 namespace Kosson.KORM.SQLite
 {
+	/// <summary>
+	/// SQLite database provider for KORM.
+	/// </summary>
 	public class SQLiteDB : ADONETDB
 	{
+		/// <summary>
+		/// Creates a new instance of SQLite database provider.
+		/// </summary>
 		public SQLiteDB(IOptionsMonitor<KORMOptions> optionsMonitor, ILogger<Kosson.KORM.SQLite.SQLiteDB> logger)
 			: base(optionsMonitor, logger)
 		{
 		}
 
 		// Cancelling already completed query (e.g. getLastID during batch insert) causes next execution of the command to return no rows.
+		/// <inheritdoc/>
 		protected override bool SupportsCancel { get { return false; } }
 
+		/// <inheritdoc/>
 		protected override IDBCommandBuilder CreateCommandBuilder()
 		{
 			return new CommandBuilder();
 		}
 
+		/// <inheritdoc/>
 		protected override DbConnection CreateConnection()
 		{
 			var csb = new SqliteConnectionStringBuilder();
@@ -38,6 +47,7 @@ namespace Kosson.KORM.SQLite
 			return conn;
 		}
 
+		/// <inheritdoc/>
 		protected override object NativeToSQL(object val)
 		{
 			if (val is bool) return val;
@@ -45,6 +55,7 @@ namespace Kosson.KORM.SQLite
 			return base.NativeToSQL(val);
 		}
 
+		/// <inheritdoc/>
 		protected override KORMException TranslateException(Exception exc, DbCommand cmd)
 		{
 			var se = exc as SqliteException;

@@ -69,6 +69,7 @@ namespace Kosson.KORM
 		/// Creates a semi-shallow copy of a given record. Inlines are copied; referenced records are kept same.
 		/// </summary>
 		/// <typeparam name="TRecord">Type of record to copy.</typeparam>
+		/// <param name="cloner">Implementation of IRecordCloner to use.</param>
 		/// <param name="record">Record to copy.</param>
 		/// <returns>Copy of a given record.</returns>
 		public static TRecord Clone<TRecord>(this IRecordCloner cloner, TRecord record) where TRecord : IRecord, new()

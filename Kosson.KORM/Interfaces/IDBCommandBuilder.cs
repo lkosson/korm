@@ -530,7 +530,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Sets schema name.
 		/// </summary>
-		/// <param name="table">Identifier of schema to create.</param>
+		/// <param name="schema">Identifier of schema to create.</param>
 		void Schema(IDBIdentifier schema);
 	}
 

@@ -116,6 +116,7 @@ namespace Kosson.KORM
 		/// Adds WHERE condition testing if given set contains value of column/property. Condition is joined with existing conditions by AND.
 		/// </summary>
 		/// <typeparam name="TCommand">Type of command to add condition to.</typeparam>
+		/// <typeparam name="TValue">Type of an item in values array.</typeparam>
 		/// <param name="query">Command or query to add comparison to.</param>
 		/// <param name="field">Column or property name for left side of the comparison.</param>
 		/// <param name="values">Values of set for right side of the comparison.</param>
@@ -180,6 +181,7 @@ namespace Kosson.KORM
 		/// Condition is joined with existing conditions by AND.
 		/// </summary>
 		/// <typeparam name="TCommand">Type of command to add condition to.</typeparam>
+		/// <param name="query">The query to add condition to.</param>
 		/// <param name="subquery">Subquery returning primary key values as a single column.</param>
 		/// <param name="values">Subquery parameter values.</param>
 		/// <returns>Original command with comparison added to it.</returns>
@@ -192,6 +194,7 @@ namespace Kosson.KORM
 		/// Condition is joined with existing conditions by AND.
 		/// </summary>
 		/// <typeparam name="TCommand">Type of command to add condition to.</typeparam>
+		/// <param name="query">The query to add condition to.</param>
 		/// <param name="values">Primary key values to use in condition.</param>
 		/// <returns>Original command with comparison added to it.</returns>
 		public static TCommand WhereIDIn<TCommand>(this TCommand query, IEnumerable<long> values)
@@ -361,7 +364,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <typeparam name="TRecord">Type of record to return.</typeparam>
 		/// <param name="query">SELECT command to execute.</param>
-		/// <param name="ids">Primary KEY (ID) values of the records to select.</param>
+		/// <param name="refs">Primary KEY (ID) references of the records to select.</param>
 		/// <returns>Records with matching primary key values or empty collection.</returns>
 		public static IReadOnlyCollection<TRecord> ByRefs<TRecord>(this IORMSelect<TRecord> query, IEnumerable<RecordRef<TRecord>> refs) where TRecord : IRecord
 			=> ByIDs(query, refs.Select(r => r.ID));
@@ -409,7 +412,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <typeparam name="TRecord">Type of record to return.</typeparam>
 		/// <param name="query">SELECT command to execute.</param>
-		/// <param name="ids">Primary KEY (ID) values of the records to select.</param>
+		/// <param name="refs">Primary KEY (ID) references of the records to select.</param>
 		/// <returns>Records with matching primary key values or empty collection.</returns>
 		public static Task<IReadOnlyCollection<TRecord>> ByRefsAsync<TRecord>(this IORMSelect<TRecord> query, IEnumerable<RecordRef<TRecord>> refs) where TRecord : IRecord
 			=> ByIDsAsync(query, refs.Select(r => r.ID));

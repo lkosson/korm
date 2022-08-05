@@ -96,6 +96,7 @@ namespace Kosson.KORM
 		/// Creates a new exception from underlying, database engine-specific exception.
 		/// </summary>
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
+		/// <param name="cmd">Command that caused the exception.</param>
 		public KORMDuplicateValueException(Exception inner, DbCommand cmd)
 			: base("Duplicate value in unique field.", inner, cmd)
 		{
@@ -112,6 +113,7 @@ namespace Kosson.KORM
 		/// Creates a new exception from underlying, database engine-specific exception.
 		/// </summary>
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
+		/// <param name="cmd">Command that caused the exception.</param>
 		public KORMLockException(Exception inner, DbCommand cmd)
 			: base("Row is locked in another transaction.", inner, cmd)
 		{

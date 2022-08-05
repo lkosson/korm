@@ -12,6 +12,9 @@ namespace Kosson.KORM
 		/// </summary>
 		public string ConnectionString { get; set; }
 
+		/// <summary>
+		/// Creates a new, default database connection parameters.
+		/// </summary>
 		public KORMOptions()
 		{
 			ConnectionString = "server=(local)";

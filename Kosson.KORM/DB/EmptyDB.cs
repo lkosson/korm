@@ -7,15 +7,23 @@ using System.Data.Common;
 
 namespace Kosson.KORM.DB
 {
+	/// <summary>
+	/// Dummy database provider for KORM.
+	/// </summary>
 	public class EmptyDB : ADONETDB
 	{
+		/// <inheritdoc/>
 		public override string ConnectionString => "";
 
+		/// <summary>
+		/// Creates a new instance of dummy database provider.
+		/// </summary>
 		public EmptyDB(IOptionsMonitor<KORMOptions> optionsMonitor, ILogger<EmptyDB> logger)
 			: base(optionsMonitor, logger)
 		{
 		}
 
+		/// <inheritdoc/>
 		protected override DbConnection CreateConnection()
 		{
 			return new Connection();
