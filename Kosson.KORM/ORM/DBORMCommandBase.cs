@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -73,7 +74,7 @@ namespace Kosson.KORM.ORM
 			}
 		}
 
-		protected TraceToken LogStart([CallerMemberName] string method = "")
+		protected TraceToken LogStart([CallerMemberName] string method = "", string args = "")
 		{
 			if (logger == null) return default;
 			if (!logger.IsEnabled(LogLevel.Information)) return default;
@@ -86,7 +87,7 @@ namespace Kosson.KORM.ORM
 			token.command = command;
 			token.method = method;
 
-			logger.LogInformation(token.id, $"{command}\t{typeof(TRecord).Name}\t{method}");
+			logger.LogInformation(token.id, $"{command}\t{typeof(TRecord).Name}\t{method}{(String.IsNullOrEmpty(args) ? "" : "\t" + args)}");
 			return token;
 		}
 

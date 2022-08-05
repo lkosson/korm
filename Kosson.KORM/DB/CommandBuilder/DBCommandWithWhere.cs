@@ -52,6 +52,12 @@ namespace Kosson.KORM.DB.CommandBuilder
 			if (wheres == null || wheres.Count == 0) return;
 			AppendCRLF(sb);
 			sb.Append("WHERE ");
+			AppendWheresConditions(sb);
+		}
+
+		private void AppendWheresConditions(StringBuilder sb)
+		{
+			if (wheres == null) return;
 			bool multipleGroups = false;
 			foreach (var where in wheres)
 			{
@@ -91,6 +97,15 @@ namespace Kosson.KORM.DB.CommandBuilder
 				AppendWhere(sb, where);
 			}
 			if (multipleGroups) AppendGroupEnd(sb);
+		}
+
+		internal string ToStringWhere()
+		{
+			var sb = new StringBuilder();
+			AppendWheresConditions(sb);
+			sb.Replace("\r\n", "\n");
+			sb.Replace("\n", " ");
+			return sb.ToString();
 		}
 
 		/// <summary>

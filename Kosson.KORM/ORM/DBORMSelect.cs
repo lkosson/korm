@@ -129,7 +129,7 @@ namespace Kosson.KORM.ORM
 
 		public IORMReader<TRecord> ExecuteReader()
 		{
-			var token = LogStart();
+			var token = LogStart(args: ((DB.CommandBuilder.DBCommandWithWhere)command).ToStringWhere());
 			var sql = command.ToString();
 			var reader = new DBORMReader<TRecord>(DB, factory, converter, loaderFromReader, sql, Parameters);
 			reader.PrepareReader();
@@ -139,7 +139,7 @@ namespace Kosson.KORM.ORM
 
 		public async Task<IORMReader<TRecord>> ExecuteReaderAsync()
 		{
-			var token = LogStart();
+			var token = LogStart(args: ((DB.CommandBuilder.DBCommandWithWhere)command).ToStringWhere());
 			var sql = command.ToString();
 			var reader = new DBORMReader<TRecord>(DB, factory, converter, loaderFromReader, sql, Parameters);
 			await reader.PrepareReaderAsync();
