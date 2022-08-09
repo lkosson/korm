@@ -40,7 +40,10 @@ namespace Kosson.KORM.Scratch
 			db.Commit();
 
 			db.BeginTransaction();
-			orm.InsertAll(Enumerable.Range(0, 1000).Select(i => new User { Name = "user" + i, UserDetails = new UserDetails { Group = i / 100 } }));
+			var gs = Enumerable.Range(0, 10).Select(i => new User { Name = "group" + i, UserDetails = new UserDetails { Group = i / 100 } });
+			var us = Enumerable.Range(0, 1000).Select(i => new User { Name = "user" + i, UserDetails = new UserDetails { Group = gs.Skip(i / 100).First() } });
+			orm.InsertAll(gs);
+			orm.InsertAll(us);
 
 			var first = orm.Select<User>().ExecuteFirst();
 
@@ -67,7 +70,7 @@ namespace Kosson.KORM.Scratch
 				UserDetails = new UserDetails()
 				{
 					PasswordHash = "00-11",
-					Group = 3
+					Group = gs.Skip(5).First().ID
 				}
 			};
 
@@ -158,7 +161,7 @@ namespace Kosson.KORM.Scratch
 		[Inline("usr")]
 		public UserDetails UserDetails { get; set; }
 
-		[Subquery("SELECT COUNT(*) FROM Membership WHERE mem_User = {0}.usr_ID")]
+		[Subquery("SELECT COUNT(*) FROM \"Membership\" WHERE \"mem_User\" = {0}.\"usr_ID\"")]
 		public int RolesCount { get; set; }
 
 		[Subquery.Count("Membership", "mem_User", "usr_ID")]
