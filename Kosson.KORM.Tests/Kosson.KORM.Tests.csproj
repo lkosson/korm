@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Kosson.KORM.MSSQL\Kosson.KORM.MSSQL.csproj" />
+    <ProjectReference Include="..\Kosson.KORM.PGSQL\Kosson.KORM.PGSQL.csproj" />
     <ProjectReference Include="..\Kosson.KORM.SQLite\Kosson.KORM.SQLite.csproj" />
   </ItemGroup>
 
