@@ -9,9 +9,7 @@ namespace Kosson.KORM.Tests
 		protected override System.Collections.Generic.IEnumerable<Type> Tables()
 		{
 			yield return typeof(Table);
-			yield return typeof(TableWithConvertedField);
-			yield return typeof(ConvertedTable);
-			yield return typeof(NonConvertedTable);
+			yield return typeof(BaseConvertedTable);
 		}
 
 		[TestMethod]
@@ -33,42 +31,42 @@ namespace Kosson.KORM.Tests
 		[TestMethod]
 		public void MarkedFieldsAreConverted()
 		{
-			var record = new TableWithConvertedField
+			var record = new BaseConvertedTable
 			{
-				IntAsString = INTMARKER.ToString(),
-				StringAsInt = INTMARKER + 1
+				Int = INTMARKER,
+				String = (INTMARKER + 1).ToString()
 			};
 			ORM.Store(record);
-			var retrieved = ORM.Get(record.Ref());
-			Assert.AreEqual(record.IntAsString, retrieved.IntAsString);
-			Assert.AreEqual(record.StringAsInt, retrieved.StringAsInt);
+			var retrieved = ORM.Select<TableWithConvertedField>().ByID(record.ID);
+			Assert.AreEqual(record.Int.ToString(), retrieved.IntAsString);
+			Assert.AreEqual(record.String, retrieved.StringAsInt.ToString());
 		}
 
 		[TestMethod]
 		public void MarkedTableIsConverted()
 		{
-			var record = new ConvertedTable
+			var record = new BaseConvertedTable
 			{
-				IntAsString = INTMARKER.ToString(),
-				StringAsInt = INTMARKER + 1
+				Int = INTMARKER,
+				String = (INTMARKER + 1).ToString()
 			};
 			ORM.Store(record);
-			var retrieved = ORM.Get(record.Ref());
-			Assert.AreEqual(record.IntAsString, retrieved.IntAsString);
-			Assert.AreEqual(record.StringAsInt, retrieved.StringAsInt);
+			var retrieved = ORM.Select<ConvertedTable>().ByID(record.ID);
+			Assert.AreEqual(record.Int.ToString(), retrieved.IntAsString);
+			Assert.AreEqual(record.String, retrieved.StringAsInt.ToString());
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof(InvalidCastException))]
 		public void NonConvertedTableReadFails()
 		{
-			var record = new NonConvertedTable
+			var record = new BaseConvertedTable
 			{
-				IntAsString = INTMARKER.ToString(),
-				StringAsInt = INTMARKER + 1
+				Int = INTMARKER,
+				String = (INTMARKER + 1).ToString()
 			};
 			ORM.Store(record);
-			ORM.Get(record.Ref());
+			ORM.Select<NonConvertedTable>().ByID(record.ID);
 		}
 
 		[Table]
@@ -81,33 +79,55 @@ namespace Kosson.KORM.Tests
 			public object Value2 { get; set; }
 		}
 
-		[Table]
+		[Table(Prefix = "")]
+		[DBName("BaseConvertedTable")]
+		class BaseConvertedTable : Record
+		{
+			[Column]
+			[DBName("IntField")]
+			public int Int { get; set; }
+
+			[Column(10)]
+			[DBName("TextField")]
+			public string String { get; set; }
+		}
+
+		[Table(Prefix = "")]
+		[DBName("BaseConvertedTable")]
 		class TableWithConvertedField : Record
 		{
 			[Column("INT", IsConverted = true)]
+			[DBName("IntField")]
 			public string IntAsString { get; set; }
 
 			[Column("VARCHAR(10)", IsConverted = true)]
+			[DBName("TextField")]
 			public int StringAsInt { get; set; }
 		}
 
-		[Table(IsConverted = true)]
+		[Table(IsConverted = true, Prefix = "")]
+		[DBName("BaseConvertedTable")]
 		class ConvertedTable : Record
 		{
 			[Column("INT")]
+			[DBName("IntField")]
 			public string IntAsString { get; set; }
 
 			[Column("VARCHAR(10)")]
+			[DBName("TextField")]
 			public int StringAsInt { get; set; }
 		}
 
-		[Table(IsConverted = false)]
+		[Table(IsConverted = false, Prefix = "")]
+		[DBName("BaseConvertedTable")]
 		class NonConvertedTable : Record
 		{
 			[Column("INT")]
+			[DBName("IntField")]
 			public string IntAsString { get; set; }
 
 			[Column("VARCHAR(10)")]
+			[DBName("TextField")]
 			public int StringAsInt { get; set; }
 		}
 	}
