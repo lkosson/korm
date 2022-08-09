@@ -37,8 +37,7 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KORMInsertFailedException))]
-		public void InsertBeforeNotificationsResultThrowsException()
+		public void InsertBeforeNotificationsResultDontThrowException()
 		{
 			var record = new Table();
 			record.NotifyBeforeResult = RecordNotifyResult.Break;
@@ -98,8 +97,7 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KORMUpdateFailedException))]
-		public void UpdateBeforeNotificationsResultThrowsException()
+		public void UpdateBeforeNotificationsResultDontThrowException()
 		{
 			var record = new Table();
 			ORM.Insert(record);
@@ -164,8 +162,7 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(KORMDeleteFailedException))]
-		public void DeleteBeforeNotificationsResultThrowsException()
+		public void DeleteBeforeNotificationsResultDontThrowException()
 		{
 			var record = new Table();
 			ORM.Insert(record);
