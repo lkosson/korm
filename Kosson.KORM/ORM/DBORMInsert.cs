@@ -78,6 +78,7 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
+					LogRecord(LogLevel.Debug, token, record);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record, ref parameters);
 
 					if (cmdGetLastID == null)
@@ -91,10 +92,10 @@ namespace Kosson.KORM.ORM
 						var row = DB.ExecuteQuery(cmdGetLastID, 1).Single();
 						if (!manualid) record.ID = converter.Convert<long>(row[0]);
 					}
+					LogID(token, record);
 
 					count++;
 					if (notify != null) result = notify.OnInserted();
-					LogRecord(LogLevel.Debug, token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
 				LogEnd(token, count);
@@ -120,15 +121,16 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
+					LogRecord(LogLevel.Debug, token, record);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record, ref parameters);
 
 					if (cmdGetLastID != null) await DB.ExecuteNonQueryAsync(cmdInsert);
 					var rows = await DB.ExecuteQueryAsync(cmdGetLastID ?? cmdInsert, 1);
 					if (!manualid && rows.Any()) record.ID = converter.Convert<long>(rows.First()[0]);
+					LogID(token, record);
 
 					count++;
 					if (notify != null) result = notify.OnInserted();
-					LogRecord(LogLevel.Debug, token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
 				LogEnd(token, count);

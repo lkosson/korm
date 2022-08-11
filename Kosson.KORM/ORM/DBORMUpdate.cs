@@ -83,8 +83,8 @@ namespace Kosson.KORM.ORM
 		{
 			var token = LogStart();
 			var sql = command.ToString();
-			var result = DB.ExecuteNonQueryRaw(sql, Parameters);
 			LogRaw(token, sql, Parameters);
+			var result = DB.ExecuteNonQueryRaw(sql, Parameters);
 			LogEnd(token, result);
 			return result;
 		}
@@ -113,6 +113,7 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
+					LogRecord(LogLevel.Debug, token, record);
 					var rowVersion = record as IRecordWithRowVersion;
 					ApplyRowVersion(rowVersion, rowVersionParameter);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record, ref parameters);
@@ -121,7 +122,6 @@ namespace Kosson.KORM.ORM
 
 					count += lcount;
 					if (notify != null) result = notify.OnUpdated();
-					LogRecord(LogLevel.Debug, token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
 				LogEnd(token, count);
@@ -133,8 +133,8 @@ namespace Kosson.KORM.ORM
 		{
 			var token = LogStart();
 			var sql = command.ToString();
-			var result = await DB.ExecuteNonQueryRawAsync(sql, Parameters);
 			LogRaw(token, sql, Parameters);
+			var result = await DB.ExecuteNonQueryRawAsync(sql, Parameters);
 			LogEnd(token, result);
 			return result;
 		}
@@ -155,6 +155,7 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
+					LogRecord(LogLevel.Debug, token, record);
 					var rowVersion = record as IRecordWithRowVersion;
 					ApplyRowVersion(rowVersion, rowVersionParameter);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record, ref parameters);
@@ -163,7 +164,6 @@ namespace Kosson.KORM.ORM
 
 					count += lcount;
 					if (notify != null) result = notify.OnUpdated();
-					LogRecord(LogLevel.Debug, token, record);
 					if (result == RecordNotifyResult.Break) break;
 				}
 				LogEnd(token, count);
