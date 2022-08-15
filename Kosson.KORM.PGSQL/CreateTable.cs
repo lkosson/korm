@@ -12,7 +12,7 @@ namespace Kosson.KORM.PGSQL
 
 		protected override void AppendTable(StringBuilder sb)
 		{
-			sb.Append("IF NOT EXISTS");
+			sb.Append("IF NOT EXISTS ");
 			base.AppendTable(sb);
 		}
 

@@ -85,7 +85,7 @@ namespace Kosson.KORM.ORM
 			token.id = new EventId(id);
 			token.start = opStopwatch.ElapsedMilliseconds;
 			token.desc = command + "\t" + typeof(TRecord).Name + (String.IsNullOrEmpty(args) ? "" : "\t" + args);
-			if (logger.IsEnabled(LogLevel.Debug)) logger.LogInformation(token.id, $"{token.desc}");
+			if (logger.IsEnabled(LogLevel.Debug)) logger.LogDebug(token.id, $"{token.desc}");
 			return token;
 		}
 
