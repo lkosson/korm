@@ -24,15 +24,17 @@ namespace Kosson.KORM.ORM
 		private List<object> parameters;
 		protected virtual bool UseFullFieldNames { get { return true; } }
 		protected IEnumerable<object> Parameters { get { return parameters ?? Enumerable.Empty<object>(); } }
-		private readonly ILogger logger;
+		private readonly ILogger operationLogger;
+		private readonly ILogger recordLogger;
 
 		public IDB DB { get; }
 
-		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder, ILogger logger)
+		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 		{
 			this.DB = db;
 			this.metaBuilder = metaBuilder;
-			this.logger = logger;
+			this.operationLogger = operationLogger;
+			this.recordLogger = recordLogger;
 			if (meta == null) meta = metaBuilder.Get(typeof(TRecord));
 			if (opStopwatch == null) opStopwatch = Stopwatch.StartNew();
 		}
@@ -76,8 +78,8 @@ namespace Kosson.KORM.ORM
 
 		protected TraceToken LogStart([CallerMemberName] string method = "", string args = "")
 		{
-			if (logger == null) return default;
-			if (!logger.IsEnabled(LogLevel.Warning)) return default;
+			if (operationLogger == null) return default;
+			if (!operationLogger.IsEnabled(LogLevel.Warning)) return default;
 			var command = GetType().Name;
 			command = command.Substring(5, command.IndexOf('`') - 5);
 			int id = Interlocked.Increment(ref nextTraceId);
@@ -85,53 +87,53 @@ namespace Kosson.KORM.ORM
 			token.id = new EventId(id);
 			token.start = opStopwatch.ElapsedMilliseconds;
 			token.desc = command + "\t" + typeof(TRecord).Name + (String.IsNullOrEmpty(args) ? "" : "\t" + args);
-			if (logger.IsEnabled(LogLevel.Debug)) logger.LogDebug(token.id, $"{token.desc}");
+			if (operationLogger.IsEnabled(LogLevel.Debug)) operationLogger.LogDebug(token.id, $"{token.desc}");
 			return token;
 		}
 
 		protected void LogEnd(TraceToken token, int? result = null)
 		{
-			if (logger == null) return;
+			if (operationLogger == null) return;
 			if (token.id == 0) return;
 			var time = opStopwatch.ElapsedMilliseconds - token.start;
 			if (time >= 1000)
 			{
-				logger.LogWarning(token.id, $"{token.desc}\t{time} ms\t{result}");
+				operationLogger.LogWarning(token.id, $"{token.desc}\t{time} ms\t{result}");
 			}
 			else
 			{
-				logger.LogInformation(token.id, $"{token.desc}\t{time} ms\t{result}");
+				operationLogger.LogInformation(token.id, $"{token.desc}\t{time} ms\t{result}");
 			}
 		}
 
 		protected void LogRaw(TraceToken token, string sql, IEnumerable<object> parameters)
 		{
-			if (logger == null) return;
+			if (operationLogger == null) return;
 			if (token.id == 0) return;
-			if (!logger.IsEnabled(LogLevel.Debug)) return;
-			logger.LogDebug(token.id, $"{token.desc}\t{sql}");
+			if (!operationLogger.IsEnabled(LogLevel.Debug)) return;
+			operationLogger.LogDebug(token.id, $"{token.desc}\t{sql}");
 			var i = 0;
 			foreach (var parameter in parameters)
 			{
-				logger.LogDebug(token.id, $"{token.desc}\t@P{i}\t{parameter}");
+				operationLogger.LogDebug(token.id, $"{token.desc}\t@P{i}\t{parameter}");
 				i++;
 			}
 		}
 
 		protected void LogRecord(LogLevel level, TraceToken token, TRecord record)
 		{
-			if (logger == null) return;
+			if (recordLogger == null) return;
 			if (token.id == 0) return;
-			if (!logger.IsEnabled(level)) return;
-			logger.Log(level, token.id, $"{token.desc}\t{(record.Ref().IsNull ? "" : record.Ref() + "\t")}{record.ToStringByFields(meta)}");
+			if (!recordLogger.IsEnabled(level)) return;
+			recordLogger.Log(level, token.id, $"{token.desc}\t{(record.Ref().IsNull ? "" : record.Ref() + "\t")}{record.ToStringByFields(meta)}");
 		}
 
 		protected void LogID(TraceToken token, TRecord record)
 		{
-			if (logger == null) return;
+			if (recordLogger == null) return;
 			if (token.id == 0) return;
-			if (!logger.IsEnabled(LogLevel.Debug)) return;
-			logger.Log(LogLevel.Debug, token.id, $"{token.desc}\t{record.Ref()}");
+			if (!recordLogger.IsEnabled(LogLevel.Information)) return;
+			recordLogger.Log(LogLevel.Information, token.id, $"{token.desc}\t{record.Ref()}");
 		}
 
 		protected struct TraceToken
@@ -152,8 +154,8 @@ namespace Kosson.KORM.ORM
 
 		protected abstract TCommand BuildCommand(IDBCommandBuilder cb);
 
-		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder, ILogger logger)
-			: base(db, metaBuilder, logger)
+		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
+			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
 			var cb = db.CommandBuilder;
 

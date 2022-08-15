@@ -12,8 +12,8 @@ namespace Kosson.KORM.ORM
 		private IFactory factory;
 		private LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader;
 
-		public DBORMSelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IFactory factory, LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader, ILogger logger)
-			: base(db, metaBuilder, logger)
+		public DBORMSelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IFactory factory, LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader, ILogger operationLogger, ILogger recordLogger)
+			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
 			this.converter = converter;
 			this.factory = factory;
@@ -100,7 +100,7 @@ namespace Kosson.KORM.ORM
 				{
 					var record = reader.Read();
 					result.Add(record);
-					LogRecord(LogLevel.Trace, token, record);
+					LogRecord(LogLevel.Debug, token, record);
 				}
 				LogEnd(token, result.Count);
 				return result;
@@ -120,7 +120,7 @@ namespace Kosson.KORM.ORM
 				{
 					var record = reader.Read();
 					result.Add(record);
-					LogRecord(LogLevel.Trace, token, record);
+					LogRecord(LogLevel.Debug, token, record);
 				}
 				LogEnd(token, result.Count);
 				return result;

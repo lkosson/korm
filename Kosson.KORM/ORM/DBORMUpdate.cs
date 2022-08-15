@@ -12,8 +12,8 @@ namespace Kosson.KORM.ORM
 		protected override bool UseFullFieldNames { get { return false; } }
 		private string commandText;
 
-		public DBORMUpdate(IDB db, IMetaBuilder metaBuilder, ILogger logger)
-			: base(db, metaBuilder, logger)
+		public DBORMUpdate(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
+			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
 			commandText = command.ToString();
 			var cb = db.CommandBuilder;
@@ -113,7 +113,7 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
-					LogRecord(LogLevel.Debug, token, record);
+					LogRecord(LogLevel.Information, token, record);
 					var rowVersion = record as IRecordWithRowVersion;
 					ApplyRowVersion(rowVersion, rowVersionParameter);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record, ref parameters);
@@ -155,7 +155,7 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
-					LogRecord(LogLevel.Debug, token, record);
+					LogRecord(LogLevel.Information, token, record);
 					var rowVersion = record as IRecordWithRowVersion;
 					ApplyRowVersion(rowVersion, rowVersionParameter);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record, ref parameters);

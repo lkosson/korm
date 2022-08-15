@@ -11,8 +11,8 @@ namespace Kosson.KORM.ORM
 	{
 		protected override bool UseFullFieldNames { get { return false; } }
 
-		public DBORMDelete(IDB db, IMetaBuilder metaBuilder, ILogger logger)
-			: base(db, metaBuilder, logger)
+		public DBORMDelete(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
+			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
 		}
 
@@ -73,7 +73,7 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
-					LogRecord(LogLevel.Debug, token, record);
+					LogRecord(LogLevel.Information, token, record);
 					var rowVersion = record as IRecordWithRowVersion;
 					if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
 					DB.SetParameter(idParameter, record.ID);
@@ -122,7 +122,7 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
-					LogRecord(LogLevel.Debug, token, record);
+					LogRecord(LogLevel.Information, token, record);
 					var rowVersion = record as IRecordWithRowVersion;
 					if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
 					DB.SetParameter(idParameter, record.ID);

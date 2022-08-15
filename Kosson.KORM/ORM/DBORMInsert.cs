@@ -12,8 +12,8 @@ namespace Kosson.KORM.ORM
 	{
 		private IConverter converter;
 
-		public DBORMInsert(IDB db, IMetaBuilder metaBuilder, IConverter converter, ILogger logger)
-			: base(db, metaBuilder, logger)
+		public DBORMInsert(IDB db, IMetaBuilder metaBuilder, IConverter converter, ILogger operationLogger, ILogger recordLogger)
+			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
 			this.converter = converter;
 		}
@@ -78,7 +78,7 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
-					LogRecord(LogLevel.Debug, token, record);
+					LogRecord(LogLevel.Information, token, record);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record, ref parameters);
 
 					if (cmdGetLastID == null)
@@ -121,7 +121,7 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Break) break;
 					if (result == RecordNotifyResult.Skip) continue;
 
-					LogRecord(LogLevel.Debug, token, record);
+					LogRecord(LogLevel.Information, token, record);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record, ref parameters);
 
 					if (cmdGetLastID != null) await DB.ExecuteNonQueryAsync(cmdInsert);
