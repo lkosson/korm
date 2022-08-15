@@ -14,6 +14,7 @@ namespace Kosson.KORM.Scratch
 			//services.AddKORMServices<SQLite.SQLiteDB>("data source=korm.sqlite3");
 			services.AddKORMServices<PGSQL.PGSQLDB>("host=10.0.0.149;database=korm;username=korm;password=korm");
 			services.AddScoped<Runner>();
+			services.AddSingleton<ILoggerFactory, ConsoleLoggerFactory>();
 			services.AddSingleton(typeof(ILogger<>), typeof(ConsoleLogger<>));
 
 			var sp = services.BuildServiceProvider();

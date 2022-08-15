@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Kosson.KORM.Scratch
 {
-	class ConsoleLogger<T> : ILogger<T>, ILogger
+	class ConsoleLogger : ILogger
 	{
 		LogLevel MinLevel => LogLevel.Warning;
 		IDisposable ILogger.BeginScope<TState>(TState state) => null;
@@ -24,5 +24,9 @@ namespace Kosson.KORM.Scratch
 			Console.WriteLine(formatter(state, exception));
 			Console.ForegroundColor = c;
 		}
+	}
+
+	class ConsoleLogger<T> : ConsoleLogger, ILogger<T>
+	{
 	}
 }
