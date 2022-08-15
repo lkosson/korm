@@ -93,7 +93,7 @@ namespace Kosson.KORM.ORM
 			//var rows = DB.ExecuteQuery(sql, Parameters);
 			//return rows.Load<TRecord>(converter, recordLoader, factory);
 			var token = LogStart();
-			using (var reader = ExecuteReader())
+			using (var reader = ExecuteReaderNoLog())
 			{
 				var result = new List<TRecord>();
 				while (reader.MoveNext())
@@ -113,7 +113,7 @@ namespace Kosson.KORM.ORM
 			//var rows = await DB.ExecuteQueryAsync(sql, Parameters);
 			//return rows.Load<TRecord>(converter, recordLoader, factory);
 			var token = LogStart();
-			using (var reader = await ExecuteReaderAsync())
+			using (var reader = await ExecuteReaderAsyncNoLog())
 			{
 				var result = new List<TRecord>();
 				while (await reader.MoveNextAsync())
@@ -130,20 +130,32 @@ namespace Kosson.KORM.ORM
 		public IORMReader<TRecord> ExecuteReader()
 		{
 			var token = LogStart(args: ((DB.CommandBuilder.DBCommandWithWhere)command).ToStringWhere());
+			var reader = ExecuteReaderNoLog();
+			LogEnd(token);
+			return reader;
+		}
+
+		private IORMReader<TRecord> ExecuteReaderNoLog()
+		{
 			var sql = command.ToString();
 			var reader = new DBORMReader<TRecord>(DB, factory, converter, loaderFromReader, sql, Parameters);
 			reader.PrepareReader();
-			LogEnd(token);
 			return reader;
 		}
 
 		public async Task<IORMReader<TRecord>> ExecuteReaderAsync()
 		{
 			var token = LogStart(args: ((DB.CommandBuilder.DBCommandWithWhere)command).ToStringWhere());
+			var reader = await ExecuteReaderAsyncNoLog();
+			LogEnd(token);
+			return reader;
+		}
+
+		private async Task<IORMReader<TRecord>> ExecuteReaderAsyncNoLog()
+		{
 			var sql = command.ToString();
 			var reader = new DBORMReader<TRecord>(DB, factory, converter, loaderFromReader, sql, Parameters);
 			await reader.PrepareReaderAsync();
-			LogEnd(token);
 			return reader;
 		}
 
