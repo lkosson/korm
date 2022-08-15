@@ -27,8 +27,8 @@ namespace Kosson.KORM.ORM
 			this.metaBuilder = metaBuilder;
 			this.converter = converter;
 			this.factory = factory;
-			this.operationLogger = loggerFactory.CreateLogger(nameof(Kosson.KORM.ORM));
-			this.recordLogger = loggerFactory.CreateLogger(nameof(Kosson.KORM.ORM) + ".Records");
+			this.operationLogger = loggerFactory.CreateLogger("Kosson.KORM.ORM");
+			this.recordLogger = loggerFactory.CreateLogger("Kosson.KORM.ORM.Records");
 		}
 
 		void IORM.CreateTables(IEnumerable<Type> types) => new DBTableCreator(db, metaBuilder, operationLogger).Create(types);
