@@ -213,6 +213,7 @@ namespace Kosson.KORM.ORM
 			else if (field.Type == typeof(Guid)) ReadFieldPrimitive(field, fieldIndex, miGetGuid, localRecord);
 			else if (field.Type == typeof(string)) ReadFieldPrimitive(field, fieldIndex, miGetString, localRecord);
 			else if (field.IsRecordRef) ReadFieldRecordRef(field, fieldIndex, localRecord);
+			else if (field.Type.IsEnum) ReadFieldPrimitive(field, fieldIndex, miGetInt32, localRecord);
 			else ReadFieldConvert(field, fieldIndex, localRecord);
 		}
 
