@@ -25,6 +25,7 @@ namespace Kosson.KORM.Tests
 			var services = new ServiceCollection();
 			PrepareKORMServices(services);
 			services.AddSingleton(typeof(ILogger<>), typeof(Microsoft.Extensions.Logging.Abstractions.NullLogger<>));
+			services.AddSingleton<ILoggerFactory, Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory>();
 
 			serviceProvider = services.BuildServiceProvider();
 			scope = serviceProvider.CreateScope();
