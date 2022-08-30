@@ -177,13 +177,13 @@ namespace Kosson.KORM.DB
 				if (dbconn == null)
 				{
 					dbconn = CreateConnection();
-					connectionStartStackTrace = new StackTrace();
+					connectionStartStackTrace = CaptureStackTrace();
 				}
 				if (dbtran == null)
 				{
 					dbtran = dbconn.BeginTransaction(IsolationLevel);
 					this.isImplicit = isImplicit;
-					transactionStartStackTrace = new StackTrace();
+					transactionStartStackTrace = CaptureStackTrace();
 				}
 			}
 		}
@@ -197,7 +197,7 @@ namespace Kosson.KORM.DB
 				dbtran.Commit();
 				dbtran.Dispose();
 				dbtran = null;
-				transactionEndStackTrace = new StackTrace();
+				transactionEndStackTrace = CaptureStackTrace();
 			}
 		}
 
@@ -210,7 +210,7 @@ namespace Kosson.KORM.DB
 				dbtran.Rollback();
 				dbtran.Dispose();
 				dbtran = null;
-				transactionEndStackTrace = new StackTrace();
+				transactionEndStackTrace = CaptureStackTrace();
 			}
 		}
 
@@ -264,8 +264,8 @@ namespace Kosson.KORM.DB
 						throw;
 					}
 				}
-				transactionEndStackTrace = new StackTrace();
-				connectionEndStackTrace = new StackTrace();
+				transactionEndStackTrace = CaptureStackTrace();
+				connectionEndStackTrace = CaptureStackTrace();
 			}
 		}
 
@@ -275,6 +275,12 @@ namespace Kosson.KORM.DB
 			Close(true);
 			syncroot.Dispose();
 			optionsMonitorDisposer.Dispose();
+		}
+
+		private StackTrace CaptureStackTrace()
+		{
+			if (!Debugger.IsAttached) return null;
+			return new StackTrace();
 		}
 		#endregion
 		#region Parameters handling
