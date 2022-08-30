@@ -63,9 +63,9 @@ namespace Kosson.KORM.Scratch
 			var hist = "";
 			for (int i = 0; i < steps; i++)
 			{
-				hist += (hstart + hstep * i).ToString("0.00") + "\t" + hdata[i].ToString() + "\t" + "".PadLeft(hdata[i] * 50 / hmax, '*') + "\n";
+				hist += (hstart + hstep * i).ToString("0.000") + "\t" + hdata[i].ToString() + "\t" + "".PadLeft(hdata[i] * 50 / hmax, '*') + "\n";
 			}
-			return "total\t" + sum.ToString("0.00") + "ms\navg\t" + avg.ToString("0.00") + "ms\ndev\t" + dev.ToString("0.00") + "ms\np1\t" + p1.ToString("0.00") + "ms\np5\t" + p5.ToString("0.00") + "ms\np9\t" + p9.ToString("0.00") + "ms\n" + hist;
+			return "total\t" + sum.ToString("0.000") + "ms\navg\t" + avg.ToString("0.00") + "ms\ndev\t" + dev.ToString("0.00") + "ms\np1\t" + p1.ToString("0.00") + "ms\np5\t" + p5.ToString("0.00") + "ms\np9\t" + p9.ToString("0.00") + "ms\n" + hist;
 		}
 	}
 }
