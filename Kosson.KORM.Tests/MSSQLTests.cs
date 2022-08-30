@@ -174,6 +174,7 @@ namespace Kosson.KORM.Tests
 	[TestClass]
 	public class MSSQLValueStorageTests : ValueStorageTests
 	{
+		protected override bool SupportsInfinity => false;
 		protected override void PrepareKORMServices(IServiceCollection services) => MSSQLTests.PrepareKORMServices(services);
 	}
 }

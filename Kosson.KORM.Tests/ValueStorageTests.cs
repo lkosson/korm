@@ -6,6 +6,8 @@ namespace Kosson.KORM.Tests
 {
 	public abstract class ValueStorageTests : ORMTestsBase
 	{
+		protected virtual bool SupportsInfinity => true;
+
 		protected override System.Collections.Generic.IEnumerable<Type> Tables()
 		{
 			yield return typeof(SingleValueTableEnum);
@@ -45,66 +47,94 @@ namespace Kosson.KORM.Tests
 		[TestMethod]
 		public void RetrievedValueIsEqualToStoredEnum()
 		{
+			RetrievedValueIsEqualToStored<DayOfWeek, SingleValueTableEnum>(DayOfWeek.Sunday);
 			RetrievedValueIsEqualToStored<DayOfWeek, SingleValueTableEnum>(DayOfWeek.Thursday);
+			RetrievedValueIsEqualToStored<DayOfWeek, SingleValueTableEnum>((DayOfWeek)42);
 		}
 
 		[TestMethod]
 		public void RetrievedValueIsEqualToStoredBool()
 		{
 			RetrievedValueIsEqualToStored<bool, SingleValueTableBool>(true);
+			RetrievedValueIsEqualToStored<bool, SingleValueTableBool>(false);
 		}
 
 		[TestMethod]
 		public void RetrievedValueIsEqualToStoredByte()
 		{
-			RetrievedValueIsEqualToStored<byte, SingleValueTableByte>(123);
+			RetrievedValueIsEqualToStored<byte, SingleValueTableByte>(0);
+			RetrievedValueIsEqualToStored<byte, SingleValueTableByte>(1);
+			RetrievedValueIsEqualToStored<byte, SingleValueTableByte>(142);
 		}
 
 		[TestMethod]
 		public void RetrievedValueIsEqualToStoredShort()
 		{
+			RetrievedValueIsEqualToStored<short, SingleValueTableShort>(0);
+			RetrievedValueIsEqualToStored<short, SingleValueTableShort>(1);
+			RetrievedValueIsEqualToStored<short, SingleValueTableShort>(-42);
 			RetrievedValueIsEqualToStored<short, SingleValueTableShort>(12345);
 		}
 
 		[TestMethod]
 		public void RetrievedValueIsEqualToStoredInt()
 		{
+			RetrievedValueIsEqualToStored<int, SingleValueTableInt>(0);
+			RetrievedValueIsEqualToStored<int, SingleValueTableInt>(1);
+			RetrievedValueIsEqualToStored<int, SingleValueTableInt>(-42);
 			RetrievedValueIsEqualToStored<int, SingleValueTableInt>(12356789);
 		}
 
 		[TestMethod]
 		public void RetrievedValueIsEqualToStoredLong()
 		{
+			RetrievedValueIsEqualToStored<long, SingleValueTableLong>(0);
+			RetrievedValueIsEqualToStored<long, SingleValueTableLong>(1);
+			RetrievedValueIsEqualToStored<long, SingleValueTableLong>(-42);
 			RetrievedValueIsEqualToStored<long, SingleValueTableLong>(123456789123456);
 		}
 
 		[TestMethod]
 		public void RetrievedValueIsEqualToStoredFloat()
 		{
+			RetrievedValueIsEqualToStored<float, SingleValueTableFloat>(0f);
+			RetrievedValueIsEqualToStored<float, SingleValueTableFloat>(1f);
+			RetrievedValueIsEqualToStored<float, SingleValueTableFloat>(-42f);
+			if (SupportsInfinity) RetrievedValueIsEqualToStored<float, SingleValueTableFloat>(Single.PositiveInfinity);
 			RetrievedValueIsEqualToStored<float, SingleValueTableFloat>(12345.6789f);
 		}
 
 		[TestMethod]
 		public void RetrievedValueIsEqualToStoredDouble()
 		{
+			RetrievedValueIsEqualToStored<double, SingleValueTableDouble>(0);
+			RetrievedValueIsEqualToStored<double, SingleValueTableDouble>(1);
+			RetrievedValueIsEqualToStored<double, SingleValueTableDouble>(-42);
+			if (SupportsInfinity) RetrievedValueIsEqualToStored<double, SingleValueTableDouble>(Double.PositiveInfinity);
 			RetrievedValueIsEqualToStored<double, SingleValueTableDouble>(12345.6789123456);
 		}
 
 		[TestMethod]
 		public void RetrievedValueIsEqualToStoredDecimal()
 		{
+			RetrievedValueIsEqualToStored<decimal, SingleValueTableDecimal>(0);
+			RetrievedValueIsEqualToStored<decimal, SingleValueTableDecimal>(1);
+			RetrievedValueIsEqualToStored<decimal, SingleValueTableDecimal>(-42);
 			RetrievedValueIsEqualToStored<decimal, SingleValueTableDecimal>(123456.789123m);
 		}
 
 		[TestMethod]
 		public void RetrievedValueIsEqualToStoredDateTime()
 		{
+			RetrievedValueIsEqualToStored<DateTime, SingleValueTableDateTime>(new DateTime(1900, 1, 1, 0, 0, 0));
 			RetrievedValueIsEqualToStored<DateTime, SingleValueTableDateTime>(new DateTime(2017, 6, 22, 7, 48, 51));
+			RetrievedValueIsEqualToStored<DateTime, SingleValueTableDateTime>(new DateTime(2100, 12, 31, 23, 59, 59));
 		}
 
 		[TestMethod]
 		public void RetrievedValueIsEqualToStoredGuid()
 		{
+			RetrievedValueIsEqualToStored<Guid, SingleValueTableGuid>(Guid.Empty);
 			RetrievedValueIsEqualToStored<Guid, SingleValueTableGuid>(Guid.NewGuid());
 		}
 
