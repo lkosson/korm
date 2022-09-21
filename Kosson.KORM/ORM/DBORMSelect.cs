@@ -89,9 +89,6 @@ namespace Kosson.KORM.ORM
 
 		public IReadOnlyCollection<TRecord> Execute()
 		{
-			//var sql = command.ToString();
-			//var rows = DB.ExecuteQuery(sql, Parameters);
-			//return rows.Load<TRecord>(converter, recordLoader, factory);
 			var token = LogStart(args: ((DB.CommandBuilder.DBCommandWithWhere)command).ToStringWhere());
 			using (var reader = ExecuteReaderNoLog())
 			{
@@ -109,9 +106,6 @@ namespace Kosson.KORM.ORM
 
 		public async Task<IReadOnlyCollection<TRecord>> ExecuteAsync()
 		{
-			//var sql = command.ToString();
-			//var rows = await DB.ExecuteQueryAsync(sql, Parameters);
-			//return rows.Load<TRecord>(converter, recordLoader, factory);
 			var token = LogStart(args: ((DB.CommandBuilder.DBCommandWithWhere)command).ToStringWhere());
 			using (var reader = await ExecuteReaderAsyncNoLog())
 			{
