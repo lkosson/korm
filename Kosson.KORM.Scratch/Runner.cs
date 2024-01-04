@@ -40,10 +40,12 @@ namespace Kosson.KORM.Scratch
 			db.Commit();
 
 			db.BeginTransaction();
-			var gs = Enumerable.Range(0, 10).Select(i => new User { Name = "group" + i, UserDetails = new UserDetails { Group = i / 100 } });
-			var us = Enumerable.Range(0, 1000).Select(i => new User { Name = "user" + i, UserDetails = new UserDetails { Group = gs.Skip(i / 100).First() } });
+			var gs = Enumerable.Range(0, 10).Select(i => new User { Name = "group" + i, UserDetails = new UserDetails { Group = i / 100 } }).ToList();
 			orm.InsertAll(gs);
+			var us = Enumerable.Range(0, 1000).Select(i => new User { Name = "user" + i, UserDetails = new UserDetails { Group = gs.Skip(i / 100).First() } }).ToList();
 			orm.InsertAll(us);
+
+			var joined = orm.Select<User>().Execute().Join(orm.Select<User>(), user => user.UserDetails.Group);
 
 			var first = orm.Select<User>().ExecuteFirst();
 
