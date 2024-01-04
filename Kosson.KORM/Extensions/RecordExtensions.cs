@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Kosson.KORM
 {
@@ -24,6 +27,112 @@ namespace Kosson.KORM
 			}
 			return dictionary;
 		}
+
+		private static IEnumerable<TResult> Join<TRecordLocal, TRecordForeign, TResult>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector, Func<TRecordLocal, TRecordForeign, TResult> resultConstructor) where TRecordForeign : IRecord
+		{
+			var foreignRefs = records.Select(foreignKeySelector).Distinct().ToList();
+			var foreignRecords = foreignRecordSelect.ByRefs(foreignRefs);
+			var foreignLookup = foreignRecords.ToDictionaryByRef();
+			var joinedRecords = records.Select(record1 => foreignLookup.TryGetValue(foreignKeySelector(record1), out var record2) ? resultConstructor(record1, record2) : resultConstructor(record1, default));
+			return joinedRecords;
+		}
+
+		private static async Task<IEnumerable<TResult>> JoinAsync<TRecordLocal, TRecordForeign, TResult>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector, Func<TRecordLocal, TRecordForeign, TResult> resultConstructor) where TRecordForeign : IRecord
+		{
+			var foreignRefs = records.Select(foreignKeySelector).Distinct().ToList();
+			var foreignRecords = await foreignRecordSelect.ByRefsAsync(foreignRefs);
+			var foreignLookup = foreignRecords.ToDictionaryByRef();
+			var joinedRecords = records.Select(record1 => foreignLookup.TryGetValue(foreignKeySelector(record1), out var record2) ? resultConstructor(record1, record2) : resultConstructor(record1, default));
+			return joinedRecords;
+		}
+
+		/// <summary>
+		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
+		/// </summary>
+		/// <param name="records">Local records</param>
+		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
+		/// <param name="foreignKeySelector">Foreign key reference</param>
+		/// <returns>Tuples of joined local and remote records</returns>
+		public static IEnumerable<(TRecordLocal, TRecordForeign)> Join<TRecordLocal, TRecordForeign>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector) 
+			where TRecordForeign : IRecord 
+			=> Join(records, foreignRecordSelect, foreignKeySelector, (record1, record2) => (record1, record2));
+
+		/// <summary>
+		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
+		/// </summary>
+		/// <param name="records">Local records</param>
+		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
+		/// <param name="foreignKeySelector">Foreign key reference</param>
+		/// <returns>Tuples of joined local and remote records</returns>
+		public static IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordForeign)> Join<TRecordLocal1, TRecordLocal2, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2), RecordRef<TRecordForeign>> foreignKeySelector) 
+			where TRecordForeign : IRecord
+			=> Join(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, record));
+
+		/// <summary>
+		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
+		/// </summary>
+		/// <param name="records">Local records</param>
+		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
+		/// <param name="foreignKeySelector">Foreign key reference</param>
+		/// <returns>Tuples of joined local and remote records</returns>
+		public static IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign)> Join<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3), RecordRef<TRecordForeign>> foreignKeySelector)
+			where TRecordForeign : IRecord
+			=> Join(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, tuple.Item3, record));
+
+		/// <summary>
+		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
+		/// </summary>
+		/// <param name="records">Local records</param>
+		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
+		/// <param name="foreignKeySelector">Foreign key reference</param>
+		/// <returns>Tuples of joined local and remote records</returns>
+		public static IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign)> Join<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4), RecordRef<TRecordForeign>> foreignKeySelector)
+			where TRecordForeign : IRecord
+			=> Join(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, record));
+
+		/// <summary>
+		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
+		/// </summary>
+		/// <param name="records">Local records</param>
+		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
+		/// <param name="foreignKeySelector">Foreign key reference</param>
+		/// <returns>Tuples of joined local and remote records</returns>
+		public static Task<IEnumerable<(TRecordLocal, TRecordForeign)>> JoinAsync<TRecordLocal, TRecordForeign>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector)
+			where TRecordForeign : IRecord
+			=> JoinAsync(records, foreignRecordSelect, foreignKeySelector, (record1, record2) => (record1, record2));
+
+		/// <summary>
+		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
+		/// </summary>
+		/// <param name="records">Local records</param>
+		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
+		/// <param name="foreignKeySelector">Foreign key reference</param>
+		/// <returns>Tuples of joined local and remote records</returns>
+		public static Task<IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordForeign)>> JoinAsync<TRecordLocal1, TRecordLocal2, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2), RecordRef<TRecordForeign>> foreignKeySelector)
+			where TRecordForeign : IRecord
+			=> JoinAsync(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, record));
+
+		/// <summary>
+		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
+		/// </summary>
+		/// <param name="records">Local records</param>
+		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
+		/// <param name="foreignKeySelector">Foreign key reference</param>
+		/// <returns>Tuples of joined local and remote records</returns>
+		public static Task<IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign)>> JoinAsync<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3), RecordRef<TRecordForeign>> foreignKeySelector)
+			where TRecordForeign : IRecord
+			=> JoinAsync(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, tuple.Item3, record));
+
+		/// <summary>
+		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
+		/// </summary>
+		/// <param name="records">Local records</param>
+		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
+		/// <param name="foreignKeySelector">Foreign key reference</param>
+		/// <returns>Tuples of joined local and remote records</returns>
+		public static Task<IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign)>> JoinAsync<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4), RecordRef<TRecordForeign>> foreignKeySelector)
+			where TRecordForeign : IRecord
+			=> JoinAsync(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, record));
 
 		/// <summary>
 		/// Creates a record reference to the record.
