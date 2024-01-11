@@ -60,7 +60,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
 		/// </summary>
-		/// <param name="records">Local records</param>
+		/// <param name="tuples">Local records</param>
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
@@ -71,7 +71,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
 		/// </summary>
-		/// <param name="records">Local records</param>
+		/// <param name="tuples">Local records</param>
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
@@ -82,7 +82,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
 		/// </summary>
-		/// <param name="records">Local records</param>
+		/// <param name="tuples">Local records</param>
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
@@ -104,7 +104,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
 		/// </summary>
-		/// <param name="records">Local records</param>
+		/// <param name="tuples">Local records</param>
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
@@ -115,7 +115,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
 		/// </summary>
-		/// <param name="records">Local records</param>
+		/// <param name="tuples">Local records</param>
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
@@ -126,7 +126,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Performs in-memory left outer join operation by fetching foreign records based on values found in provided records using a given SELECT query.
 		/// </summary>
-		/// <param name="records">Local records</param>
+		/// <param name="tuples">Local records</param>
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
