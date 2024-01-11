@@ -1,5 +1,5 @@
 @echo off
-SET SDK="c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\"
+SET SDK="c:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\"
 SET PATH=%PATH%;%SDK%
 
 msbuild kosson.korm.sln /m /t:Clean /p:Configuration=Release
