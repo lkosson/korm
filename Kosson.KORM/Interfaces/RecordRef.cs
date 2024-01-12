@@ -145,6 +145,48 @@ namespace Kosson.KORM
 			return typeof(T).Name + "@" + ID;
 		}
 
+		/// <summary>
+		/// Parses a string to a RecordRef.
+		/// </summary>
+		/// <param name="value">String to parse</param>
+		/// <returns>Parsed RecordRef</returns>
+		/// <exception cref="FormatException"></exception>
+		public static RecordRef<T> Parse(string value)
+		{
+			var at = value.IndexOf('@');
+			if (at > 0)
+			{
+				var providedType = value.Substring(0, at);
+				var expectedType = typeof(T).Name;
+				if (providedType != expectedType) throw new FormatException($"Invalid RecordRef type, expected \"{expectedType}\", got \"{providedType}\".");
+				value = value.Substring(at + 1);
+			}
+			if (!Int64.TryParse(value, out long id)) throw new FormatException($"Invalid RecordRef value.");
+			return new RecordRef<T>(id);
+		}
+
+		/// <summary>
+		/// Attempts to parse provided value as a RecordRef.
+		/// </summary>
+		/// <param name="value">String to parse</param>
+		/// <param name="recordRef">Parsed RecordRef</param>
+		/// <returns>true is parsing was successful</returns>
+		public static bool TryParse(string value, out RecordRef<T> recordRef)
+		{
+			recordRef = default;
+			var at = value.IndexOf('@');
+			if (at > 0)
+			{
+				var providedType = value.Substring(0, at);
+				var expectedType = typeof(T).Name;
+				if (providedType != expectedType) return false;
+				value = value.Substring(at + 1);
+			}
+			if (!Int64.TryParse(value, out long id)) return false;
+			recordRef = new RecordRef<T>(id);
+			return true;
+		}
+
 		#region IConvertible implementation
 		TypeCode IConvertible.GetTypeCode()
 		{
