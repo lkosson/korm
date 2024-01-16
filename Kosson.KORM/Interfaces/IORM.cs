@@ -112,6 +112,16 @@ namespace Kosson.KORM
 	}
 
 	/// <summary>
+	/// Abstract strongly-typed ORM command with WHERE clause.
+	/// </summary>
+	/// <typeparam name="TCommand">Derived concrete interface of the command.</typeparam>
+	public interface IORMNarrowableCommand<TCommand, TRecord> : IORMNarrowableCommand<TCommand>
+		where TCommand : IORMNarrowableCommand<TCommand>
+		where TRecord : IRecord
+	{
+	}
+
+	/// <summary>
 	/// Abstract ORM command retrieving records from database.
 	/// </summary>
 	/// <typeparam name="TRecord">Type of records returned.</typeparam>
@@ -182,7 +192,7 @@ namespace Kosson.KORM
 	/// ORM command for retrieving records of a specified type from its backing database table.
 	/// </summary>
 	/// <typeparam name="TRecord">Type of records to retrieve.</typeparam>
-	public interface IORMSelect<TRecord> : IORMCommand<IORMSelect<TRecord>>, IORMNarrowableCommand<IORMSelect<TRecord>>, IORMQueryCommand<TRecord> where TRecord : IRecord
+	public interface IORMSelect<TRecord> : IORMCommand<IORMSelect<TRecord>>, IORMNarrowableCommand<IORMSelect<TRecord>, TRecord>, IORMQueryCommand<TRecord> where TRecord : IRecord
 	{
 		/// <summary>
 		/// Changes command behavior to SELECT FOR UPDATE mode.
@@ -238,7 +248,7 @@ namespace Kosson.KORM
 	/// ORM command for deleting records of a specified type from its backing database table.
 	/// </summary>
 	/// <typeparam name="TRecord">Type of records to delete</typeparam>
-	public interface IORMDelete<TRecord> : IORMCommand<IORMDelete<TRecord>>, IORMNarrowableCommand<IORMDelete<TRecord>>, IORMNonQueryCommand<TRecord> where TRecord : IRecord
+	public interface IORMDelete<TRecord> : IORMCommand<IORMDelete<TRecord>>, IORMNarrowableCommand<IORMDelete<TRecord>, TRecord>, IORMNonQueryCommand<TRecord> where TRecord : IRecord
 	{
 	}
 
@@ -246,7 +256,7 @@ namespace Kosson.KORM
 	/// ORM command for modifying records of a specified type from its backing database table.
 	/// </summary>
 	/// <typeparam name="TRecord">Type of records to modify.</typeparam>
-	public interface IORMUpdate<TRecord> : IORMCommand<IORMUpdate<TRecord>>, IORMNarrowableCommand<IORMUpdate<TRecord>>, IORMNonQueryCommand<TRecord> where TRecord : IRecord
+	public interface IORMUpdate<TRecord> : IORMCommand<IORMUpdate<TRecord>>, IORMNarrowableCommand<IORMUpdate<TRecord>, TRecord>, IORMNonQueryCommand<TRecord> where TRecord : IRecord
 	{
 		/// <summary>
 		/// Adds SET clause to the command, changing given column to new value.
