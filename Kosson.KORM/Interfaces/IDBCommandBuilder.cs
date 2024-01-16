@@ -55,6 +55,26 @@ namespace Kosson.KORM
 		string ArrayElementSeparator { get; }
 
 		/// <summary>
+		/// AND boolean operator.
+		/// </summary>
+		string AndConditionOperator { get; }
+
+		/// <summary>
+		/// OR boolean operator.
+		/// </summary>
+		string OrConditionOperator { get; }
+
+		/// <summary>
+		/// Left parenthesis for boolean expression.
+		/// </summary>
+		string ConditionParenthesisLeft { get; }
+
+		/// <summary>
+		/// Right parenthesis for boolean expression.
+		/// </summary>
+		string ConditionParenthesisRight { get; }
+
+		/// <summary>
 		/// Determines whether database supports inserting rows with user-provided primary key (ID) value.
 		/// </summary>
 		bool SupportsPrimaryKeyInsert { get; }
@@ -178,6 +198,13 @@ namespace Kosson.KORM
 		IDBExpression Const(byte[] value);
 
 		/// <summary>
+		/// Creates a new expression for a given constant value.
+		/// </summary>
+		/// <param name="value">Constant value to create expression for.</param>
+		/// <returns>New constant expression.</returns>
+		IDBExpression Const(bool value);
+
+		/// <summary>
 		/// Creates a new expression for a given database identifier.
 		/// </summary>
 		/// <param name="name">Identifier name to create expression for.</param>
@@ -220,6 +247,20 @@ namespace Kosson.KORM
 		/// <param name="values">Expressions representing elements of array to create.</param>
 		/// <returns>Expression represeting array of provided expression values.</returns>
 		IDBExpression Array(IDBExpression[] values);
+
+		/// <summary>
+		/// Creates a new boolean expression evaluating to true if all provided conditions are met.
+		/// </summary>
+		/// <param name="conditions">Conditions to check.</param>
+		/// <returns>Expression representing a conjunction of provided conditions.</returns>
+		IDBExpression And(params IDBExpression[] conditions);
+
+		/// <summary>
+		/// Creates a new boolean expression evaluating to true if any provided condition is met.
+		/// </summary>
+		/// <param name="conditions">Conditions to check.</param>
+		/// <returns>Expression representing an alternative of provided conditions.</returns>
+		IDBExpression Or(params IDBExpression[] conditions);
 	}
 
 	/// <summary>

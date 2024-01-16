@@ -158,7 +158,31 @@ namespace Kosson.KORM.DB
 				if (i > 0) sb.Append(builder.ArrayElementSeparator);
 				values[i].Append(sb);
 			}
-			base.Append(sb);
+		}
+	}
+
+	class DBCompoundCondition : DBRawExpression
+	{
+		private readonly string conditionOperator;
+		private readonly IDBExpression[] conditions;
+
+		public DBCompoundCondition(IDBCommandBuilder builder, string conditionOperator, IDBExpression[] conditions)
+			: base(builder, null)
+		{
+			this.conditionOperator = conditionOperator;
+			this.conditions = conditions;
+		}
+
+		public override void Append(StringBuilder sb)
+		{
+			for (int i = 0; i < conditions.Length; i++)
+			{
+				if (i > 0) sb.Append(conditionOperator);
+				var condition = conditions[i];
+				if (condition is DBCompoundCondition) sb.Append(builder.ConditionParenthesisLeft);
+				condition.Append(sb);
+				if (condition is DBCompoundCondition) sb.Append(builder.ConditionParenthesisRight);
+			}
 		}
 	}
 

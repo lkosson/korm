@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Linq;
 
 namespace Kosson.KORM.DB.CommandBuilder
 {
@@ -32,6 +33,18 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		/// <inheritdoc/>
 		public virtual string ArrayElementSeparator => ",";
+
+		/// <inheritdoc/>
+		public virtual string AndConditionOperator => " AND ";
+
+		/// <inheritdoc/>
+		public virtual string OrConditionOperator => " OR ";
+
+		/// <inheritdoc/>
+		public virtual string ConditionParenthesisLeft => "(";
+
+		/// <inheritdoc/>
+		public virtual string ConditionParenthesisRight => ")";
 
 		/// <inheritdoc/>
 		public virtual bool SupportsPrimaryKeyInsert => true;
@@ -123,6 +136,9 @@ namespace Kosson.KORM.DB.CommandBuilder
 		public virtual IDBExpression Const(byte[] value) => new DBBlobConst(value);
 
 		/// <inheritdoc/>
+		public virtual IDBExpression Const(bool value) => value ? Expression("1=1") : Expression("0=1");
+
+		/// <inheritdoc/>
 		public virtual IDBIdentifier Identifier(string name) => new DBIdentifier(this, name);
 
 		/// <inheritdoc/>
@@ -139,5 +155,11 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		/// <inheritdoc/>
 		public virtual IDBExpression Array(IDBExpression[] values) => new DBArray(this, values);
+
+		/// <inheritdoc/>
+		public virtual IDBExpression And(IDBExpression[] conditions) => conditions.Length == 0 ? Const(true) : conditions.Length == 1 ? conditions.Single() : new DBCompoundCondition(this, AndConditionOperator, conditions);
+
+		/// <inheritdoc/>
+		public virtual IDBExpression Or(IDBExpression[] conditions) => conditions.Length == 0 ? Const(false) : conditions.Length == 1 ? conditions.Single() : new DBCompoundCondition(this, OrConditionOperator, conditions);
 	}
 }

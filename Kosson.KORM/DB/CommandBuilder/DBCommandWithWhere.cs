@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Kosson.KORM.DB.CommandBuilder
@@ -40,6 +41,8 @@ namespace Kosson.KORM.DB.CommandBuilder
 		{
 			// ORing empty WHERE clause list is no-op.
 			if (wheres == null) return;
+			// Adding empty OR group is no-op.
+			if (wheres.Last() == null) return;
 			wheres.Add(null);
 		}
 
@@ -57,46 +60,30 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		private void AppendWheresConditions(StringBuilder sb)
 		{
-			if (wheres == null) return;
-			bool multipleGroups = false;
+			var where = BuildWhereExpression();
+			where.Append(sb);
+		}
+
+		protected virtual IDBExpression BuildWhereExpression()
+		{
+			if (wheres == null) return Builder.Const(true);
+			var groups = new List<List<IDBExpression>>();
+			var currentGroup = new List<IDBExpression>();
+			groups.Add(currentGroup);
 			foreach (var where in wheres)
 			{
 				if (where == null)
 				{
-					multipleGroups = true;
-					break;
-				}
-			}
-			if (multipleGroups) AppendGroupStart(sb);
-			bool first = true;
-			bool newGroup = false;
-			foreach (var where in wheres)
-			{
-				if (where == null)
-				{
-					newGroup = true;
-					continue;
-				}
-
-				if (newGroup)
-				{
-					if (!first) AppendWhereGroupSeparator(sb);
-					newGroup = false;
-					first = true;
-				}
-
-				if (first)
-				{
-					first = false;
+					currentGroup = new List<IDBExpression>();
+					groups.Add(currentGroup);
 				}
 				else
 				{
-					AppendCRLF(sb);
-					AppendWhereSeparator(sb);
+					currentGroup.Add(where);
 				}
-				AppendWhere(sb, where);
 			}
-			if (multipleGroups) AppendGroupEnd(sb);
+
+			return Builder.Or(groups.Select(group => group.Count == 1 ? group.Single() : Builder.And(group.ToArray())).ToArray());
 		}
 
 		internal string ToStringWhere()
@@ -106,55 +93,6 @@ namespace Kosson.KORM.DB.CommandBuilder
 			sb.Replace("\r\n", "\n");
 			sb.Replace("\n", " ");
 			return sb.ToString();
-		}
-
-		/// <summary>
-		/// Appends given WHERE expression to command text.
-		/// </summary>
-		/// <param name="sb">StringBuilder constructing a command text.</param>
-		/// <param name="where">Expression to append.</param>
-		protected virtual void AppendWhere(StringBuilder sb, IDBExpression where)
-		{
-			where.Append(sb);
-		}
-
-		/// <summary>
-		/// Appends WHERE clause separator used between expressions in a group to command text.
-		/// </summary>
-		/// <param name="sb">StringBuilder constructing a command text.</param>
-		protected virtual void AppendWhereSeparator(StringBuilder sb)
-		{
-			sb.Append("AND ");
-		}
-
-		/// <summary>
-		/// Appends WHERE clause group beginning delimiter.
-		/// </summary>
-		/// <param name="sb">StringBuilder constructing a command text.</param>
-		protected virtual void AppendGroupStart(StringBuilder sb)
-		{
-			sb.Append("(");
-		}
-
-		/// <summary>
-		/// Appends WHERE clause group ending delimiter.
-		/// </summary>
-		/// <param name="sb">StringBuilder constructing a command text.</param>
-		protected virtual void AppendGroupEnd(StringBuilder sb)
-		{
-			sb.Append(")");
-		}
-
-		/// <summary>
-		/// Appends WHERE clause group separator to command text.
-		/// </summary>
-		/// <param name="sb">StringBuilder constructing a command text.</param>
-		protected virtual void AppendWhereGroupSeparator(StringBuilder sb)
-		{
-			AppendGroupEnd(sb);
-			AppendCRLF(sb);
-			sb.Append("OR ");
-			AppendGroupStart(sb);
 		}
 	}
 }
