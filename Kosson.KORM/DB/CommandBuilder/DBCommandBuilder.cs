@@ -148,7 +148,10 @@ namespace Kosson.KORM.DB.CommandBuilder
 		public virtual IDBExpression Expression(string expression) => new DBRawExpression(this, expression);
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Comparison(IDBIdentifier lexpr, DBExpressionComparison comparison, IDBExpression rexpr) => new DBComparison(this, lexpr, comparison, rexpr);
+		public virtual IDBExpression Comparison(IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr) => new DBComparison(this, lexpr, comparison, rexpr);
+
+		/// <inheritdoc/>
+		public virtual IDBExpression BinaryExpression(IDBExpression lexpr, DBBinaryOperator binOperator, IDBExpression rexpr) => new DBBinaryExpression(this, lexpr, binOperator, rexpr);
 
 		/// <inheritdoc/>
 		public virtual IDBExpression Parameter(string name) => new DBParameter(this, name);

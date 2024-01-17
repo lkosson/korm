@@ -250,13 +250,13 @@ namespace Kosson.KORM.DB
 
 	class DBComparison : DBExpression, IDBExpression
 	{
-		private readonly IDBIdentifier lexpr;
+		private readonly IDBExpression lexpr;
 		private readonly IDBExpression rexpr;
 		private readonly DBExpressionComparison comparison;
 
 		public string RawValue { get { throw new NotSupportedException(); } }
 
-		public DBComparison(IDBCommandBuilder builder, IDBIdentifier lexpr, DBExpressionComparison comparison, IDBExpression rexpr)
+		public DBComparison(IDBCommandBuilder builder, IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr)
 			: base(builder)
 		{
 			if (lexpr == null) throw new ArgumentNullException("lexpr");
@@ -292,6 +292,47 @@ namespace Kosson.KORM.DB
 
 				if (comparison == DBExpressionComparison.In) sb.Append(")");
 			}
+		}
+
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+			Append(sb);
+			return sb.ToString();
+		}
+	}
+
+	class DBBinaryExpression : DBExpression, IDBExpression
+	{
+		private readonly IDBExpression lexpr;
+		private readonly IDBExpression rexpr;
+		private readonly DBBinaryOperator op;
+
+		public string RawValue { get { throw new NotSupportedException(); } }
+
+		public DBBinaryExpression(IDBCommandBuilder builder, IDBExpression lexpr, DBBinaryOperator op, IDBExpression rexpr)
+			: base(builder)
+		{
+			if (lexpr == null) throw new ArgumentNullException("lexpr");
+			if (rexpr == null) throw new ArgumentNullException("rexpr");
+			this.lexpr = lexpr;
+			this.rexpr = rexpr;
+			this.op = op;
+		}
+
+		public virtual void Append(StringBuilder sb)
+		{
+			lexpr.Append(sb);
+
+			if (op == DBBinaryOperator.And) sb.Append(builder.AndConditionOperator);
+			if (op == DBBinaryOperator.Or) sb.Append(builder.OrConditionOperator);
+			if (op == DBBinaryOperator.Add) sb.Append(" + ");
+			if (op == DBBinaryOperator.Subtract) sb.Append(" - ");
+			if (op == DBBinaryOperator.Multiply) sb.Append(" * ");
+			if (op == DBBinaryOperator.Divide) sb.Append(" / ");
+			else throw new ArgumentOutOfRangeException("op", op, "Unsupported operator type.");
+
+			rexpr.Append(sb);
 		}
 
 		public override string ToString()

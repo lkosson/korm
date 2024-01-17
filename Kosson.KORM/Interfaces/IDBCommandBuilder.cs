@@ -232,7 +232,16 @@ namespace Kosson.KORM
 		/// <param name="comparison">Type of comparison between values.</param>
 		/// <param name="rexpr">Right value of a comparison.</param>
 		/// <returns>New expression representing comparison between given expressions.</returns>
-		IDBExpression Comparison(IDBIdentifier lexpr, DBExpressionComparison comparison, IDBExpression rexpr);
+		IDBExpression Comparison(IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr);
+
+		/// <summary>
+		/// Creates a new binary operator from two given expressions.
+		/// </summary>
+		/// <param name="lexpr">Left value of the operator.</param>
+		/// <param name="comparison">Type of an operator between values.</param>
+		/// <param name="rexpr">Right value of the operator.</param>
+		/// <returns>New expression representing binary operator of given expressions.</returns>
+		IDBExpression BinaryExpression(IDBExpression lexpr, DBBinaryOperator binaryOperator, IDBExpression rexpr);
 
 		/// <summary>
 		/// Creates a new expression representing a database command parameter.
@@ -307,6 +316,39 @@ namespace Kosson.KORM
 		/// String pattern (LIKE) comparison.
 		/// </summary>
 		Like
+	}
+
+	public enum DBBinaryOperator
+	{
+		/// <summary>
+		/// Boolean AND operator.
+		/// </summary>
+		And,
+
+		/// <summary>
+		/// Boolean OR operator.
+		/// </summary>
+		Or,
+
+		/// <summary>
+		/// Arithmetic addition (+) operator.
+		/// </summary>
+		Add,
+
+		/// <summary>
+		/// Arithmetic subtraction (-) operator.
+		/// </summary>
+		Subtract,
+
+		/// <summary>
+		/// Arithmetic multiplication (*) operator.
+		/// </summary>
+		Multiply,
+
+		/// <summary>
+		/// Arithmetic division (/) operator.
+		/// </summary>
+		Divide
 	}
 
 	/// <summary>
