@@ -64,7 +64,7 @@ namespace Kosson.KORM
 			if (value is string) return builder.Const((string)value);
 			if (value is DateTime) return builder.Const((DateTime)value);
 			if (value is Enum) return builder.Const((int)value);
-			if (value is bool) return builder.Const((bool)value ? 1 : 0);
+			if (value is bool) return builder.Const((bool)value);
 			if (value is byte[]) return builder.Const((byte[])value);
 			if (value is IHasID)
 			{
