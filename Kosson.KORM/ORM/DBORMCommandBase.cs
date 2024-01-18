@@ -29,6 +29,8 @@ namespace Kosson.KORM.ORM
 
 		public IDB DB { get; }
 
+		public IMetaRecord Meta => meta;
+
 		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 		{
 			this.DB = db;
