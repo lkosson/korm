@@ -45,6 +45,9 @@ namespace Kosson.KORM.Scratch
 			var us = Enumerable.Range(0, 1000).Select(i => new User { Name = "user" + i, UserDetails = new UserDetails { Group = gs.Skip(i / 100).First() } }).ToList();
 			orm.InsertAll(us);
 
+			var x = 1;
+			var linqd = orm.Select<Membership>().Where(m => 4m != x + 3L || m.User.Name == DateTime.Now.AddDays(1).ToString() || m.CreationTime == null || (m.ID > 10 && m.User.UserDetails.Group.ID == x));
+
 			var joined = orm.Select<User>().Execute().Join(orm.Select<User>(), user => user.UserDetails.Group);
 
 			var first = orm.Select<User>().ExecuteFirst();
@@ -151,6 +154,9 @@ namespace Kosson.KORM.Scratch
 		[ForeignKey.Cascade]
 		//public long Role { get; set; }
 		public RecordRef<Role> Role { get; set; }
+
+		[Column]
+		public DateTime? CreationTime { get; set; }
 	}
 
 	[Table("usr"/*, Query="SELECT 1 usr_ID, usr_Name, usr_PasswordHash, usr_Group FROM Users"*/)]
