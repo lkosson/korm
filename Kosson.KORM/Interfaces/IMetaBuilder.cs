@@ -147,6 +147,11 @@ namespace Kosson.KORM
 		Type ForeignType { get; }
 
 		/// <summary>
+		/// Metadata of a referenced foreign key record.
+		/// </summary>
+		IMetaRecord ForeignMeta { get; }
+
+		/// <summary>
 		/// Determines whether this property is primary key column of a backing database table for containing record.
 		/// </summary>
 		bool IsPrimaryKey { get; }

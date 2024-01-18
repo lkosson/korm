@@ -31,6 +31,7 @@ namespace Kosson.KORM.Meta
 		public bool IsCascade { get; private set; }
 		public bool IsSetNull { get; private set; }
 		public Type ForeignType { get; private set; }
+		public IMetaRecord ForeignMeta { get; private set; }
 
 		public SubqueryBuilder SubqueryBuilder { get; private set; }
 
@@ -53,7 +54,7 @@ namespace Kosson.KORM.Meta
 			ProcessDBAliasAttribute(property);
 			ProcessDBNameAttribute(property);
 			ProcessColumnAttribute(property, factory);
-			ProcessForeignKeyAttribute(property);
+			ProcessForeignKeyAttribute(property, factory);
 			ProcessSubqueryAttribute(property);
 			ProcessInlineAttribute(property, factory);
 		}
@@ -134,7 +135,7 @@ namespace Kosson.KORM.Meta
 			IsReadOnly = true;
 		}
 
-		private void ProcessForeignKeyAttribute(PropertyInfo property)
+		private void ProcessForeignKeyAttribute(PropertyInfo property, IFactory factory)
 		{
 			var fk = (ForeignKeyAttribute)property.GetCustomAttribute(typeof(ForeignKeyAttribute), false);
 			if (fk == null) return;
@@ -150,6 +151,7 @@ namespace Kosson.KORM.Meta
 			else
 			{
 				ForeignType = Type;
+				ForeignMeta = new MetaRecord(factory, ForeignType);
 			}
 
 			if (typeof(Record32).IsAssignableFrom(ForeignType) && DBType == DbType.Int64) DBType = DbType.Int32;

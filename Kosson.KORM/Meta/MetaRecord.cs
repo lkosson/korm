@@ -61,20 +61,15 @@ namespace Kosson.KORM.Meta
 		IMetaRecordField IMetaRecord.GetField(string name)
 		{
 			IMetaRecordField field = GetField(name);
-			if (field == null)
-			{
-				var dot = name.IndexOf('.');
-				if (dot > 0)
-				{
-					field = GetField(name.Substring(0, dot));
-					if (field != null)
-					{
-						if (field.InlineRecord == null) return null;
-						field = field.InlineRecord.GetField(name.Substring(dot + 1));
-					}
-				}
-			}
-			return field;
+			if (field != null) return field;
+			var dot = name.IndexOf('.');
+			if (dot <= 0) return null;
+			field = GetField(name.Substring(0, dot));
+			if (field == null) return null;
+			name = name.Substring(dot + 1);
+			if (field.ForeignMeta != null) return field.ForeignMeta.GetField(name);
+			if (field.InlineRecord != null) return field.InlineRecord.GetField(name);
+			return null;
 		}
 
 		private MetaRecordField GetField(string name)
