@@ -325,11 +325,11 @@ namespace Kosson.KORM.DB
 			lexpr.Append(sb);
 
 			if (op == DBBinaryOperator.And) sb.Append(builder.AndConditionOperator);
-			if (op == DBBinaryOperator.Or) sb.Append(builder.OrConditionOperator);
-			if (op == DBBinaryOperator.Add) sb.Append(" + ");
-			if (op == DBBinaryOperator.Subtract) sb.Append(" - ");
-			if (op == DBBinaryOperator.Multiply) sb.Append(" * ");
-			if (op == DBBinaryOperator.Divide) sb.Append(" / ");
+			else if (op == DBBinaryOperator.Or) sb.Append(builder.OrConditionOperator);
+			else if (op == DBBinaryOperator.Add) sb.Append(" + ");
+			else if (op == DBBinaryOperator.Subtract) sb.Append(" - ");
+			else if (op == DBBinaryOperator.Multiply) sb.Append(" * ");
+			else if (op == DBBinaryOperator.Divide) sb.Append(" / ");
 			else throw new ArgumentOutOfRangeException("op", op, "Unsupported operator type.");
 
 			rexpr.Append(sb);
