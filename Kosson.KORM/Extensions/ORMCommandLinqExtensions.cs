@@ -136,6 +136,16 @@ namespace Kosson.KORM
 		{
 			var value = ProcessExpression(query, unaryExpression.Operand);
 			if (unaryExpression.NodeType == ExpressionType.Convert) return value is IDBExpression ? value : value is IConvertible convertibleValue ? convertibleValue.ToType(unaryExpression.Type, null) : value;
+
+			if (unaryExpression.NodeType == ExpressionType.Negate && value is int intValue) return -intValue;
+			if (unaryExpression.NodeType == ExpressionType.Negate && value is long longValue) return -longValue;
+			if (unaryExpression.NodeType == ExpressionType.Negate && value is decimal decimalValue) return -decimalValue;
+			if (unaryExpression.NodeType == ExpressionType.Not && value is bool boolValue) return !boolValue;
+
+			var dbExpression = ConvertToParameterOrField(query, value);
+
+			if (unaryExpression.NodeType == ExpressionType.Negate) return query.DB.CommandBuilder.UnaryExpression(dbExpression, DBUnaryOperator.Negate);
+			else if (unaryExpression.NodeType == ExpressionType.Not) return query.DB.CommandBuilder.UnaryExpression(dbExpression, DBUnaryOperator.Not);
 			else throw new NotSupportedException("Unsupported unary expression: " + unaryExpression);
 		}
 

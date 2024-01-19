@@ -302,6 +302,40 @@ namespace Kosson.KORM.DB
 		}
 	}
 
+	class DBUnaryExpression : DBExpression, IDBExpression
+	{
+		private readonly IDBExpression expr;
+		private readonly DBUnaryOperator op;
+
+		public string RawValue { get { throw new NotSupportedException(); } }
+
+		public DBUnaryExpression(IDBCommandBuilder builder, IDBExpression expr, DBUnaryOperator op)
+			: base(builder)
+		{
+			if (expr == null) throw new ArgumentNullException("expr");
+			this.expr = expr;
+			this.op = op;
+		}
+
+		public virtual void Append(StringBuilder sb)
+		{
+			if (op == DBUnaryOperator.Not) sb.Append("NOT");
+			else if (op == DBUnaryOperator.Negate) sb.Append("-");
+			else throw new ArgumentOutOfRangeException("op", op, "Unsupported operator type.");
+
+			sb.Append("(");
+			expr.Append(sb);
+			sb.Append(")");
+		}
+
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+			Append(sb);
+			return sb.ToString();
+		}
+	}
+
 	class DBBinaryExpression : DBExpression, IDBExpression
 	{
 		private readonly IDBExpression lexpr;

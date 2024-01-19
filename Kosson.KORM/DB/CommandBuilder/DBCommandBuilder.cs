@@ -151,6 +151,9 @@ namespace Kosson.KORM.DB.CommandBuilder
 		public virtual IDBExpression Comparison(IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr) => new DBComparison(this, lexpr, comparison, rexpr);
 
 		/// <inheritdoc/>
+		public virtual IDBExpression UnaryExpression(IDBExpression expr, DBUnaryOperator unaryOperator) => new DBUnaryExpression(this, expr, unaryOperator);
+
+		/// <inheritdoc/>
 		public virtual IDBExpression BinaryExpression(IDBExpression lexpr, DBBinaryOperator binOperator, IDBExpression rexpr) => new DBBinaryExpression(this, lexpr, binOperator, rexpr);
 
 		/// <inheritdoc/>

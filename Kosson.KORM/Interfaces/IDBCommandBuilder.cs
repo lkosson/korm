@@ -235,10 +235,18 @@ namespace Kosson.KORM
 		IDBExpression Comparison(IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr);
 
 		/// <summary>
+		/// Creates a new unary operator from two a expression.
+		/// </summary>
+		/// <param name="expr">Left value of the operator.</param>
+		/// <param name="comparison">Type of an operator.</param>
+		/// <returns>New expression representing unary operator of given expressions.</returns>
+		IDBExpression UnaryExpression(IDBExpression expr, DBUnaryOperator unaryOperator);
+
+		/// <summary>
 		/// Creates a new binary operator from two given expressions.
 		/// </summary>
 		/// <param name="lexpr">Left value of the operator.</param>
-		/// <param name="comparison">Type of an operator between values.</param>
+		/// <param name="binaryOperator">Type of an operator between values.</param>
 		/// <param name="rexpr">Right value of the operator.</param>
 		/// <returns>New expression representing binary operator of given expressions.</returns>
 		IDBExpression BinaryExpression(IDBExpression lexpr, DBBinaryOperator binaryOperator, IDBExpression rexpr);
@@ -316,6 +324,19 @@ namespace Kosson.KORM
 		/// String pattern (LIKE) comparison.
 		/// </summary>
 		Like
+	}
+
+	public enum DBUnaryOperator
+	{
+		/// <summary>
+		/// Boolean NOT operator.
+		/// </summary>
+		Not,
+
+		/// <summary>
+		/// Arithmetic negation operator.
+		/// </summary>
+		Negate
 	}
 
 	public enum DBBinaryOperator
