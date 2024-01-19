@@ -35,12 +35,6 @@ namespace Kosson.KORM.DB.CommandBuilder
 		public virtual string ArrayElementSeparator => ",";
 
 		/// <inheritdoc/>
-		public virtual string AndConditionOperator => " AND ";
-
-		/// <inheritdoc/>
-		public virtual string OrConditionOperator => " OR ";
-
-		/// <inheritdoc/>
 		public virtual string ConditionParenthesisLeft => "(";
 
 		/// <inheritdoc/>
@@ -163,9 +157,9 @@ namespace Kosson.KORM.DB.CommandBuilder
 		public virtual IDBExpression Array(IDBExpression[] values) => new DBArray(this, values);
 
 		/// <inheritdoc/>
-		public virtual IDBExpression And(IDBExpression[] conditions) => conditions.Length == 0 ? Const(true) : conditions.Length == 1 ? conditions.Single() : new DBCompoundCondition(this, AndConditionOperator, conditions);
+		public virtual IDBExpression And(IDBExpression[] conditions) => conditions.Length == 0 ? Const(true) : conditions.Length == 1 ? conditions.Single() : new DBCompoundCondition(this, " AND ", conditions);
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Or(IDBExpression[] conditions) => conditions.Length == 0 ? Const(false) : conditions.Length == 1 ? conditions.Single() : new DBCompoundCondition(this, OrConditionOperator, conditions);
+		public virtual IDBExpression Or(IDBExpression[] conditions) => conditions.Length == 0 ? Const(false) : conditions.Length == 1 ? conditions.Single() : new DBCompoundCondition(this, " OR ", conditions);
 	}
 }

@@ -95,8 +95,8 @@ namespace Kosson.KORM
 			else if (binaryExpression.NodeType == ExpressionType.GreaterThanOrEqual) return query.DB.CommandBuilder.Comparison((IDBExpression)left, DBExpressionComparison.GreaterOrEqual, (IDBExpression)right);
 			else if (binaryExpression.NodeType == ExpressionType.LessThan) return query.DB.CommandBuilder.Comparison((IDBExpression)left, DBExpressionComparison.Less, (IDBExpression)right);
 			else if (binaryExpression.NodeType == ExpressionType.LessThanOrEqual) return query.DB.CommandBuilder.Comparison((IDBExpression)left, DBExpressionComparison.LessOrEqual, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.AndAlso) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.And, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.OrElse) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.Or, (IDBExpression)right);
+			else if (binaryExpression.NodeType == ExpressionType.AndAlso) return query.DB.CommandBuilder.And((IDBExpression)left, (IDBExpression)right);
+			else if (binaryExpression.NodeType == ExpressionType.OrElse) return query.DB.CommandBuilder.Or((IDBExpression)left, (IDBExpression)right);
 			else if (binaryExpression.NodeType == ExpressionType.Add) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.Add, (IDBExpression)right);
 			else if (binaryExpression.NodeType == ExpressionType.Subtract) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.Subtract, (IDBExpression)right);
 			else if (binaryExpression.NodeType == ExpressionType.Multiply) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.Multiply, (IDBExpression)right);

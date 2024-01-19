@@ -4,9 +4,10 @@ using System.Text;
 
 namespace Kosson.KORM.DB
 {
-	class DBExpression
+	abstract class DBExpression
 	{
 		protected readonly IDBCommandBuilder builder;
+		public abstract bool IsSimple { get; }
 
 		protected DBExpression(IDBCommandBuilder builder)
 		{
@@ -19,6 +20,7 @@ namespace Kosson.KORM.DB
 		private readonly string expression;
 
 		public string RawValue { get { if (expression == null) throw new NotSupportedException(); return expression; } }
+		public override bool IsSimple => false;
 
 		public DBRawExpression(IDBCommandBuilder builder, string expression)
 			: base(builder)
@@ -42,6 +44,7 @@ namespace Kosson.KORM.DB
 	class DBComment : DBExpression, IDBComment
 	{
 		public string RawValue { get; }
+		public override bool IsSimple => true;
 
 		public DBComment(IDBCommandBuilder builder, string value)
 			: base(builder)
@@ -68,6 +71,7 @@ namespace Kosson.KORM.DB
 	class DBStringConst : DBExpression, IDBExpression
 	{
 		public string RawValue { get; }
+		public override bool IsSimple => true;
 
 		public DBStringConst(IDBCommandBuilder builder, string value)
 			: base(builder)
@@ -102,6 +106,7 @@ namespace Kosson.KORM.DB
 		private readonly byte[] value;
 
 		public string RawValue { get { throw new NotImplementedException(); } }
+		public bool IsSimple => true;
 
 		public DBBlobConst(byte[] value)
 		{
@@ -129,6 +134,8 @@ namespace Kosson.KORM.DB
 
 	class DBParameter : DBRawExpression
 	{
+		public override bool IsSimple => true;
+
 		public DBParameter(IDBCommandBuilder builder, string name)
 			: base(builder, name)
 		{
@@ -144,6 +151,7 @@ namespace Kosson.KORM.DB
 	class DBArray : DBRawExpression
 	{
 		private readonly IDBExpression[] values;
+		public override bool IsSimple => true;
 
 		public DBArray(IDBCommandBuilder builder, IDBExpression[] values)
 			: base(builder, null)
@@ -165,6 +173,7 @@ namespace Kosson.KORM.DB
 	{
 		private readonly string conditionOperator;
 		private readonly IDBExpression[] conditions;
+		public override bool IsSimple => false;
 
 		public DBCompoundCondition(IDBCommandBuilder builder, string conditionOperator, IDBExpression[] conditions)
 			: base(builder, null)
@@ -188,6 +197,8 @@ namespace Kosson.KORM.DB
 
 	class DBIdentifier : DBRawExpression, IDBIdentifier
 	{
+		public override bool IsSimple => true;
+
 		public DBIdentifier(IDBCommandBuilder builder, string identifier)
 			: base(builder, identifier)
 		{
@@ -205,6 +216,7 @@ namespace Kosson.KORM.DB
 	class DBDottedIdentifier : DBExpression, IDBDottedIdentifier
 	{
 		public string RawValue { get { throw new NotSupportedException(); } }
+		public override bool IsSimple => true;
 		public string[] Fragments { get; }
 
 		public DBDottedIdentifier(IDBCommandBuilder builder, string[] fragments)
@@ -255,6 +267,7 @@ namespace Kosson.KORM.DB
 		private readonly DBExpressionComparison comparison;
 
 		public string RawValue { get { throw new NotSupportedException(); } }
+		public override bool IsSimple => false;
 
 		public DBComparison(IDBCommandBuilder builder, IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr)
 			: base(builder)
@@ -268,13 +281,14 @@ namespace Kosson.KORM.DB
 
 		public virtual void Append(StringBuilder sb)
 		{
+			if (!lexpr.IsSimple) sb.Append(builder.ConditionParenthesisLeft);
 			lexpr.Append(sb);
+			if (!lexpr.IsSimple) sb.Append(builder.ConditionParenthesisRight);
 
 			if (rexpr == null)
 			{
 				if (comparison == DBExpressionComparison.Equal) sb.Append(" IS NULL");
 				if (comparison == DBExpressionComparison.NotEqual) sb.Append(" IS NOT NULL");
-
 			}
 			else
 			{
@@ -288,7 +302,9 @@ namespace Kosson.KORM.DB
 				else if (comparison == DBExpressionComparison.Like) sb.Append(" LIKE ");
 				else throw new ArgumentOutOfRangeException("comparison", comparison, "Unsupported comparison type.");
 
+				if (!rexpr.IsSimple) sb.Append(builder.ConditionParenthesisLeft);
 				rexpr.Append(sb);
+				if (!rexpr.IsSimple) sb.Append(builder.ConditionParenthesisRight);
 
 				if (comparison == DBExpressionComparison.In) sb.Append(")");
 			}
@@ -308,6 +324,7 @@ namespace Kosson.KORM.DB
 		private readonly DBUnaryOperator op;
 
 		public string RawValue { get { throw new NotSupportedException(); } }
+		public override bool IsSimple => false;
 
 		public DBUnaryExpression(IDBCommandBuilder builder, IDBExpression expr, DBUnaryOperator op)
 			: base(builder)
@@ -323,9 +340,9 @@ namespace Kosson.KORM.DB
 			else if (op == DBUnaryOperator.Negate) sb.Append("-");
 			else throw new ArgumentOutOfRangeException("op", op, "Unsupported operator type.");
 
-			sb.Append("(");
+			if (!expr.IsSimple) sb.Append(builder.ConditionParenthesisLeft);
 			expr.Append(sb);
-			sb.Append(")");
+			if (!expr.IsSimple) sb.Append(builder.ConditionParenthesisRight);
 		}
 
 		public override string ToString()
@@ -343,6 +360,7 @@ namespace Kosson.KORM.DB
 		private readonly DBBinaryOperator op;
 
 		public string RawValue { get { throw new NotSupportedException(); } }
+		public override bool IsSimple => false;
 
 		public DBBinaryExpression(IDBCommandBuilder builder, IDBExpression lexpr, DBBinaryOperator op, IDBExpression rexpr)
 			: base(builder)
@@ -356,17 +374,19 @@ namespace Kosson.KORM.DB
 
 		public virtual void Append(StringBuilder sb)
 		{
+			if (!lexpr.IsSimple) sb.Append(builder.ConditionParenthesisLeft);
 			lexpr.Append(sb);
+			if (!lexpr.IsSimple) sb.Append(builder.ConditionParenthesisRight);
 
-			if (op == DBBinaryOperator.And) sb.Append(builder.AndConditionOperator);
-			else if (op == DBBinaryOperator.Or) sb.Append(builder.OrConditionOperator);
-			else if (op == DBBinaryOperator.Add) sb.Append(" + ");
+			if (op == DBBinaryOperator.Add) sb.Append(" + ");
 			else if (op == DBBinaryOperator.Subtract) sb.Append(" - ");
 			else if (op == DBBinaryOperator.Multiply) sb.Append(" * ");
 			else if (op == DBBinaryOperator.Divide) sb.Append(" / ");
 			else throw new ArgumentOutOfRangeException("op", op, "Unsupported operator type.");
 
+			if (!rexpr.IsSimple) sb.Append(builder.ConditionParenthesisLeft);
 			rexpr.Append(sb);
+			if (!rexpr.IsSimple) sb.Append(builder.ConditionParenthesisRight);
 		}
 
 		public override string ToString()

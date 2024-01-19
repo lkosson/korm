@@ -55,16 +55,6 @@ namespace Kosson.KORM
 		string ArrayElementSeparator { get; }
 
 		/// <summary>
-		/// AND boolean operator.
-		/// </summary>
-		string AndConditionOperator { get; }
-
-		/// <summary>
-		/// OR boolean operator.
-		/// </summary>
-		string OrConditionOperator { get; }
-
-		/// <summary>
 		/// Left parenthesis for boolean expression.
 		/// </summary>
 		string ConditionParenthesisLeft { get; }
@@ -342,16 +332,6 @@ namespace Kosson.KORM
 	public enum DBBinaryOperator
 	{
 		/// <summary>
-		/// Boolean AND operator.
-		/// </summary>
-		And,
-
-		/// <summary>
-		/// Boolean OR operator.
-		/// </summary>
-		Or,
-
-		/// <summary>
 		/// Arithmetic addition (+) operator.
 		/// </summary>
 		Add,
@@ -381,6 +361,11 @@ namespace Kosson.KORM
 		/// Returns internal value from which the expression is constructed. For internal use only.
 		/// </summary>
 		string RawValue { get; }
+
+		/// <summary>
+		/// Determines whether expression is simple enough to not require parentheses when used as a part of compound expression.
+		/// </summary>
+		bool IsSimple { get; }
 
 		/// <summary>
 		/// Appends expression to a given StringBuilder. For internal use only.
