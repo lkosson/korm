@@ -32,7 +32,7 @@ namespace Kosson.KORM.Meta
 		public bool IsCascade { get; private set; }
 		public bool IsSetNull { get; private set; }
 		public Type ForeignType { get; private set; }
-		public IMetaRecord ForeignMeta => new MetaRecord(factory, ForeignType);
+		public IMetaRecord ForeignMeta => ForeignType == null ? null : new MetaRecord(factory, ForeignType);
 
 		public SubqueryBuilder SubqueryBuilder { get; private set; }
 
