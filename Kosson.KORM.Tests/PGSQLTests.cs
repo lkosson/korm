@@ -149,6 +149,12 @@ namespace Kosson.KORM.Tests
 	}
 
 	[TestClass]
+	public class PGSQLSelectLinqTests : SelectLinqTests
+	{
+		protected override void PrepareKORMServices(IServiceCollection services) => PGSQLTests.PrepareKORMServices(services);
+	}
+
+	[TestClass]
 	public class PGSQLSelectTests : SelectTests
 	{
 		protected override void PrepareKORMServices(IServiceCollection services) => PGSQLTests.PrepareKORMServices(services);

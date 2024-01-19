@@ -143,6 +143,12 @@ namespace Kosson.KORM.Tests
 		protected override void PrepareKORMServices(IServiceCollection services) => SQLiteTests.PrepareKORMServices(services);
 	}
 
+	[TestClass]
+	public class SQLiteSelectLinqTests : SelectLinqTests
+	{
+		protected override void PrepareKORMServices(IServiceCollection services) => SQLiteTests.PrepareKORMServices(services);
+	}
+
 	// SQLiteSchemaTests/SchemaTests tests missing - SQLite doesn't support schemas
 
 	[TestClass]

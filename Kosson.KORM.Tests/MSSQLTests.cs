@@ -148,6 +148,12 @@ namespace Kosson.KORM.Tests
 	}
 
 	[TestClass]
+	public class MSSQLSelectLinqTests : SelectLinqTests
+	{
+		protected override void PrepareKORMServices(IServiceCollection services) => MSSQLTests.PrepareKORMServices(services);
+	}
+
+	[TestClass]
 	public class MSSQLSelectTests : SelectTests
 	{
 		protected override void PrepareKORMServices(IServiceCollection services) => MSSQLTests.PrepareKORMServices(services);
