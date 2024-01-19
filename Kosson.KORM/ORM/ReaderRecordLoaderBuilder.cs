@@ -54,7 +54,7 @@ namespace Kosson.KORM.ORM
 			var meta = metaBuilder.Get(typeof(TRecord));
 			var indices = new Dictionary<string, int>();
 			int fieldIndex = 0;
-			PrepareIndices(meta, "this", ref fieldIndex, indices);
+			PrepareIndices(meta, "this", ref fieldIndex, indices, new Stack<long>());
 
 			var dm = new DynamicMethod("Load", null, new[] { typeof(TRecord), typeof(DbDataReader), typeof(IConverter), typeof(IFactory) }, true);
 			il = dm.GetILGenerator();
@@ -69,13 +69,13 @@ namespace Kosson.KORM.ORM
 			return (LoaderFromReaderByIndexDelegate<TRecord>)dm.CreateDelegate(typeof(LoaderFromReaderByIndexDelegate<TRecord>));
 		}
 
-		private void PrepareIndices(IMetaRecord meta, string prefix, ref int fieldIndex, Dictionary<string, int> indices)
+		private void PrepareIndices(IMetaRecord meta, string prefix, ref int fieldIndex, Dictionary<string, int> indices, Stack<long> descentPath)
 		{
-			PrepareIndices1(meta, prefix, ref fieldIndex, indices);
-			PrepareIndices2(meta, prefix, ref fieldIndex, indices);
+			PrepareIndices1(meta, prefix, ref fieldIndex, indices, descentPath);
+			PrepareIndices2(meta, prefix, ref fieldIndex, indices, descentPath);
 		}
 
-		private void PrepareIndices1(IMetaRecord meta, string prefix, ref int fieldIndex, Dictionary<string, int> indices)
+		private void PrepareIndices1(IMetaRecord meta, string prefix, ref int fieldIndex, Dictionary<string, int> indices, Stack<long> descentPath)
 		{
 			// keep order in sync with DBORMSelect.PrepareTemplate and DBSelect.AppendColumns
 			foreach (var field in meta.Fields)
@@ -87,7 +87,10 @@ namespace Kosson.KORM.ORM
 				if (field.IsInline)
 				{
 					var foreignMeta = metaBuilder.Get(field.Type);
-					PrepareIndices(foreignMeta, fieldName, ref fieldIndex, indices);
+					if (descentPath.Contains(field.ID)) throw new KORMInvalidOperationException("Cyclic inlines detected on " + meta.Name + "." + field.Name + ".");
+					descentPath.Push(field.ID);
+					PrepareIndices(foreignMeta, fieldName, ref fieldIndex, indices, descentPath);
+					descentPath.Pop();
 				}
 				else
 				{
@@ -102,11 +105,11 @@ namespace Kosson.KORM.ORM
 				if (!field.IsEagerLookup) continue;
 				var fieldName = prefix + "." + field.Name;
 				var foreignMeta = metaBuilder.Get(field.Type);
-				PrepareIndices1(foreignMeta, fieldName, ref fieldIndex, indices);
+				PrepareIndices1(foreignMeta, fieldName, ref fieldIndex, indices, descentPath);
 			}
 		}
 
-		private void PrepareIndices2(IMetaRecord meta, string prefix, ref int fieldIndex, Dictionary<string, int> indices)
+		private void PrepareIndices2(IMetaRecord meta, string prefix, ref int fieldIndex, Dictionary<string, int> indices, Stack<long> descentPath)
 		{
 			// keep order in sync with DBORMSelect.PrepareTemplate and DBSelect.AppendColumns
 			foreach (var field in meta.Fields)
@@ -124,7 +127,10 @@ namespace Kosson.KORM.ORM
 				if (!field.IsEagerLookup) continue;
 				var fieldName = prefix + "." + field.Name;
 				var foreignMeta = metaBuilder.Get(field.Type);
-				PrepareIndices2(foreignMeta, fieldName, ref fieldIndex, indices);
+				if (descentPath.Contains(field.ID)) throw new KORMInvalidOperationException("Cyclic eager lookups detected on " + meta.Name + "." + field.Name + ".");
+				descentPath.Push(field.ID);
+				PrepareIndices2(foreignMeta, fieldName, ref fieldIndex, indices, descentPath);
+				descentPath.Pop();
 			}
 		}
 
