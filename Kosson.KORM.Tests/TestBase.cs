@@ -4,6 +4,7 @@ using Kosson.KORM;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 namespace Kosson.KORM.Tests
 {
@@ -16,12 +17,16 @@ namespace Kosson.KORM.Tests
 		protected IDB DB { get; private set; }
 		protected IMetaBuilder MetaBuilder { get; private set; }
 		protected IServiceProvider ServiceProvider { get; private set; }
+		protected IConfiguration Configuration { get; private set; }
 
 		protected abstract void PrepareKORMServices(IServiceCollection services);
+
+		protected string ConnectionString(string name) => Configuration.GetSection("ConnectionStrings")[name];
 
 		[TestInitialize]
 		public virtual void Init()
 		{
+			Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 			var services = new ServiceCollection();
 			PrepareKORMServices(services);
 			services.AddSingleton(typeof(ILogger<>), typeof(Microsoft.Extensions.Logging.Abstractions.NullLogger<>));
@@ -41,8 +46,8 @@ namespace Kosson.KORM.Tests
 		[TestCleanup]
 		public void Cleanup()
 		{
-			scope.Dispose();
-			((IDisposable)serviceProvider).Dispose();
+			scope?.Dispose();
+			((IDisposable)serviceProvider)?.Dispose();
 		}
 	}
 }
