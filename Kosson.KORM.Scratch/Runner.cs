@@ -46,7 +46,8 @@ namespace Kosson.KORM.Scratch
 			orm.InsertAll(us);
 
 			var x = 1;
-			var linqd = orm.Select<Membership>().Where(m => 4m != x + 3L || m.User.Name == DateTime.Now.AddDays(1).ToString() || m.CreationTime == null || (m.ID > 10 && m.User.UserDetails.Group.ID == x));
+			var y = new[] { 1, 2 };
+			var linqd = orm.Select<Membership>().Where(m => 4m != y[1] + 3L || m.User.Name == DateTime.Now.AddDays(1).ToString() || m.CreationTime == null || (m.ID > 10 && m.User.UserDetails.Group.ID == x));
 
 			var joined = orm.Select<User>().Execute().Join(orm.Select<User>(), user => user.UserDetails.Group);
 
