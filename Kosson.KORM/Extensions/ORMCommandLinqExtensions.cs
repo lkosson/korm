@@ -21,7 +21,7 @@ namespace Kosson.KORM
 			{
 				IDBExpression dbExpression => query.Where(dbExpression),
 				bool boolExpression => boolExpression ? (TCommand)query : query.Where(query.DB.CommandBuilder.Const(false)),
-				var other => throw new ArgumentOutOfRangeException(nameof(expression), other, "Unsupported expression result: " + other)
+				var other => throw new NotSupportedException("Unsupported expression result \"" + other + "\".")
 			};
 
 		private static object ProcessExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, Expression expression)
@@ -101,15 +101,15 @@ namespace Kosson.KORM
 			else if (binaryExpression.NodeType == ExpressionType.Subtract) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.Subtract, (IDBExpression)right);
 			else if (binaryExpression.NodeType == ExpressionType.Multiply) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.Multiply, (IDBExpression)right);
 			else if (binaryExpression.NodeType == ExpressionType.Divide) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.Divide, (IDBExpression)right);
-			else throw new ArgumentOutOfRangeException(nameof(binaryExpression), binaryExpression, "Unsupported binary expression: " + binaryExpression.NodeType);
+			else throw new NotSupportedException("Unsupported binary expression: " + binaryExpression.NodeType);
 		}
 
 		private static object ProcessMethodCallExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, MethodCallExpression methodCallExpression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord
 		{
-			var target = ProcessExpression(query, methodCallExpression.Object);
-			if (target is IDBExpression) throw new ArgumentOutOfRangeException("Unsupported method call on database value: " + methodCallExpression);
+			var target = methodCallExpression.Object == null ? null : ProcessExpression(query, methodCallExpression.Object);
+			if (target is IDBExpression) throw new NotSupportedException("Unsupported method call on database value: " + methodCallExpression);
 			var arguments = new object[methodCallExpression.Arguments.Count];
 			var parameters = methodCallExpression.Method.GetParameters();
 			for (int i = 0; i < arguments.Length; i++)
@@ -136,7 +136,7 @@ namespace Kosson.KORM
 		{
 			var value = ProcessExpression(query, unaryExpression.Operand);
 			if (unaryExpression.NodeType == ExpressionType.Convert) return value is IDBExpression ? value : value is IConvertible convertibleValue ? convertibleValue.ToType(unaryExpression.Type, null) : value;
-			else throw new ArgumentOutOfRangeException(nameof(unaryExpression), unaryExpression, "Unsupported unary expression: " + unaryExpression);
+			else throw new NotSupportedException("Unsupported unary expression: " + unaryExpression);
 		}
 
 		private static object ProcessMemberExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, MemberExpression memberExpression)
@@ -148,6 +148,7 @@ namespace Kosson.KORM
 			if (subject is PartialIdentifier partialIdentifier)
 			{
 				partialIdentifier.Append(memberExpression.Member.Name);
+				if (partialIdentifier.Meta != query.Meta) throw new NotSupportedException("Not supported foreign value reference \"" + partialIdentifier + "\".");
 				var field = partialIdentifier.Meta.GetField(partialIdentifier.CurrentPath);
 				if (field.IsInline) return partialIdentifier;
 				if (field.IsEagerLookup) return new PartialIdentifier(field.ForeignMeta, partialIdentifier);
@@ -156,7 +157,7 @@ namespace Kosson.KORM
 			}
 			if (memberExpression.Member is FieldInfo fieldInfo) return fieldInfo.GetValue(subject);
 			else if (memberExpression.Member is PropertyInfo propertyInfo) return propertyInfo.GetValue(subject);
-			else throw new ArgumentOutOfRangeException(nameof(memberExpression), memberExpression.Member, "Unsupported member expression: " + memberExpression);
+			else throw new NotSupportedException("Unsupported member expression: " + memberExpression);
 		}
 
 		private static IDBExpression ConvertToParameterOrField<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, object value)
