@@ -6,6 +6,7 @@ namespace Kosson.KORM.Meta
 {
 	class MetaRecordField : MetaObject, IMetaRecordField
 	{
+		private readonly IFactory factory;
 		public IMetaRecord Record { get; private set; }
 		public PropertyInfo Property { get; private set; }
 
@@ -31,7 +32,7 @@ namespace Kosson.KORM.Meta
 		public bool IsCascade { get; private set; }
 		public bool IsSetNull { get; private set; }
 		public Type ForeignType { get; private set; }
-		public IMetaRecord ForeignMeta { get; private set; }
+		public IMetaRecord ForeignMeta => new MetaRecord(factory, ForeignType);
 
 		public SubqueryBuilder SubqueryBuilder { get; private set; }
 
@@ -44,6 +45,7 @@ namespace Kosson.KORM.Meta
 
 		public MetaRecordField(PropertyInfo property, IMetaRecord record, IFactory factory)
 		{
+			this.factory = factory;
 			Record = record;
 			Update(property, factory);
 		}
@@ -54,7 +56,7 @@ namespace Kosson.KORM.Meta
 			ProcessDBAliasAttribute(property);
 			ProcessDBNameAttribute(property);
 			ProcessColumnAttribute(property, factory);
-			ProcessForeignKeyAttribute(property, factory);
+			ProcessForeignKeyAttribute(property);
 			ProcessSubqueryAttribute(property);
 			ProcessInlineAttribute(property, factory);
 		}
@@ -135,7 +137,7 @@ namespace Kosson.KORM.Meta
 			IsReadOnly = true;
 		}
 
-		private void ProcessForeignKeyAttribute(PropertyInfo property, IFactory factory)
+		private void ProcessForeignKeyAttribute(PropertyInfo property)
 		{
 			var fk = (ForeignKeyAttribute)property.GetCustomAttribute(typeof(ForeignKeyAttribute), false);
 			if (fk == null) return;
@@ -144,15 +146,8 @@ namespace Kosson.KORM.Meta
 			IsCascade = fk.IsCascade;
 			IsSetNull = fk.IsSetNull;
 
-			if (IsRecordRef)
-			{
-				ForeignType = Type.GetGenericArguments()[0];
-			}
-			else
-			{
-				ForeignType = Type;
-				ForeignMeta = new MetaRecord(factory, ForeignType);
-			}
+			if (IsRecordRef) ForeignType = Type.GetGenericArguments()[0];
+			else ForeignType = Type;
 
 			if (typeof(Record32).IsAssignableFrom(ForeignType) && DBType == DbType.Int64) DBType = DbType.Int32;
 			if (typeof(Record16).IsAssignableFrom(ForeignType) && DBType == DbType.Int64) DBType = DbType.Int16;
