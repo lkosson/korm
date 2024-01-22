@@ -91,7 +91,7 @@ namespace Kosson.KORM.ORM
 
 		public IReadOnlyCollection<TRecord> Execute()
 		{
-			var token = LogStart(args: ((DB.CommandBuilder.DBCommandWithWhere)command).ToStringWhere());
+			var token = LogStart(args: command.ToStringForLog());
 			using (var reader = ExecuteReaderNoLog())
 			{
 				var result = new List<TRecord>();
@@ -108,7 +108,7 @@ namespace Kosson.KORM.ORM
 
 		public async Task<IReadOnlyCollection<TRecord>> ExecuteAsync()
 		{
-			var token = LogStart(args: ((DB.CommandBuilder.DBCommandWithWhere)command).ToStringWhere());
+			var token = LogStart(args: command.ToStringForLog());
 			using (var reader = await ExecuteReaderAsyncNoLog())
 			{
 				var result = new List<TRecord>();
@@ -125,7 +125,7 @@ namespace Kosson.KORM.ORM
 
 		public IORMReader<TRecord> ExecuteReader()
 		{
-			var token = LogStart(args: ((DB.CommandBuilder.DBCommandWithWhere)command).ToStringWhere());
+			var token = LogStart(args: command.ToStringForLog());
 			var reader = ExecuteReaderNoLog();
 			LogEnd(token);
 			return reader;
@@ -141,7 +141,7 @@ namespace Kosson.KORM.ORM
 
 		public async Task<IORMReader<TRecord>> ExecuteReaderAsync()
 		{
-			var token = LogStart(args: ((DB.CommandBuilder.DBCommandWithWhere)command).ToStringWhere());
+			var token = LogStart(args: command.ToStringForLog());
 			var reader = await ExecuteReaderAsyncNoLog();
 			LogEnd(token);
 			return reader;

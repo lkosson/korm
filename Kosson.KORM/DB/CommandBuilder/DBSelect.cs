@@ -58,6 +58,8 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// </summary>
 		protected bool forSubquery;
 
+		private bool columnsRemoved;
+
 		/// <inheritdoc/>
 		public DBSelect(IDBCommandBuilder builder) : base(builder)
 		{
@@ -153,6 +155,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		void IDBSelect.RemoveColumns(Func<string, bool> predicate)
 		{
+			columnsRemoved = true;
 			if (columns != null)
 			{
 				var newColumns = new List<DBCommandColumn>();
@@ -168,6 +171,40 @@ namespace Kosson.KORM.DB.CommandBuilder
 					newSubqueries.Add(new DBCommandSubquery(predicate(subquery.Alias.RawValue) ? Builder.Const((string)null) : subquery.Expression, subquery.Alias));
 				subqueries = newSubqueries;
 			}
+		}
+
+		string IDBSelect.ToStringForLog()
+		{
+			var sb = new StringBuilder();
+			if (columnsRemoved)
+			{
+				if (columns != null)
+				{
+					foreach (var column in columns)
+					{
+						if (column.Expression is DBStringConst && column.Expression.RawValue == null) continue;
+						if (sb.Length > 0) sb.Append(",");
+						sb.Append(column.Alias.RawValue);
+					}
+				}
+
+				if (subqueries != null)
+				{
+					foreach (var subquery in subqueries)
+					{
+						if (subquery.Expression is DBStringConst && subquery.Expression.RawValue == null) continue;
+						if (sb.Length > 0) sb.Append(",");
+						sb.Append(subquery.Alias.RawValue);
+					}
+				}
+
+				sb.Append("\t");
+			}
+			var where = BuildWhereExpression();
+			where?.Append(sb);
+			sb.Replace("\r\n", "\n");
+			sb.Replace("\n", " ");
+			return sb.ToString();
 		}
 
 		/// <inheritdoc/>

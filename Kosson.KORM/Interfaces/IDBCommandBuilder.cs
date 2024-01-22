@@ -524,6 +524,13 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="predicate">Predicate determining which columns to remove.</param>
 		internal void RemoveColumns(Func<string, bool> predicate);
+
+		/// <summary>
+		/// Returns summary of this query suitable for logging as one line.
+		/// Internal use only.
+		/// </summary>
+		/// <returns>Summary of the query.</returns>
+		internal string ToStringForLog();
 	}
 
 	/// <summary>

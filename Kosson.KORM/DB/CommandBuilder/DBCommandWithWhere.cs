@@ -55,18 +55,13 @@ namespace Kosson.KORM.DB.CommandBuilder
 			if (wheres == null || wheres.Count == 0) return;
 			AppendCRLF(sb);
 			sb.Append("WHERE ");
-			AppendWheresConditions(sb);
-		}
-
-		private void AppendWheresConditions(StringBuilder sb)
-		{
 			var where = BuildWhereExpression();
-			where.Append(sb);
+			where?.Append(sb);
 		}
 
 		protected virtual IDBExpression BuildWhereExpression()
 		{
-			if (wheres == null) return Builder.Const(true);
+			if (wheres == null) return null;
 			var groups = new List<List<IDBExpression>>();
 			var currentGroup = new List<IDBExpression>();
 			groups.Add(currentGroup);
@@ -84,15 +79,6 @@ namespace Kosson.KORM.DB.CommandBuilder
 			}
 
 			return Builder.Or(groups.Select(group => group.Count == 1 ? group.Single() : Builder.And(group.ToArray())).ToArray());
-		}
-
-		internal string ToStringWhere()
-		{
-			var sb = new StringBuilder();
-			AppendWheresConditions(sb);
-			sb.Replace("\r\n", "\n");
-			sb.Replace("\n", " ");
-			return sb.ToString();
 		}
 	}
 }
