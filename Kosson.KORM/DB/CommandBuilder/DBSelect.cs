@@ -151,6 +151,25 @@ namespace Kosson.KORM.DB.CommandBuilder
 			forSubquery = true;
 		}
 
+		void IDBSelect.RemoveColumns(Func<string, bool> predicate)
+		{
+			if (columns != null)
+			{
+				var newColumns = new List<DBCommandColumn>();
+				foreach (var column in columns)
+					newColumns.Add(new DBCommandColumn(predicate(column.Alias.RawValue) ? Builder.Const((string)null) : column.Expression, column.Alias));
+				columns = newColumns;
+			}
+
+			if (subqueries != null)
+			{
+				var newSubqueries = new List<DBCommandSubquery>();
+				foreach (var subquery in subqueries)
+					newSubqueries.Add(new DBCommandSubquery(predicate(subquery.Alias.RawValue) ? Builder.Const((string)null) : subquery.Expression, subquery.Alias));
+				subqueries = newSubqueries;
+			}
+		}
+
 		/// <inheritdoc/>
 		protected override void AppendCommandText(StringBuilder sb)
 		{

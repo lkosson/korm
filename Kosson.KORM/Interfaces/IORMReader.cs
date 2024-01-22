@@ -8,7 +8,7 @@ namespace Kosson.KORM
 	/// Enumerator of result of a reader-based database command.
 	/// </summary>
 	/// <typeparam name="TRecord">Type of record returned by the query.</typeparam>
-	public interface IORMReader<TRecord> : IEnumerable<TRecord>, IDisposable where TRecord : IRecord
+	public interface IORMReader<TRecord> : IEnumerable<TRecord>, IDisposable
 	{
 		/// <summary>
 		/// Constructs a record from current row of a reader.

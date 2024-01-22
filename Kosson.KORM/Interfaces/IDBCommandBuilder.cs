@@ -517,6 +517,13 @@ namespace Kosson.KORM
 		/// Marks SELECT command as a subquery expression of outer SELECT command.
 		/// </summary>
 		void ForSubquery();
+
+		/// <summary>
+		/// Removes from select all columns with their aliases matching provided predicate.
+		/// Internal use only.
+		/// </summary>
+		/// <param name="predicate">Predicate determining which columns to remove.</param>
+		internal void RemoveColumns(Func<string, bool> predicate);
 	}
 
 	/// <summary>

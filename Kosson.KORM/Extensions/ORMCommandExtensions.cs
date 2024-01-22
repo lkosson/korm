@@ -452,6 +452,38 @@ namespace Kosson.KORM
 		}
 
 		/// <summary>
+		/// Executes SELECT command and returns first record of the result or null when resultset is empty.
+		/// </summary>
+		/// <typeparam name="TRecord">Type of original record.</typeparam>
+		/// <typeparam name="TResult">Type of result row.</typeparam>
+		/// <param name="query">SELECT command to execute.</param>
+		/// <returns>Record returned by the query or null if empty resultset is returned.</returns>
+		public static TResult ExecuteFirst<TRecord, TResult>(this IORMSelectAnonymous<TRecord, TResult> query) where TRecord : IRecord
+		{
+			//return query.Limit(1).Execute().FirstOrDefault();
+			query.OriginalSelect.Limit(1);
+			using var reader = query.ExecuteReader();
+			if (!reader.MoveNext()) return default;
+			return reader.Read();
+		}
+
+		/// <summary>
+		/// Asynchronous version of ExecuteFirst.
+		/// Executes SELECT command and returns first record of the result or null when resultset is empty.
+		/// </summary>
+		/// <typeparam name="TRecord">Type of original record.</typeparam>
+		/// <typeparam name="TResult">Type of result row.</typeparam>
+		/// <param name="query">SELECT command to execute.</param>
+		/// <returns>Record returned by the query or null if empty resultset is returned.</returns>
+		public async static Task<TResult> ExecuteFirstAsync<TRecord, TResult>(this IORMSelectAnonymous<TRecord, TResult> query) where TRecord : IRecord
+		{
+			query.OriginalSelect.Limit(1);
+			using var reader = await query.ExecuteReaderAsync();
+			if (!await reader.MoveNextAsync()) return default;
+			return reader.Read();
+		}
+
+		/// <summary>
 		/// Adds LIMIT 1 clause to the SELECT command, limiting result to a single row.
 		/// </summary>
 		/// <typeparam name="TRecord">Type of record on which the query is based.</typeparam>

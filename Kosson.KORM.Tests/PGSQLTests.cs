@@ -155,6 +155,12 @@ namespace Kosson.KORM.Tests
 	}
 
 	[TestClass]
+	public class PGSQLSelectAnonymousTests : SelectAnonymousTests
+	{
+		protected override void PrepareKORMServices(IServiceCollection services) => PGSQLTests.PrepareKORMServices(services, ConnectionString("pgsql"));
+	}
+
+	[TestClass]
 	public class PGSQLSelectTests : SelectTests
 	{
 		protected override void PrepareKORMServices(IServiceCollection services) => PGSQLTests.PrepareKORMServices(services, ConnectionString("pgsql"));

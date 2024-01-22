@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Kosson.KORM
@@ -130,7 +131,7 @@ namespace Kosson.KORM
 	/// Abstract ORM command retrieving records from database.
 	/// </summary>
 	/// <typeparam name="TRecord">Type of records returned.</typeparam>
-	public interface IORMQueryCommand<TRecord> where TRecord : IRecord
+	public interface IORMQueryCommand<TRecord>
 	{
 		/// <summary>
 		/// Executes the command and returns records built from its result.
@@ -219,6 +220,14 @@ namespace Kosson.KORM
 		/// <param name="descending">Determines whether order should be descending or ascending.</param>
 		/// <returns>Original command with ORDER BY clause added to it.</returns>
 		IORMSelect<TRecord> OrderBy(IDBExpression expression, bool descending = false);
+
+		/// <summary>
+		/// Narrows a set columns returned by the command and produce a anonymously-typed resultset.
+		/// </summary>
+		/// <typeparam name="TResult">Type of a result of a query.</typeparam>
+		/// <param name="selectorExpression">Expression selecting desired column(s), such as "record => new { record.Property, ... }" or "record => record.Property". </param>
+		/// <returns></returns>
+		IORMSelectAnonymous<TRecord, TResult> Select<TResult>(Expression<Func<TRecord, TResult>> selectorExpression);
 	}
 
 	/// <summary>
@@ -270,5 +279,16 @@ namespace Kosson.KORM
 		/// <param name="value">Expression determining new value of a column.</param>
 		/// <returns>Original command with SET clause added to it.</returns>
 		IORMUpdate<TRecord> Set(IDBIdentifier field, IDBExpression value);
+	}
+
+	/// <summary>
+	/// ORM command for retrieving partial set of columns associated with properties of provided record.
+	/// </summary>
+	/// <typeparam name="TRecord">Type of record associated with base query.</typeparam>
+	/// <typeparam name="TResult">Type of actual result.</typeparam>
+	public interface IORMSelectAnonymous<TRecord, TResult> : IORMQueryCommand<TResult>
+		where TRecord : IRecord
+	{
+		internal IORMSelect<TRecord> OriginalSelect { get; }
 	}
 }

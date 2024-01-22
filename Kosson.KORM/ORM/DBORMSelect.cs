@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Kosson.KORM.ORM
@@ -187,6 +189,42 @@ namespace Kosson.KORM.ORM
 		{
 			command.Tag(comment);
 			return this;
+		}
+
+		public IORMSelectAnonymous<TRecord, TResult> Select<TResult>(System.Linq.Expressions.Expression<Func<TRecord, TResult>> selectorExpression)
+		{
+			var columnAliases = new HashSet<string>();
+			var columnPrefixes = new HashSet<string>();
+
+			void ProcessExpression(Expression expression)
+			{
+				var path = new List<string>();
+				while (true)
+				{
+					if (expression is ParameterExpression) break;
+					if (expression is not MemberExpression memberExpression) throw new InvalidOperationException("Expected simple property expression.");
+					if (memberExpression.Member is not PropertyInfo propertyInfo) throw new InvalidOperationException("Expected simple property expression.");
+					path.Add(propertyInfo.Name);
+					expression = memberExpression.Expression;
+				}
+				path.Reverse();
+				for (int i = 0; i < path.Count; i++)
+					columnAliases.Add(String.Join(".", path.Take(i + 1)));
+				columnPrefixes.Add(String.Join(".", path) + ".");
+			}
+
+			if (selectorExpression.Body is MemberExpression memberExpression) ProcessExpression(memberExpression);
+			else if (selectorExpression.Body is ParameterExpression) columnPrefixes.Add("");
+			else if (selectorExpression.Body is NewExpression newExpression)
+			{
+				foreach (var argument in newExpression.Arguments)
+				{
+					ProcessExpression(argument);
+				}
+			}
+			else throw new InvalidOperationException("Expected \"record => new { record.Property, ... }\" or \"record => record.Property\" expression.");
+			command.RemoveColumns(alias => !columnAliases.Contains(alias) && !columnPrefixes.Any(prefix => alias.StartsWith(prefix)));
+			return new DBORMSelectAnonymous<TRecord, TResult>(this, selectorExpression);
 		}
 
 		public override string ToString()
