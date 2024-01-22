@@ -45,6 +45,13 @@ namespace Kosson.KORM.Scratch
 			var us = Enumerable.Range(0, 1000).Select(i => new User { Name = "user" + i, UserDetails = new UserDetails { Group = gs.Skip(i / 100).First() } }).ToList();
 			orm.InsertAll(us);
 
+			var roles = new[] { new Role { Name = "Admin" }, new Role { Name = "User" } };
+			orm.InsertAll(roles);
+			orm.InsertAll(us.Select(u => new Membership { Role = roles[u.ID % 2], User = u }));
+
+			var selected = orm.Select<Membership>().Select(m => new { m.ID, m.User.UserDetails.Group }).Execute();
+			var selectedid = orm.Select<Membership>().Select(m => m.ID).ExecuteFirst();
+
 			var x = 1;
 			var y = new[] { 1, 2 };
 			var linqd = orm.Select<Membership>().Where(m => 4m != y[1] + 3L || m.User.Name == DateTime.Now.AddDays(1).ToString() || m.CreationTime == null || (m.ID > 10 && m.User.UserDetails.Group.ID == x));
