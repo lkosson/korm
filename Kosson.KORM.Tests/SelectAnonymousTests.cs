@@ -45,6 +45,30 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void SelectIDFieldDirectly()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<TestTable>().Select(t => t.ID).Execute();
+			Assert.AreEqual(inserted.ID, retrieved.Single());
+		}
+
+		[TestMethod]
+		public async Task SelectIDFieldAsync()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = await ORM.Select<TestTable>().Select(t => t.ID).ExecuteFirstAsync();
+			Assert.AreEqual(inserted.ID, retrieved);
+		}
+
+		[TestMethod]
+		public async Task SelectIDFieldDirectlyAsync()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = await ORM.Select<TestTable>().Select(t => t.ID).ExecuteAsync();
+			Assert.AreEqual(inserted.ID, retrieved.Single());
+		}
+
+		[TestMethod]
 		public void SelectValueField()
 		{
 			var inserted = PrepareTestTables();
