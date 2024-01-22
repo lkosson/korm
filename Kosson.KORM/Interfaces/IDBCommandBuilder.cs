@@ -228,7 +228,7 @@ namespace Kosson.KORM
 		/// Creates a new unary operator from two a expression.
 		/// </summary>
 		/// <param name="expr">Left value of the operator.</param>
-		/// <param name="comparison">Type of an operator.</param>
+		/// <param name="unaryOperator">Type of an operator.</param>
 		/// <returns>New expression representing unary operator of given expressions.</returns>
 		IDBExpression UnaryExpression(IDBExpression expr, DBUnaryOperator unaryOperator);
 
@@ -316,6 +316,9 @@ namespace Kosson.KORM
 		Like
 	}
 
+	/// <summary>
+	/// Type of unary operation to perform.
+	/// </summary>
 	public enum DBUnaryOperator
 	{
 		/// <summary>
@@ -329,6 +332,9 @@ namespace Kosson.KORM
 		Negate
 	}
 
+	/// <summary>
+	/// Type of binary operation to perform.
+	/// </summary>
 	public enum DBBinaryOperator
 	{
 		/// <summary>

@@ -59,6 +59,10 @@ namespace Kosson.KORM.DB.CommandBuilder
 			where?.Append(sb);
 		}
 
+		/// <summary>
+		/// Build a database expression based on WHERE clauses added to this command.
+		/// </summary>
+		/// <returns>Database expression from WHERE clauses. null is no clauses are added.</returns>
 		protected virtual IDBExpression BuildWhereExpression()
 		{
 			if (wheres == null) return null;

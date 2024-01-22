@@ -121,6 +121,7 @@ namespace Kosson.KORM
 	/// Abstract strongly-typed ORM command with WHERE clause.
 	/// </summary>
 	/// <typeparam name="TCommand">Derived concrete interface of the command.</typeparam>
+	/// <typeparam name="TRecord">Type of record associated with the table.</typeparam>
 	public interface IORMNarrowableCommand<TCommand, TRecord> : IORMNarrowableCommand<TCommand>
 		where TCommand : IORMNarrowableCommand<TCommand>
 		where TRecord : IRecord

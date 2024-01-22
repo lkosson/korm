@@ -14,6 +14,14 @@ namespace Kosson.KORM
 	/// </summary>
 	public static class ORMCommandLinqExtensions
 	{
+		/// <summary>
+		/// Appends WHERE clause to the command based on provided LINQ expression.
+		/// </summary>
+		/// <typeparam name="TCommand">Type of command.</typeparam>
+		/// <typeparam name="TRecord">Type of record returned by the command.</typeparam>
+		/// <param name="query">Query to append WHERE clause to.</param>
+		/// <param name="expression">Expression to add.</param>
+		/// <returns>Original command with WHERE clause added to it.</returns>
 		public static TCommand Where<TCommand, TRecord>(this IORMNarrowableCommand<TCommand, TRecord> query, Expression<Func<TRecord, bool>> expression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord
