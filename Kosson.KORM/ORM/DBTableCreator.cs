@@ -108,7 +108,7 @@ namespace Kosson.KORM.ORM
 			if (String.IsNullOrEmpty(field.ColumnDefinition))
 			{
 				if (field.IsNotNull) column.NotNull();
-				if (field.DefaultValue != null) column.DefaultValue(cb.Const(field.DefaultValue));
+				if (field.DefaultValue != null) column.DefaultValue(cb.Const(field.DefaultValue is bool boolValue ? boolValue ? 1 : 0 : field.DefaultValue));
 			}
 			if (field.IsForeignKey) PrepareForeignKey(column, field);
 			executor(column);
