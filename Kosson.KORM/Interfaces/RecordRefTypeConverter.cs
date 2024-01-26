@@ -40,7 +40,7 @@ namespace Kosson.KORM
 			return base.ConvertFrom(context, culture, value);
 		}
 
-		private static object CreateEntityRef<TEntity>(long id) where TEntity : Record
+		private static object CreateEntityRef<TEntity>(long id) where TEntity : IRecord
 		{
 			return new RecordRef<TEntity>(id);
 		}
