@@ -92,8 +92,10 @@ namespace Kosson.KORM.MSSQL
 			if (se != null)
 			{
 				if (se.Number == 1222) return new KORMLockException(exc, cmd);
-				else if (se.Number == 2627) return new KORMDuplicateValueException(exc, cmd);
-				else if (se.Number == 3701) return new KORMInvalidStructureException(exc, cmd);
+				else if (se.Number == 2601) return new KORMDuplicateValueException(exc, cmd); // duplicate unique key
+				else if (se.Number == 2627) return new KORMDuplicateValueException(exc, cmd); // duplicate primary key
+				else if (se.Number == 2628) return new KORMDataLengthException(exc, cmd); // data truncated
+				else if (se.Number == 3701) return new KORMInvalidStructureException(exc, cmd); // permissions
 				else if (se.Number == 1785) return new KORMInvalidStructureException(exc, cmd); // multiple cascade paths
 				else if (se.Number == 2714) return new KORMObjectExistsException(exc, cmd); // object exists
 				else if (se.Number == 2705) return new KORMObjectExistsException(exc, cmd); // column exists
