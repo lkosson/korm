@@ -57,6 +57,7 @@ namespace Kosson.KORM
 			public UniqueAttribute(params string[] indexFields)
 				: base("UIDX_{0}_" + String.Join("", indexFields), indexFields)
 			{
+				IsUnique = true;
 			}
 		}
 
