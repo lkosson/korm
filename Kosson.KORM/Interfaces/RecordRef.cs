@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.ComponentModel;
 
 namespace Kosson.KORM
@@ -122,7 +123,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="record">Record to convert.</param>
 		/// <returns>Reference to a record.</returns>
-		public static implicit operator RecordRef<T>(T record)
+		public static implicit operator RecordRef<T>(T? record)
 		{
 			return new RecordRef<T>(record == null ? 0 : record.ID);
 		}
@@ -196,7 +197,7 @@ namespace Kosson.KORM
 		private TTargetType ThrowInvalidCast<TTargetType>()
 		{
 			ThrowInvalidCast(typeof(TTargetType));
-			return default(TTargetType);
+			return default(TTargetType)!;
 		}
 
 		private void ThrowInvalidCast(Type type)
@@ -266,7 +267,7 @@ namespace Kosson.KORM
 			return ID.ToString();
 		}
 
-		object IConvertible.ToType(Type type, IFormatProvider provider)
+		object? IConvertible.ToType(Type type, IFormatProvider provider)
 		{
 			//if (typeof(IRecordRef).IsAssignableFrom(type))
 			//{
