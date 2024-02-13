@@ -82,8 +82,8 @@ namespace Kosson.KORM
 				else if (binaryExpression.NodeType == ExpressionType.ArrayIndex && left is Array leftArray && right is int rightInt) return leftArray.GetValue(rightInt);
 			}
 
-			left = ConvertToParameterOrField(query, left);
-			right = ConvertToParameterOrField(query, right);
+			left = ConvertConstToParameter(query, left);
+			right = ConvertConstToParameter(query, right);
 
 			if (leftFinal)
 			{
@@ -150,7 +150,7 @@ namespace Kosson.KORM
 			if (unaryExpression.NodeType == ExpressionType.Negate && value is decimal decimalValue) return -decimalValue;
 			if (unaryExpression.NodeType == ExpressionType.Not && value is bool boolValue) return !boolValue;
 
-			var dbExpression = ConvertToParameterOrField(query, value);
+			var dbExpression = ConvertConstToParameter(query, value);
 
 			if (unaryExpression.NodeType == ExpressionType.Negate) return query.DB.CommandBuilder.UnaryExpression(dbExpression, DBUnaryOperator.Negate);
 			else if (unaryExpression.NodeType == ExpressionType.Not) return query.DB.CommandBuilder.UnaryExpression(dbExpression, DBUnaryOperator.Not);
@@ -169,22 +169,23 @@ namespace Kosson.KORM
 				if (partialIdentifier.Meta != query.Meta) throw new NotSupportedException("Not supported foreign value reference \"" + partialIdentifier + "\".");
 				var field = partialIdentifier.Meta.GetField(partialIdentifier.CurrentPath);
 				if (field.IsInline) return partialIdentifier;
-				if (field.IsEagerLookup) return new PartialIdentifier(field.ForeignMeta, partialIdentifier);
+				//if (field.IsEagerLookup) return new PartialIdentifier(field.ForeignMeta, partialIdentifier);
 				if (!field.IsFromDB) throw new ArgumentOutOfRangeException(partialIdentifier.ToString(), "Record property is not accessible from database.");
-				return partialIdentifier;
+				var fieldExpression = query.Field(partialIdentifier.FullPath);
+				if (field.Type == typeof(bool)) return query.DB.CommandBuilder.Comparison(fieldExpression, DBExpressionComparison.Equal, query.Parameter(true));
+				return query.Field(partialIdentifier.FullPath);
 			}
 			if (memberExpression.Member is FieldInfo fieldInfo) return fieldInfo.GetValue(subject);
 			else if (memberExpression.Member is PropertyInfo propertyInfo) return propertyInfo.GetValue(subject);
 			else throw new NotSupportedException("Unsupported member expression: " + memberExpression);
 		}
 
-		private static IDBExpression ConvertToParameterOrField<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, object value)
+		private static IDBExpression ConvertConstToParameter<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, object value)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord => value switch
 			{
-				PartialIdentifier partialIdentifier => query.Field(partialIdentifier.FullPath),
 				IDBExpression expression => expression,
-				null => null,
+				null => null, // required for "x == null" to "x IS NULL" conversion
 				_ => query.Parameter(value)
 			};
 

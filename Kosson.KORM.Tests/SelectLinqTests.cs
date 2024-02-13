@@ -31,6 +31,7 @@ namespace Kosson.KORM.Tests
 			inserted1.Referenced = referenced1;
 			inserted1.InlinedDirectly.InlinedReferenced = referenced1;
 			inserted1.InlinedDirectly.DoubleInline.Value = "A";
+			inserted1.DirectBoolean = true;
 			ORM.Insert(inserted1);
 
 			var inserted2 = new LinqTestTable();
@@ -38,6 +39,7 @@ namespace Kosson.KORM.Tests
 			inserted2.Referenced = referenced2;
 			inserted2.InlinedDirectly.InlinedReferenced = referenced1;
 			inserted2.InlinedDirectly.DoubleInline.Value = "AA";
+			inserted1.DirectBoolean = false;
 			ORM.Insert(inserted2);
 
 			var inserted3 = new LinqTestTable();
@@ -46,6 +48,7 @@ namespace Kosson.KORM.Tests
 			inserted3.SelfReferencedRef = inserted1;
 			inserted3.InlinedDirectly.InlinedReferenced = referenced2;
 			inserted3.InlinedDirectly.DoubleInline.Value = "AAA";
+			inserted1.DirectBoolean = false;
 			ORM.Insert(inserted3);
 
 			var inserted4 = new LinqTestTable();
@@ -54,6 +57,7 @@ namespace Kosson.KORM.Tests
 			inserted4.SelfReferencedRef = inserted2;
 			inserted4.InlinedDirectly.InlinedReferenced = referenced2;
 			inserted4.InlinedDirectly.DoubleInline.Value = "AAAA";
+			inserted1.DirectBoolean = true;
 			ORM.Insert(inserted4);
 
 			return new[] { inserted1, inserted2, inserted3, inserted4 };
@@ -84,6 +88,23 @@ namespace Kosson.KORM.Tests
 			Assert.AreEqual(INTMARKER, retrieved.Value);
 		}
 
+		[TestMethod]
+		public void SelectLinqByDirectBoolean()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.DirectBoolean).Execute();
+			Assert.AreEqual(inserted.Count(t => t.DirectBoolean), retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => t.DirectBoolean));
+		}
+
+		[TestMethod]
+		public void SelectLinqByNegatedBoolean()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => !t.DirectBoolean).Execute();
+			Assert.AreEqual(inserted.Count(t => !t.DirectBoolean), retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => !t.DirectBoolean));
+		}
 		[TestMethod]
 		public void SelectLinqByNull()
 		{
@@ -279,6 +300,9 @@ namespace Kosson.KORM.Tests
 			[Column]
 			[ForeignKey.None]
 			public LinqReferencedTable Referenced { get; set; }
+
+			[Column]
+			public bool DirectBoolean { get; set; }
 
 			[Inline]
 			public LinqInline InlinedDirectly { get; set; } = new LinqInline();
