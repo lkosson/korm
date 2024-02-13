@@ -157,11 +157,16 @@ namespace Kosson.KORM
 			else throw new NotSupportedException("Unsupported unary expression: " + unaryExpression);
 		}
 
-		private static object ProcessMemberExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, MemberExpression memberExpression)
+		private static object ProcessMemberExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, MemberExpression memberExpression, bool recursive = false)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord
 		{
-			var subject = memberExpression.Expression == null ? null : ProcessExpression(query, memberExpression.Expression);
+			var subject = memberExpression.Expression switch
+			{
+				MemberExpression nestedMemberExpression => ProcessMemberExpression(query, nestedMemberExpression, true),
+				null => null, // for static calls
+				_ => ProcessExpression(query, memberExpression.Expression)
+			};
 			if (memberExpression.Member.Name == nameof(IRecordRef.ID) && typeof(IRecordRef).IsAssignableFrom(memberExpression.Member.DeclaringType)) return subject;
 			if (subject is PartialIdentifier partialIdentifier)
 			{
@@ -169,7 +174,7 @@ namespace Kosson.KORM
 				if (partialIdentifier.Meta != query.Meta) throw new NotSupportedException("Not supported foreign value reference \"" + partialIdentifier + "\".");
 				var field = partialIdentifier.Meta.GetField(partialIdentifier.CurrentPath);
 				if (field.IsInline) return partialIdentifier;
-				//if (field.IsEagerLookup) return new PartialIdentifier(field.ForeignMeta, partialIdentifier);
+				if (field.IsEagerLookup && recursive) return new PartialIdentifier(field.ForeignMeta, partialIdentifier);
 				if (!field.IsFromDB) throw new ArgumentOutOfRangeException(partialIdentifier.ToString(), "Record property is not accessible from database.");
 				var fieldExpression = query.Field(partialIdentifier.FullPath);
 				if (field.Type == typeof(bool)) return query.DB.CommandBuilder.Comparison(fieldExpression, DBExpressionComparison.Equal, query.Parameter(true));
