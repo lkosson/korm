@@ -1,6 +1,7 @@
 ﻿using Kosson.KORM;
 using Kosson.KORM.Backup;
 using System;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 
@@ -52,9 +53,9 @@ namespace Kosson.KORM.Scratch
 			var selected = orm.Select<Membership>().Select(m => new { m.ID, m.User.UserDetails.Group }).Execute();
 			var selectedid = orm.Select<Membership>().Select(m => m.ID).ExecuteFirst();
 
-			var x = 1;
 			var y = new[] { 1, 2 };
-			var linqd = orm.Select<Membership>().Where(m => 4m != y[1] + 3L || m.User.Name == DateTime.Now.AddDays(1).ToString() || m.CreationTime == null || (m.ID > 10 && m.User.UserDetails.Group.ID == x));
+			var linqd = orm.Select<Membership>().Where(m => m.User.UserDetails.PasswordHash == "123").Execute();
+			//var linqd = orm.Select<Membership>().Where(m => 4m != y[1] + 3L || m.User.ID == DateTime.Now.AddDays(1).Ticks || m.CreationTime == null || (m.ID > 10 && m.User.UserDetails.Group.ID == x));
 
 			var joined = orm.Select<User>().Execute().Join(orm.Select<User>(), user => user.UserDetails.Group);
 
@@ -132,6 +133,7 @@ namespace Kosson.KORM.Scratch
 			{
 				for (int i = 0; i < 1000; i++)
 				{
+					LoopCounter.Instance.Inc();
 					var q = orm.Select<Membership>()
 						.WhereField("ID", DBExpressionComparison.GreaterOrEqual, 100)
 						.WhereField("usr_Name", DBExpressionComparison.NotEqual, "d'Arc")
@@ -151,6 +153,31 @@ namespace Kosson.KORM.Scratch
 		}
 	}
 
+	[EventSource(Name = "loop-counter")]
+	class LoopCounter : EventSource
+	{
+		public readonly static LoopCounter Instance = new LoopCounter();
+		private IncrementingEventCounter counter;
+
+		private LoopCounter()
+		{
+			counter = new IncrementingEventCounter("loop-counter", this)
+			{
+				DisplayName = "Loop counter",
+				DisplayRateTimeScale = TimeSpan.FromSeconds(1)
+			};
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			counter.Dispose();
+			base.Dispose(disposing);
+		}
+
+		public void Inc() => counter.Increment(1);
+	}
+
+
 	[Table]
 	class Membership : Record, IRecord
 	{
@@ -165,6 +192,9 @@ namespace Kosson.KORM.Scratch
 
 		[Column]
 		public DateTime? CreationTime { get; set; }
+
+		[Column]
+		public bool Active { get; set; }
 	}
 
 	[Table("usr"/*, Query="SELECT 1 usr_ID, usr_Name, usr_PasswordHash, usr_Group FROM Users"*/)]
