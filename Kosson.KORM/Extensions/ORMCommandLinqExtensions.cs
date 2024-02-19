@@ -171,14 +171,14 @@ namespace Kosson.KORM
 			if (subject is PartialIdentifier partialIdentifier)
 			{
 				partialIdentifier.Append(memberExpression.Member.Name);
-				if (partialIdentifier.Meta != query.Meta) throw new NotSupportedException("Not supported foreign value reference \"" + partialIdentifier + "\".");
+				//if (partialIdentifier.Meta != query.Meta) throw new NotSupportedException("Not supported foreign value reference \"" + partialIdentifier + "\".");
 				var field = partialIdentifier.Meta.GetField(partialIdentifier.CurrentPath);
 				if (field.IsInline) return partialIdentifier;
 				if (field.IsEagerLookup && recursive) return new PartialIdentifier(field.ForeignMeta, partialIdentifier);
 				if (!field.IsFromDB) throw new ArgumentOutOfRangeException(partialIdentifier.ToString(), "Record property is not accessible from database.");
 				var fieldExpression = query.Field(partialIdentifier.FullPath);
 				if (field.Type == typeof(bool)) return query.DB.CommandBuilder.Comparison(fieldExpression, DBExpressionComparison.Equal, query.Parameter(true));
-				return query.Field(partialIdentifier.FullPath);
+				return fieldExpression;
 			}
 			if (memberExpression.Member is FieldInfo fieldInfo) return fieldInfo.GetValue(subject);
 			else if (memberExpression.Member is PropertyInfo propertyInfo) return propertyInfo.GetValue(subject);
@@ -213,6 +213,7 @@ namespace Kosson.KORM
 			public IMetaRecord Meta => meta;
 			public string CurrentPath => String.Join(".", path);
 			public string FullPath => parent == null ? CurrentPath : path.Count == 0 ? parent.FullPath /* direct reference to eager field */ : parent.FullPath + "." + CurrentPath;
+			public string TableAlias => parent == null ? null : parent.TableAlias == null ? parent.Meta.DBName : parent.TableAlias + "." + parent.Meta.DBName;
 			public void Append(string part) => path.Add(part);
 			public override string ToString() => FullPath;
 		}

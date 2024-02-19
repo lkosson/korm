@@ -104,6 +104,8 @@ namespace Kosson.KORM
 		/// <param name="name"></param>
 		/// <returns></returns>
 		IMetaRecordField GetField(string name);
+
+		internal string GetFieldTableAlias(string name);
 	}
 
 	/// <summary>

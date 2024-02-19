@@ -20,16 +20,19 @@ namespace Kosson.KORM.Tests
 		{
 			var referenced1 = new LinqReferencedTable();
 			referenced1.Value = INTMARKER - 1;
+			referenced1.InlinedIndirectly.Value = "R";
 			ORM.Insert(referenced1);
 
 			var referenced2 = new LinqReferencedTable();
 			referenced2.Value = INTMARKER - 2;
+			referenced2.InlinedIndirectly.Value = "RR";
 			ORM.Insert(referenced2);
 
 			var inserted1 = new LinqTestTable();
 			inserted1.Value = INTMARKER;
 			inserted1.Referenced = referenced1;
-			inserted1.InlinedDirectly.InlinedReferenced = referenced1;
+			inserted1.InlinedDirectly.InlinedReferencedRef = referenced1;
+			inserted1.InlinedDirectly.Referenced = referenced1;
 			inserted1.InlinedDirectly.DoubleInline.Value = "A";
 			inserted1.DirectBoolean = true;
 			ORM.Insert(inserted1);
@@ -37,27 +40,30 @@ namespace Kosson.KORM.Tests
 			var inserted2 = new LinqTestTable();
 			inserted2.Value = INTMARKER + 1;
 			inserted2.Referenced = referenced2;
-			inserted2.InlinedDirectly.InlinedReferenced = referenced1;
+			inserted2.InlinedDirectly.InlinedReferencedRef = referenced1;
+			inserted2.InlinedDirectly.Referenced = referenced2;
 			inserted2.InlinedDirectly.DoubleInline.Value = "AA";
-			inserted1.DirectBoolean = false;
+			inserted2.DirectBoolean = false;
 			ORM.Insert(inserted2);
 
 			var inserted3 = new LinqTestTable();
 			inserted3.Value = INTMARKER + 2;
 			inserted3.Referenced = referenced1;
 			inserted3.SelfReferencedRef = inserted1;
-			inserted3.InlinedDirectly.InlinedReferenced = referenced2;
+			inserted3.InlinedDirectly.InlinedReferencedRef = referenced2;
+			inserted3.InlinedDirectly.Referenced = referenced1;
 			inserted3.InlinedDirectly.DoubleInline.Value = "AAA";
-			inserted1.DirectBoolean = false;
+			inserted3.DirectBoolean = false;
 			ORM.Insert(inserted3);
 
 			var inserted4 = new LinqTestTable();
 			inserted4.Value = INTMARKER + 3;
 			inserted4.Referenced = referenced2;
 			inserted4.SelfReferencedRef = inserted2;
-			inserted4.InlinedDirectly.InlinedReferenced = referenced2;
+			inserted4.InlinedDirectly.InlinedReferencedRef = referenced2;
+			inserted4.InlinedDirectly.Referenced = referenced2;
 			inserted4.InlinedDirectly.DoubleInline.Value = "AAAA";
-			inserted1.DirectBoolean = true;
+			inserted4.DirectBoolean = true;
 			ORM.Insert(inserted4);
 
 			return new[] { inserted1, inserted2, inserted3, inserted4 };
@@ -201,7 +207,7 @@ namespace Kosson.KORM.Tests
 		public void SelectLinqByLocalComplexProperty()
 		{
 			var inserted = PrepareTestTables();
-			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.Value != inserted[2].InlinedDirectly.InlinedReferenced.ID).Execute();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.Value != inserted[2].InlinedDirectly.InlinedReferencedRef.ID).Execute();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(inserted.Length, retrieved.Count);
 		}
@@ -232,10 +238,10 @@ namespace Kosson.KORM.Tests
 		{
 			var inserted = PrepareTestTables();
 			var foreign = inserted[2].Referenced;
-			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.InlinedDirectly.InlinedReferenced == foreign).Execute();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.InlinedDirectly.InlinedReferencedRef == foreign).Execute();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(2, retrieved.Count);
-			Assert.IsTrue(retrieved.All(t => t.InlinedDirectly.InlinedReferenced == foreign));
+			Assert.IsTrue(retrieved.All(t => t.InlinedDirectly.InlinedReferencedRef == foreign));
 		}
 
 		[TestMethod]
@@ -247,7 +253,7 @@ namespace Kosson.KORM.Tests
 			Assert.AreEqual(1, retrieved.Count);
 			Assert.AreEqual("AAA", retrieved.Single().InlinedDirectly.DoubleInline.Value);
 		}
-		/*
+
 		[TestMethod]
 		public void SelectLinqByForeignField()
 		{
@@ -255,10 +261,32 @@ namespace Kosson.KORM.Tests
 			var value = inserted[3].Referenced.Value;
 			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.Referenced.Value == value).Execute();
 			Assert.IsNotNull(retrieved);
-			Assert.AreEqual(1, retrieved.Count);
+			Assert.IsTrue(retrieved.Any());
 			Assert.IsTrue(retrieved.All(t => t.Referenced.Value == value));
 		}
-		*/
+
+		[TestMethod]
+		public void SelectLinqByForeignInlinedField()
+		{
+			var inserted = PrepareTestTables();
+			var value = inserted[2].InlinedDirectly.Referenced.Value;
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.InlinedDirectly.Referenced.Value == value).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.IsTrue(retrieved.Any());
+			Assert.IsTrue(retrieved.All(t => t.InlinedDirectly.Referenced.Value == value));
+		}
+
+		[TestMethod]
+		public void SelectLinqByInlinedForeignField()
+		{
+			var inserted = PrepareTestTables();
+			var value = inserted[1].Referenced.InlinedIndirectly.Value;
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.Referenced.InlinedIndirectly.Value == value).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.IsTrue(retrieved.Any());
+			Assert.IsTrue(retrieved.All(t => t.Referenced.InlinedIndirectly.Value == value));
+		}
+
 		[TestMethod]
 		public void SelectLinqByAlternative()
 		{
@@ -317,14 +345,18 @@ namespace Kosson.KORM.Tests
 			public int Value { get; set; }
 
 			[Inline]
-			public LinqInline InlinedInirectly { get; set; } = new LinqInline();
+			public LinqDoubleInline InlinedIndirectly { get; set; } = new LinqDoubleInline();
 		}
 
 		class LinqInline
 		{
 			[Column]
 			[ForeignKey.None]
-			public RecordRef<LinqReferencedTable> InlinedReferenced { get; set; }
+			public RecordRef<LinqReferencedTable> InlinedReferencedRef { get; set; }
+
+			[Column]
+			[ForeignKey.None]
+			public LinqReferencedTable Referenced { get; set; }
 
 			[Inline]
 			public LinqDoubleInline DoubleInline { get; set; } = new LinqDoubleInline();

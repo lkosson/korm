@@ -66,9 +66,9 @@ namespace Kosson.KORM.Meta
 			if (dot <= 0) return null;
 			field = GetField(name.Substring(0, dot));
 			if (field == null) return null;
-			name = name.Substring(dot + 1);
-			if (field.ForeignMeta != null) return field.ForeignMeta.GetField(name);
-			if (field.InlineRecord != null) return field.InlineRecord.GetField(name);
+			var tail = name.Substring(dot + 1);
+			if (field.ForeignMeta != null) return field.ForeignMeta.GetField(tail);
+			if (field.InlineRecord != null) return field.InlineRecord.GetField(tail);
 			return null;
 		}
 
@@ -77,6 +77,31 @@ namespace Kosson.KORM.Meta
 			MetaRecordField field;
 			if (fieldsLookup.TryGetValue(name, out field)) return field;
 			return null;
+		}
+
+		string IMetaRecord.GetFieldTableAlias(string name)
+		{
+			var path = new List<string>();
+			path.Add(Name);
+			GetFieldTableAlias(this, name, path);
+			return String.Join(".", path);
+		}
+
+		private static void GetFieldTableAlias(IMetaRecord meta, string name, List<string> path)
+		{
+			IMetaRecordField field = ((MetaRecord)meta).GetField(name);
+			if (field != null) return;
+			var dot = name.IndexOf('.');
+			if (dot <= 0) return;
+			field = meta.GetField(name.Substring(0, dot));
+			if (field == null) return;
+			var tail = name.Substring(dot + 1);
+			if (field.ForeignMeta != null)
+			{
+				path.Add(field.Name);
+				GetFieldTableAlias(field.ForeignMeta, tail, path);
+			}
+			if (field.InlineRecord != null) GetFieldTableAlias(field.InlineRecord, tail, path);
 		}
 
 		private void ProcessType(Type record, IFactory factory)

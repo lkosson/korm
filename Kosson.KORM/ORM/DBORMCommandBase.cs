@@ -64,17 +64,15 @@ namespace Kosson.KORM.ORM
 		{
 			IMetaRecordField metafield = meta.GetField(name);
 			if (metafield == null) return DB.CommandBuilder.Identifier(name);
+
+			if (UseFullFieldNames)
 			{
-				if (UseFullFieldNames)
-				{
-					var metaRecord = metafield.Record;
-					while (metaRecord.InliningField != null) metaRecord = metaRecord.InliningField.Record;
-					return DB.CommandBuilder.Identifier(metaRecord.Name, metafield.DBName);
-				}
-				else
-				{
-					return DB.CommandBuilder.Identifier(metafield.DBName);
-				}
+				var tableAlias = meta.GetFieldTableAlias(name);
+				return DB.CommandBuilder.Identifier(tableAlias, metafield.DBName);
+			}
+			else
+			{
+				return DB.CommandBuilder.Identifier(metafield.DBName);
 			}
 		}
 
