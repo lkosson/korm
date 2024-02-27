@@ -62,14 +62,11 @@ namespace Kosson.KORM.Scratch
 			var first = orm.Select<User>().ExecuteFirst();
 
 			var a1 = GC.GetTotalAllocatedBytes(true);
-			var sw1 = StatStopwatch.StartNew();
 			for (var i = 0; i < 10000; i++)
 			{
 				orm.Select<User>().ByID(first.ID);
-				sw1.AddMeasurement();
 			}
 			var a2 = GC.GetTotalAllocatedBytes(true);
-			Console.WriteLine(sw1.ToString());
 			Console.WriteLine(a2 - a1);
 
 			using (var fs = new FileStream("backup.sql", FileMode.Create))
@@ -127,28 +124,8 @@ namespace Kosson.KORM.Scratch
 
 			//databaseCopier.CopyTo<SQLite>(new KORMConfiguration { ConnectionString = "data source=backup.sqlite3;version=3" }, new[] { typeof(User), typeof(Role), typeof(Membership) });
 
-			//var profiler = Context.Current.Get<IProfiler>();
-			var sw = StatStopwatch.StartNew();
-			//using (profiler.Start())
-			{
-				for (int i = 0; i < 1000; i++)
-				{
-					LoopCounter.Instance.Inc();
-					var q = orm.Select<Membership>()
-						.WhereField("ID", DBExpressionComparison.GreaterOrEqual, 100)
-						.WhereField("usr_Name", DBExpressionComparison.NotEqual, "d'Arc")
-						.WhereFieldIsNotNull("Role");
-					//var qr = (q.ExecuteAsync().Result).Where(x => x.ID % 2 == 0).Select(x => x.User);
-					var qr = q.Execute().Where(x => x.ID % 2 == 0).Select(x => x.User);
-					qr.ToArray();
-					sw.AddMeasurement();
-				}
-			}
-
 			orm.DeleteAll(orm.Select<Membership>().Execute());
 
-			Console.WriteLine(sw);
-			//Console.WriteLine(profiler.GetReport());
 			db.Rollback();
 		}
 	}

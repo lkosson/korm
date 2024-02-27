@@ -28,7 +28,7 @@ class StatStopwatch
 	{
 		var sum = measurements.Sum();
 		var avg = measurements.Average();
-		var dev = Math.Sqrt(measurements.Select(m => (m - avg) * (m - avg)).Sum());
+		var dev = Math.Sqrt(measurements.Select(m => (m - avg) * (m - avg)).Sum() / measurements.Count);
 		measurements.Sort();
 		var p0 = measurements[0];
 		var p1 = measurements[measurements.Count * 1 / 10];
@@ -37,7 +37,7 @@ class StatStopwatch
 		var p9 = measurements[measurements.Count * 9 / 10];
 		int steps = 20;
 		var hstart = p0;
-		var hend = p9;
+		var hend = measurements[measurements.Count * 99 / 100]; // p9;
 		var hstep = (hend - hstart) / steps;
 		if (hstep < 0.001)
 		{

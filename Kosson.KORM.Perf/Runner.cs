@@ -1,4 +1,6 @@
-﻿namespace Kosson.KORM.Perf;
+﻿using System.Runtime.CompilerServices;
+
+namespace Kosson.KORM.Perf;
 
 class Runner(IDB db, IORM orm)
 {
@@ -6,8 +8,14 @@ class Runner(IDB db, IORM orm)
 	{
 		PrepareDatabase();
 		WarmUp();
-		TransactedTest(EmptyInsertTest);
-		TransactedTest(FilledInsertTest);
+		EmptyInsertTest();
+		FilledInsertTest();
+		OneByOneInsertTest();
+		BulkInsertTest();
+		BeginCommitTest();
+		GetAllTest();
+		GetFirstTest();
+		GetSingleTest();
 	}
 
 	private void PrepareDatabase()
@@ -35,30 +43,144 @@ class Runner(IDB db, IORM orm)
 		db.Rollback();
 	}
 
-	private void TransactedTest(Action step)
+	private void Report(StatStopwatch sw, [CallerMemberName] string? caller = default)
 	{
-		db.BeginTransaction();
-		var sw = new StatStopwatch();
-		for (int i = 0; i < 1000; i++)
-		{
-			sw.Start();
-			step();
-			sw.Stop();
-		}
-		db.Rollback();
-		Console.WriteLine("=== " + step.Method.Name + " ===");
+		Console.WriteLine("=== " + caller + " ===");
 		Console.WriteLine(sw);
 		Console.WriteLine();
 	}
 
 	private void EmptyInsertTest()
 	{
-		orm.Store(new TestTable());
+		db.BeginTransaction();
+		var sw = new StatStopwatch();
+		for (int i = 0; i < 1000; i++)
+		{
+			sw.Start();
+			orm.Store(new TestTable());
+			sw.Stop();
+		}
+		db.Rollback();
+		Report(sw);
 	}
 
 	private void FilledInsertTest()
 	{
-		orm.Store(new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() });
+		db.BeginTransaction();
+		var records = Enumerable.Range(0, 1000).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() }).ToList();
+		var sw = new StatStopwatch();
+		foreach (var record in records)
+		{
+			sw.Start();
+			orm.Store(record);
+			sw.Stop();
+		}
+		db.Rollback();
+		Report(sw);
+	}
+
+	private void OneByOneInsertTest()
+	{
+		db.BeginTransaction();
+		var sw = new StatStopwatch();
+		for (int i = 0; i < 100; i++)
+		{
+			var records = Enumerable.Range(0, 1000).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() }).ToList();
+			sw.Start();
+			foreach (var record in records)
+			orm.Store(record);
+			sw.Stop();
+			orm.Delete<TestTable>().Execute();
+		}
+		db.Rollback();
+		Report(sw);
+	}
+
+	private void BulkInsertTest()
+	{
+		db.BeginTransaction();
+		var sw = new StatStopwatch();
+		for (int i = 0; i < 100; i++)
+		{
+			var records = Enumerable.Range(0, 1000).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() }).ToList();
+			sw.Start();
+			orm.StoreAll(records);
+			sw.Stop();
+			orm.Delete<TestTable>().Execute();
+		}
+		db.Rollback();
+		Report(sw);
+	}
+
+	private void BeginCommitTest()
+	{
+		var sw = new StatStopwatch();
+		for (int i = 0; i < 1000; i++)
+		{
+			sw.Start();
+			db.BeginTransaction();
+			db.Commit();
+			sw.Stop();
+		}
+		Report(sw);
+	}
+
+	private void GetAllTest()
+	{
+		db.BeginTransaction();
+		for (int i = 0; i < 1000; i++)
+		{
+			orm.Store(new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() });
+		}
+		var sw = new StatStopwatch();
+		for (int i = 0; i < 1000; i++)
+		{
+			sw.Start();
+			orm.Select<TestTable>().Execute();
+			sw.Stop();
+		}
+		db.Rollback();
+		Report(sw);
+	}
+
+	private void GetFirstTest()
+	{
+		db.BeginTransaction();
+		for (int i = 0; i < 1000; i++)
+		{
+			orm.Store(new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() });
+		}
+
+		var sw = new StatStopwatch();
+		for (int i = 0; i < 1000; i++)
+		{
+			sw.Start();
+			orm.Select<TestTable>().ExecuteFirst();
+			sw.Stop();
+		}
+		db.Rollback();
+		Report(sw);
+	}
+
+	private void GetSingleTest()
+	{
+		db.BeginTransaction();
+		for (int i = 0; i < 1000; i++)
+		{
+			orm.Store(new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() });
+		}
+
+		var firstRef = orm.Select<TestTable>().ExecuteFirst().Ref();
+
+		var sw = new StatStopwatch();
+		for (int i = 0; i < 1000; i++)
+		{
+			sw.Start();
+			orm.Select<TestTable>().ByRef(firstRef);
+			sw.Stop();
+		}
+		db.Rollback();
+		Report(sw);
 	}
 }
 
