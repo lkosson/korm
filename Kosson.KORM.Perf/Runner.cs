@@ -4,6 +4,9 @@ namespace Kosson.KORM.Perf;
 
 class Runner(IDB db, IORM orm)
 {
+	private const int REP = 100;
+	private const int BLOCK = 1000;
+
 	public void Run()
 	{
 		PrepareDatabase();
@@ -53,11 +56,12 @@ class Runner(IDB db, IORM orm)
 	private void EmptyInsertTest()
 	{
 		db.BeginTransaction();
+		var records = Enumerable.Range(0, BLOCK).Select(n => new TestTable()).ToList();
 		var sw = new StatStopwatch();
-		for (int i = 0; i < 1000; i++)
+		foreach (var record in records)
 		{
 			sw.Start();
-			orm.Store(new TestTable());
+			orm.Store(record);
 			sw.Stop();
 		}
 		db.Rollback();
@@ -67,7 +71,7 @@ class Runner(IDB db, IORM orm)
 	private void FilledInsertTest()
 	{
 		db.BeginTransaction();
-		var records = Enumerable.Range(0, 1000).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() }).ToList();
+		var records = Enumerable.Range(0, BLOCK).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = n }).ToList();
 		var sw = new StatStopwatch();
 		foreach (var record in records)
 		{
@@ -83,9 +87,9 @@ class Runner(IDB db, IORM orm)
 	{
 		db.BeginTransaction();
 		var sw = new StatStopwatch();
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < REP; i++)
 		{
-			var records = Enumerable.Range(0, 1000).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() }).ToList();
+			var records = Enumerable.Range(0, BLOCK).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = n }).ToList();
 			sw.Start();
 			foreach (var record in records)
 			orm.Store(record);
@@ -100,9 +104,9 @@ class Runner(IDB db, IORM orm)
 	{
 		db.BeginTransaction();
 		var sw = new StatStopwatch();
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < REP; i++)
 		{
-			var records = Enumerable.Range(0, 1000).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() }).ToList();
+			var records = Enumerable.Range(0, BLOCK).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = n }).ToList();
 			sw.Start();
 			orm.StoreAll(records);
 			sw.Stop();
@@ -115,7 +119,7 @@ class Runner(IDB db, IORM orm)
 	private void BeginCommitTest()
 	{
 		var sw = new StatStopwatch();
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < REP; i++)
 		{
 			sw.Start();
 			db.BeginTransaction();
@@ -128,12 +132,12 @@ class Runner(IDB db, IORM orm)
 	private void GetAllTest()
 	{
 		db.BeginTransaction();
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < BLOCK; i++)
 		{
-			orm.Store(new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() });
+			orm.Store(new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = i });
 		}
 		var sw = new StatStopwatch();
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < REP; i++)
 		{
 			sw.Start();
 			orm.Select<TestTable>().Execute();
@@ -146,13 +150,13 @@ class Runner(IDB db, IORM orm)
 	private void GetFirstTest()
 	{
 		db.BeginTransaction();
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < BLOCK; i++)
 		{
-			orm.Store(new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() });
+			orm.Store(new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = i });
 		}
 
 		var sw = new StatStopwatch();
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < REP; i++)
 		{
 			sw.Start();
 			orm.Select<TestTable>().ExecuteFirst();
@@ -165,15 +169,15 @@ class Runner(IDB db, IORM orm)
 	private void GetSingleTest()
 	{
 		db.BeginTransaction();
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < BLOCK; i++)
 		{
-			orm.Store(new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString() });
+			orm.Store(new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = i });
 		}
 
 		var firstRef = orm.Select<TestTable>().ExecuteFirst().Ref();
 
 		var sw = new StatStopwatch();
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < REP; i++)
 		{
 			sw.Start();
 			orm.Select<TestTable>().ByRef(firstRef);
@@ -192,6 +196,9 @@ class TestTable : Record
 
 	[Column]
 	public DateTime DateValue { get; set; }
+
+	[Column]
+	public int IntValue { get; set; }
 
 	[Column]
 	[ForeignKey.None]

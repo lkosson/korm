@@ -51,14 +51,14 @@ class StatStopwatch
 		{
 			var llim = hstart + i * hstep;
 			var ulim = hstart + (i + 1) * hstep;
-			var c = measurements.Where(m => m >= llim && m < ulim).Count();
+			var c = measurements.Where(m => m >= llim && (i == steps - 1 || m < ulim)).Count();
 			hdata[i] = c;
 			if (c > hmax) hmax = c;
 		}
 		var hist = "";
 		for (int i = 0; i < steps; i++)
 		{
-			hist += (hstart + hstep * i).ToString("0.000").PadLeft(10) + " ms\t" + hdata[i].ToString().PadLeft(3) + "\t" + "".PadLeft(hdata[i] * 50 / hmax, '*') + "\n";
+			hist += (hstart + hstep * i).ToString("0.000").PadLeft(10) + " ms\t" + hdata[i].ToString().PadLeft(3) + "\t" + (hdata[i] == 0 ? "" : hdata[i] * 50 / hmax == 0 ? "." : "".PadLeft(hdata[i] * 50 / hmax, '*')) + "\n";
 		}
 		return $"total\t{sum,10:0.000} ms\navg\t{avg,10:0.000} ms\ndev\t{dev,10:0.000} ms\np1\t{p1,10:0.000} ms\np5\t{p5,10:0.000} ms\np9\t{p9,10:0.000} ms\n{hist}";
 	}

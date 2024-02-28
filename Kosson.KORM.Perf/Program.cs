@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 
 var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 var services = new ServiceCollection();
-services.AddKORMServices<Kosson.KORM.MSSQL.SQLDB>(configuration.GetConnectionString("mssql"));
-//services.AddKORMServices<Kosson.KORM.SQLite.SQLiteDB>(configuration.GetConnectionString("sqlite"));
-//services.AddKORMServices<PGSQL.PGSQLDB>(configuration.GetConnectionString("pgsql"));
+//services.AddKORMServices<Kosson.KORM.MSSQL.SQLDB>(configuration.GetConnectionString("mssql"));
+services.AddKORMServices<Kosson.KORM.SQLite.SQLiteDB>(configuration.GetConnectionString("sqlite"));
+//services.AddKORMServices<Kosson.KORM.PGSQL.PGSQLDB>(configuration.GetConnectionString("pgsql"));
 services.AddScoped<Runner>();
 services.AddSingleton<ILoggerFactory, ConsoleLoggerFactory>();
 services.AddSingleton(typeof(ILogger<>), typeof(ConsoleLogger<>));
