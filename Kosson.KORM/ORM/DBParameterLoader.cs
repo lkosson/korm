@@ -124,7 +124,8 @@ namespace Kosson.KORM.ORM
 				{
 					il.Emit(OpCodes.Ldarg_0); // ST: idb
 					il.Emit(OpCodes.Ldarg_1); // ST: idb, cmd
-					il.Emit(OpCodes.Ldstr, field.DBName); // ST: idb, cmd, dbname
+					// TODO: Somehow replace "@" with proper IDB.CommandBuilder.ParameterPrefix
+					il.Emit(OpCodes.Ldstr, "@" + field.DBName); // ST: idb, cmd, dbname
 
 					// if (record == null) goto localIsNull;
 					var localIsNull = il.DefineLabel();

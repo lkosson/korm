@@ -28,7 +28,11 @@ namespace Kosson.KORM.SQLite
 		protected override void AppendCommandText(StringBuilder sb)
 		{
 			base.AppendCommandText(sb);
-			if (limit > 0) sb.Append(" LIMIT " + limit);
+			if (limit > 0)
+			{
+				sb.Append(" LIMIT ");
+				sb.Append(limit);
+			}
 			// PRAGMA returns a resultset - it has to be after the SELECT command.
 			if (forUpdate) sb.Append("; PRAGMA locking_mode = EXCLUSIVE");
 		}

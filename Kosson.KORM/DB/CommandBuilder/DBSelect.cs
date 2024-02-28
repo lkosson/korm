@@ -426,7 +426,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 			AppendJoinKeyword(sb);
 			AppendTable(sb, join.Table, join.Alias);
 			AppendJoinKeyword2(sb);
-			sb.Append(join.Expression);
+			join.Expression.Append(sb);
 		}
 
 		/// <summary>

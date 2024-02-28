@@ -11,6 +11,21 @@ namespace Kosson.KORM
 	/// </summary>
 	public static class DBExtensions
 	{
+		private static string[] parameterNameCache;
+
+		private static string GetParameterName(IDB db, int num)
+		{
+			var cache = parameterNameCache;
+			if (cache == null)
+			{
+				cache = new string[8];
+				for (int i = 0; i < cache.Length; i++) cache[i] = db.CommandBuilder.ParameterPrefix + "P" + i.ToString();
+				parameterNameCache = cache;
+			}
+			if (num >= cache.Length) return db.CommandBuilder.ParameterPrefix + "P" + num.ToString();
+			return cache[num];
+		}
+
 		/// <summary>
 		/// Adds @P0, @P1, ... @Pn parameters to a given DB command with provided values.
 		/// Each subsequent call starts numbering parameters from where it stopped last time.
@@ -24,7 +39,7 @@ namespace Kosson.KORM
 			int i = command.Parameters.Count;
 			foreach (var value in values)
 			{
-				db.AddParameter(command, "@P" + i.ToString(), value);
+				db.AddParameter(command, GetParameterName(db, i), value);
 				i++;
 			}
 		}
@@ -51,7 +66,7 @@ namespace Kosson.KORM
 		{
 			var args = new string[command.ArgumentCount];
 			var vals = new object[command.ArgumentCount];
-			for (int i = 0; i < args.Length; i++) args[i] = "@P" + i;
+			for (int i = 0; i < args.Length; i++) args[i] = GetParameterName(db, i);
 			for (int i = 0; i < vals.Length; i++) vals[i] = command.GetArgument(i);
 			var sql = String.Format(command.Format, args);
 			return executor(db, sql, vals);

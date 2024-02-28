@@ -76,18 +76,24 @@ namespace Kosson.KORM.ORM
 			}
 		}
 
-		protected TraceToken LogStart([CallerMemberName] string method = "", string args = "")
+		private string LogFormatDesc(TraceToken token)
+		{
+			var ormcommand = GetType().Name;
+			ormcommand = ormcommand.Substring(5, ormcommand.IndexOf('`') - 5);
+			var desc = ormcommand + "\t" + typeof(TRecord).Name + (token.command == null ? "" : "\t" + token.command.ToStringForLog());
+			return desc;
+		}
+
+		protected TraceToken LogStart([CallerMemberName] string method = "", IDBSelect dbcommand = null)
 		{
 			if (operationLogger == null) return default;
 			if (!operationLogger.IsEnabled(LogLevel.Warning)) return default;
-			var command = GetType().Name;
-			command = command.Substring(5, command.IndexOf('`') - 5);
 			int id = Interlocked.Increment(ref nextTraceId);
 			TraceToken token = new TraceToken();
 			token.id = new EventId(id);
 			token.start = opStopwatch.ElapsedMilliseconds;
-			token.desc = command + "\t" + typeof(TRecord).Name + (String.IsNullOrEmpty(args) ? "" : "\t" + args);
-			if (operationLogger.IsEnabled(LogLevel.Debug)) operationLogger.LogDebug(token.id, $"{token.desc}");
+			token.command = dbcommand;
+			if (operationLogger.IsEnabled(LogLevel.Debug)) operationLogger.LogDebug(token.id, $"{LogFormatDesc(token)}");
 			return token;
 		}
 
@@ -98,11 +104,11 @@ namespace Kosson.KORM.ORM
 			var time = opStopwatch.ElapsedMilliseconds - token.start;
 			if (time >= 1000)
 			{
-				operationLogger.LogWarning(token.id, $"{token.desc}\t{time} ms\t{result}");
+				if (operationLogger.IsEnabled(LogLevel.Warning)) operationLogger.LogWarning(token.id, $"{LogFormatDesc(token)}\t{time} ms\t{result}");
 			}
 			else
 			{
-				operationLogger.LogInformation(token.id, $"{token.desc}\t{time} ms\t{result}");
+				if (operationLogger.IsEnabled(LogLevel.Information)) operationLogger.LogInformation(token.id, $"{LogFormatDesc(token)}\t{time} ms\t{result}");
 			}
 		}
 
@@ -111,11 +117,12 @@ namespace Kosson.KORM.ORM
 			if (operationLogger == null) return;
 			if (token.id == 0) return;
 			if (!operationLogger.IsEnabled(LogLevel.Debug)) return;
-			operationLogger.LogDebug(token.id, $"{token.desc}\t{sql}");
+			var desc = LogFormatDesc(token);
+			operationLogger.LogDebug(token.id, $"{desc}\t{sql}");
 			var i = 0;
 			foreach (var parameter in parameters)
 			{
-				operationLogger.LogDebug(token.id, $"{token.desc}\t@P{i}\t{parameter}");
+				operationLogger.LogDebug(token.id, $"{desc}\t@P{i}\t{parameter}");
 				i++;
 			}
 		}
@@ -125,7 +132,7 @@ namespace Kosson.KORM.ORM
 			if (recordLogger == null) return;
 			if (token.id == 0) return;
 			if (!recordLogger.IsEnabled(level)) return;
-			recordLogger.Log(level, token.id, $"{token.desc}\t{(record.Ref().IsNull ? "" : record.Ref() + "\t")}{record.ToStringByFields(meta)}");
+			recordLogger.Log(level, token.id, $"{LogFormatDesc(token)}\t{(record.Ref().IsNull ? "" : record.Ref() + "\t")}{record.ToStringByFields(meta)}");
 		}
 
 		protected void LogID(TraceToken token, TRecord record)
@@ -133,14 +140,14 @@ namespace Kosson.KORM.ORM
 			if (recordLogger == null) return;
 			if (token.id == 0) return;
 			if (!recordLogger.IsEnabled(LogLevel.Information)) return;
-			recordLogger.Log(LogLevel.Information, token.id, $"{token.desc}\t{record.Ref()}");
+			recordLogger.Log(LogLevel.Information, token.id, $"{LogFormatDesc(token)}\t{record.Ref()}");
 		}
 
 		protected struct TraceToken
 		{
 			public EventId id;
 			public long start;
-			public string desc;
+			public IDBSelect command;
 		}
 	}
 
