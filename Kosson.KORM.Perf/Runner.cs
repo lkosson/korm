@@ -5,7 +5,7 @@ namespace Kosson.KORM.Perf;
 class Runner(IDB db, IORM orm)
 {
 	private const int REP = 100;
-	private const int BLOCK = 1000;
+	private const int BLOCK = 100;
 
 	public void Run()
 	{
@@ -15,6 +15,10 @@ class Runner(IDB db, IORM orm)
 		FilledInsertTest();
 		OneByOneInsertTest();
 		BulkInsertTest();
+		OneByOneUpdateTest();
+		BulkUpdateTest();
+		OneByOneDeleteTest();
+		BulkDeleteTest();
 		BeginCommitTest();
 		GetAllTest();
 		GetFirstTest();
@@ -91,8 +95,7 @@ class Runner(IDB db, IORM orm)
 		{
 			var records = Enumerable.Range(0, BLOCK).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = n }).ToList();
 			sw.Start();
-			foreach (var record in records)
-			orm.Store(record);
+			foreach (var record in records) orm.Store(record);
 			sw.Stop();
 			orm.Delete<TestTable>().Execute();
 		}
@@ -109,6 +112,76 @@ class Runner(IDB db, IORM orm)
 			var records = Enumerable.Range(0, BLOCK).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = n }).ToList();
 			sw.Start();
 			orm.StoreAll(records);
+			sw.Stop();
+			orm.Delete<TestTable>().Execute();
+		}
+		db.Rollback();
+		Report(sw);
+	}
+
+	private void OneByOneUpdateTest()
+	{
+		db.BeginTransaction();
+		var sw = new StatStopwatch();
+		for (int i = 0; i < REP; i++)
+		{
+			var records = Enumerable.Range(0, BLOCK).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = n }).ToList();
+			orm.StoreAll(records);
+			foreach (var record in records) record.IntValue = -record.IntValue;
+			sw.Start();
+			foreach (var record in records) orm.Store(record);
+			sw.Stop();
+			orm.Delete<TestTable>().Execute();
+		}
+		db.Rollback();
+		Report(sw);
+	}
+
+	private void BulkUpdateTest()
+	{
+		db.BeginTransaction();
+		var sw = new StatStopwatch();
+		for (int i = 0; i < REP; i++)
+		{
+			var records = Enumerable.Range(0, BLOCK).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = n }).ToList();
+			orm.StoreAll(records);
+			foreach (var record in records) record.IntValue = -record.IntValue;
+			sw.Start();
+			orm.StoreAll(records);
+			sw.Stop();
+			orm.Delete<TestTable>().Execute();
+		}
+		db.Rollback();
+		Report(sw);
+	}
+
+	private void OneByOneDeleteTest()
+	{
+		db.BeginTransaction();
+		var sw = new StatStopwatch();
+		for (int i = 0; i < REP; i++)
+		{
+			var records = Enumerable.Range(0, BLOCK).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = n }).ToList();
+			orm.StoreAll(records);
+			sw.Start();
+			foreach (var record in records) orm.Delete(record);
+			sw.Stop();
+			orm.Delete<TestTable>().Execute();
+		}
+		db.Rollback();
+		Report(sw);
+	}
+
+	private void BulkDeleteTest()
+	{
+		db.BeginTransaction();
+		var sw = new StatStopwatch();
+		for (int i = 0; i < REP; i++)
+		{
+			var records = Enumerable.Range(0, BLOCK).Select(n => new TestTable { DateValue = DateTime.Now, StringValue = Environment.TickCount64.ToString(), IntValue = n }).ToList();
+			orm.StoreAll(records);
+			sw.Start();
+			orm.DeleteAll(records);
 			sw.Stop();
 			orm.Delete<TestTable>().Execute();
 		}
