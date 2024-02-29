@@ -10,12 +10,14 @@ namespace Kosson.KORM.ORM
 	{
 		private const string ROWVERSION_CURRENT = "ROWVERSION_CURRENT";
 		protected override bool UseFullFieldNames { get { return false; } }
-		private string commandText;
+		private bool useCachedCommandText;
+		private static string cachedCommandText;
 
 		public DBORMUpdate(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
-			commandText = command.ToString();
+			cachedCommandText ??= command.ToString();
+			useCachedCommandText = true;
 			var cb = db.CommandBuilder;
 			command = cb.Update();
 			command.Table(cb.Identifier(meta.DBSchema, meta.DBName));
@@ -57,24 +59,28 @@ namespace Kosson.KORM.ORM
 
 		public IORMUpdate<TRecord> Set(IDBIdentifier field, IDBExpression value)
 		{
+			useCachedCommandText = false;
 			command.Set(field, value);
 			return this;
 		}
 
 		public IORMUpdate<TRecord> Where(IDBExpression expression)
 		{
+			useCachedCommandText = false;
 			command.Where(expression);
 			return this;
 		}
 
 		public IORMUpdate<TRecord> Or()
 		{
+			useCachedCommandText = false;
 			command.StartWhereGroup();
 			return this;
 		}
 
 		public IORMUpdate<TRecord> Tag(IDBComment comment)
 		{
+			useCachedCommandText = false;
 			command.Tag(comment);
 			return this;
 		}
@@ -100,7 +106,7 @@ namespace Kosson.KORM.ORM
 		public int Records(IEnumerable<TRecord> records)
 		{
 			var token = LogStart();
-			using (var cmdUpdate = DB.CreateCommand(commandText))
+			using (var cmdUpdate = DB.CreateCommand(useCachedCommandText ? cachedCommandText : command.ToString()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -142,7 +148,7 @@ namespace Kosson.KORM.ORM
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
 			var token = LogStart();
-			using (var cmdUpdate = DB.CreateCommand(commandText))
+			using (var cmdUpdate = DB.CreateCommand(useCachedCommandText ? cachedCommandText : command.ToString()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -173,7 +179,7 @@ namespace Kosson.KORM.ORM
 
 		public override string ToString()
 		{
-			return command.ToString();
+			return useCachedCommandText ? cachedCommandText : command.ToString();
 		}
 	}
 }

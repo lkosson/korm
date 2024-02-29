@@ -9,11 +9,15 @@ namespace Kosson.KORM.ORM
 {
 	class DBORMDelete<TRecord> : DBORMCommandBase<TRecord, IDBDelete>, IORMDelete<TRecord> where TRecord : IRecord
 	{
+		private bool useCachedCommandText;
+		private static string cachedCommandText;
+		
 		protected override bool UseFullFieldNames { get { return false; } }
 
 		public DBORMDelete(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
+			useCachedCommandText = true;
 		}
 
 		protected override IDBDelete BuildCommand(IDBCommandBuilder cb)
@@ -25,18 +29,21 @@ namespace Kosson.KORM.ORM
 
 		public IORMDelete<TRecord> Where(IDBExpression expression)
 		{
+			useCachedCommandText = false;
 			command.Where(expression);
 			return this;
 		}
 
 		public IORMDelete<TRecord> Or()
 		{
+			useCachedCommandText = false;
 			command.StartWhereGroup();
 			return this;
 		}
 
 		public IORMDelete<TRecord> Tag(IDBComment comment)
 		{
+			useCachedCommandText = false;
 			command.Tag(comment);
 			return this;
 		}
@@ -57,10 +64,16 @@ namespace Kosson.KORM.ORM
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
 			var cb = DB.CommandBuilder;
-			command.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
-			if (rowVersionField != null) command.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
+			var commandText = useCachedCommandText ? cachedCommandText : null;
+			if (commandText == null)
+			{
+				command.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
+				if (rowVersionField != null) command.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
+				commandText = command.ToString();
+				if (useCachedCommandText) cachedCommandText = commandText;
+			}
 
-			using (var cmdDelete = DB.CreateCommand(command.ToString()))
+			using (var cmdDelete = DB.CreateCommand(commandText))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -101,15 +114,20 @@ namespace Kosson.KORM.ORM
 
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
-			var sw = Stopwatch.StartNew();
 			var token = LogStart();
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
 			var cb = DB.CommandBuilder;
-			command.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
-			if (rowVersionField != null) command.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
+			var commandText = useCachedCommandText ? cachedCommandText : null;
+			if (commandText == null)
+			{
+				command.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
+				if (rowVersionField != null) command.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
+				commandText = command.ToString();
+				if (useCachedCommandText) cachedCommandText = commandText;
+			}
 
-			using (var cmdDelete = DB.CreateCommand(command.ToString()))
+			using (var cmdDelete = DB.CreateCommand(commandText))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -140,7 +158,7 @@ namespace Kosson.KORM.ORM
 
 		public override string ToString()
 		{
-			return command.ToString();
+			return useCachedCommandText ? cachedCommandText : command.ToString();
 		}
 	}
 }

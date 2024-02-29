@@ -11,11 +11,15 @@ namespace Kosson.KORM.ORM
 	class DBORMInsert<TRecord> : DBORMCommandBase<TRecord, IDBInsert>, IORMInsert<TRecord> where TRecord : IRecord
 	{
 		private IConverter converter;
+		private bool useCachedCommandText;
+		private static string cachedCommandText;
 
 		public DBORMInsert(IDB db, IMetaBuilder metaBuilder, IConverter converter, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
 			this.converter = converter;
+			cachedCommandText ??= command.ToString();
+			useCachedCommandText = true;
 		}
 
 		protected override IDBInsert BuildCommand(IDBCommandBuilder cb)
@@ -48,12 +52,14 @@ namespace Kosson.KORM.ORM
 
 		public IORMInsert<TRecord> Tag(IDBComment comment)
 		{
+			useCachedCommandText = false;
 			command.Tag(comment);
 			return this;
 		}
 
 		public IORMInsert<TRecord> WithProvidedID()
 		{
+			useCachedCommandText = false;
 			var cb = DB.CommandBuilder;
 			var pk = meta.PrimaryKey;
 			command.PrimaryKeyInsert(cb.Identifier(pk.DBName), cb.Parameter(pk.DBName));
@@ -65,7 +71,7 @@ namespace Kosson.KORM.ORM
 			var token = LogStart();
 			var getlastid = command.GetLastID;
 			var manualid = meta.IsManualID;
-			using (var cmdInsert = DB.CreateCommand(command.ToString()))
+			using (var cmdInsert = DB.CreateCommand(useCachedCommandText ? cachedCommandText : command.ToString()))
 			using (var cmdGetLastID = getlastid == null ? null : DB.CreateCommand(getlastid))
 			{
 				int count = 0;
@@ -108,7 +114,7 @@ namespace Kosson.KORM.ORM
 			var token = LogStart();
 			var getlastid = command.GetLastID;
 			var manualid = meta.IsManualID;
-			using (var cmdInsert = DB.CreateCommand(command.ToString()))
+			using (var cmdInsert = DB.CreateCommand(useCachedCommandText ? cachedCommandText : command.ToString()))
 			using (var cmdGetLastID = getlastid == null ? null : DB.CreateCommand(getlastid))
 			{
 				int count = 0;
@@ -140,7 +146,7 @@ namespace Kosson.KORM.ORM
 
 		public override string ToString()
 		{
-			return command.ToString();
+			return useCachedCommandText ? cachedCommandText : command.ToString();
 		}
 	}
 }
