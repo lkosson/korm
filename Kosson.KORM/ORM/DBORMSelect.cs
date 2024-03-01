@@ -91,7 +91,7 @@ namespace Kosson.KORM.ORM
 
 		public IReadOnlyCollection<TRecord> Execute()
 		{
-			var token = LogStart(dbcommand: command);
+			var token = LogStart(dbcommand: Command);
 			using (var reader = ExecuteReaderNoLog())
 			{
 				var result = new List<TRecord>();
@@ -108,7 +108,7 @@ namespace Kosson.KORM.ORM
 
 		public async Task<IReadOnlyCollection<TRecord>> ExecuteAsync()
 		{
-			var token = LogStart(dbcommand: command);
+			var token = LogStart(dbcommand: Command);
 			using (var reader = await ExecuteReaderAsyncNoLog())
 			{
 				var result = new List<TRecord>();
@@ -125,7 +125,7 @@ namespace Kosson.KORM.ORM
 
 		public IORMReader<TRecord> ExecuteReader()
 		{
-			var token = LogStart(dbcommand: command);
+			var token = LogStart(dbcommand: Command);
 			var reader = ExecuteReaderNoLog();
 			LogEnd(token);
 			return reader;
@@ -133,7 +133,7 @@ namespace Kosson.KORM.ORM
 
 		private IORMReader<TRecord> ExecuteReaderNoLog()
 		{
-			var sql = command.ToString();
+			var sql = Command.ToString();
 			var reader = new DBORMReader<TRecord>(DB, factory, converter, loaderFromReader, sql, Parameters);
 			reader.PrepareReader();
 			return reader;
@@ -141,7 +141,7 @@ namespace Kosson.KORM.ORM
 
 		public async Task<IORMReader<TRecord>> ExecuteReaderAsync()
 		{
-			var token = LogStart(dbcommand: command);
+			var token = LogStart(dbcommand: Command);
 			var reader = await ExecuteReaderAsyncNoLog();
 			LogEnd(token);
 			return reader;
@@ -149,7 +149,7 @@ namespace Kosson.KORM.ORM
 
 		private async Task<IORMReader<TRecord>> ExecuteReaderAsyncNoLog()
 		{
-			var sql = command.ToString();
+			var sql = Command.ToString();
 			var reader = new DBORMReader<TRecord>(DB, factory, converter, loaderFromReader, sql, Parameters);
 			await reader.PrepareReaderAsync();
 			return reader;
@@ -157,37 +157,37 @@ namespace Kosson.KORM.ORM
 
 		public IORMSelect<TRecord> ForUpdate()
 		{
-			command.ForUpdate();
+			Command.ForUpdate();
 			return this;
 		}
 
 		public IORMSelect<TRecord> Limit(int limit)
 		{
-			command.Limit(limit);
+			Command.Limit(limit);
 			return this;
 		}
 
 		public IORMSelect<TRecord> Where(IDBExpression expression)
 		{
-			command.Where(expression);
+			Command.Where(expression);
 			return this;
 		}
 
 		public IORMSelect<TRecord> Or()
 		{
-			command.StartWhereGroup();
+			Command.StartWhereGroup();
 			return this;
 		}
 
 		public IORMSelect<TRecord> OrderBy(IDBExpression field, bool descending = false)
 		{
-			command.OrderBy(field, descending);
+			Command.OrderBy(field, descending);
 			return this;
 		}
 
 		public IORMSelect<TRecord> Tag(IDBComment comment)
 		{
-			command.Tag(comment);
+			Command.Tag(comment);
 			return this;
 		}
 
@@ -223,13 +223,13 @@ namespace Kosson.KORM.ORM
 				}
 			}
 			else throw new InvalidOperationException("Expected \"record => new { record.Property, ... }\" or \"record => record.Property\" expression.");
-			command.RemoveColumns(alias => !columnAliases.Contains(alias) && !columnPrefixes.Any(prefix => alias.StartsWith(prefix)));
+			Command.RemoveColumns(alias => !columnAliases.Contains(alias) && !columnPrefixes.Any(prefix => alias.StartsWith(prefix)));
 			return new DBORMSelectAnonymous<TRecord, TResult>(this, selectorExpression);
 		}
 
 		public override string ToString()
 		{
-			return command.ToString();
+			return Command.ToString();
 		}
 	}
 }

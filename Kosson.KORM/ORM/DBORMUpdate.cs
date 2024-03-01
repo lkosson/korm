@@ -16,18 +16,19 @@ namespace Kosson.KORM.ORM
 		public DBORMUpdate(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
-			cachedCommandText ??= command.ToString();
+			if (cachedCommandText == null)
+			{
+				var cachedCommand = Command.Clone();
+				PrepareTemplate(db.CommandBuilder, cachedCommand, meta);
+				cachedCommandText = cachedCommand.ToString();
+			}
 			useCachedCommandText = true;
-			var cb = db.CommandBuilder;
-			command = cb.Update();
-			command.Table(cb.Identifier(meta.DBSchema, meta.DBName));
 		}
 
 		protected override IDBUpdate BuildCommand(IDBCommandBuilder cb)
 		{
 			var template = cb.Update();
 			template.Table(cb.Identifier(meta.DBSchema, meta.DBName));
-			PrepareTemplate(cb, template, meta);
 			return template;
 		}
 
@@ -60,35 +61,35 @@ namespace Kosson.KORM.ORM
 		public IORMUpdate<TRecord> Set(IDBIdentifier field, IDBExpression value)
 		{
 			useCachedCommandText = false;
-			command.Set(field, value);
+			Command.Set(field, value);
 			return this;
 		}
 
 		public IORMUpdate<TRecord> Where(IDBExpression expression)
 		{
 			useCachedCommandText = false;
-			command.Where(expression);
+			Command.Where(expression);
 			return this;
 		}
 
 		public IORMUpdate<TRecord> Or()
 		{
 			useCachedCommandText = false;
-			command.StartWhereGroup();
+			Command.StartWhereGroup();
 			return this;
 		}
 
 		public IORMUpdate<TRecord> Tag(IDBComment comment)
 		{
 			useCachedCommandText = false;
-			command.Tag(comment);
+			Command.Tag(comment);
 			return this;
 		}
 
 		public int Execute()
 		{
 			var token = LogStart();
-			var sql = command.ToString();
+			var sql = Command.ToString();
 			LogRaw(token, sql, Parameters);
 			var result = DB.ExecuteNonQueryRaw(sql, Parameters);
 			LogEnd(token, result);
@@ -106,7 +107,7 @@ namespace Kosson.KORM.ORM
 		public int Records(IEnumerable<TRecord> records)
 		{
 			var token = LogStart();
-			using (var cmdUpdate = DB.CreateCommand(useCachedCommandText ? cachedCommandText : command.ToString()))
+			using (var cmdUpdate = DB.CreateCommand(useCachedCommandText ? cachedCommandText : Command.ToString()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -138,7 +139,7 @@ namespace Kosson.KORM.ORM
 		public async Task<int> ExecuteAsync()
 		{
 			var token = LogStart();
-			var sql = command.ToString();
+			var sql = Command.ToString();
 			LogRaw(token, sql, Parameters);
 			var result = await DB.ExecuteNonQueryRawAsync(sql, Parameters);
 			LogEnd(token, result);
@@ -148,7 +149,7 @@ namespace Kosson.KORM.ORM
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
 			var token = LogStart();
-			using (var cmdUpdate = DB.CreateCommand(useCachedCommandText ? cachedCommandText : command.ToString()))
+			using (var cmdUpdate = DB.CreateCommand(useCachedCommandText ? cachedCommandText : Command.ToString()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -179,7 +180,7 @@ namespace Kosson.KORM.ORM
 
 		public override string ToString()
 		{
-			return useCachedCommandText ? cachedCommandText : command.ToString();
+			return useCachedCommandText ? cachedCommandText : Command.ToString();
 		}
 	}
 }

@@ -30,28 +30,28 @@ namespace Kosson.KORM.ORM
 		public IORMDelete<TRecord> Where(IDBExpression expression)
 		{
 			useCachedCommandText = false;
-			command.Where(expression);
+			Command.Where(expression);
 			return this;
 		}
 
 		public IORMDelete<TRecord> Or()
 		{
 			useCachedCommandText = false;
-			command.StartWhereGroup();
+			Command.StartWhereGroup();
 			return this;
 		}
 
 		public IORMDelete<TRecord> Tag(IDBComment comment)
 		{
 			useCachedCommandText = false;
-			command.Tag(comment);
+			Command.Tag(comment);
 			return this;
 		}
 
 		public int Execute()
 		{
 			var token = LogStart();
-			var sql = command.ToString();
+			var sql = Command.ToString();
 			LogRaw(token, sql, Parameters);
 			var result = DB.ExecuteNonQueryRaw(sql, Parameters);
 			LogEnd(token, result);
@@ -67,9 +67,9 @@ namespace Kosson.KORM.ORM
 			var commandText = useCachedCommandText ? cachedCommandText : null;
 			if (commandText == null)
 			{
-				command.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
-				if (rowVersionField != null) command.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
-				commandText = command.ToString();
+				Command.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
+				if (rowVersionField != null) Command.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
+				commandText = Command.ToString();
 				if (useCachedCommandText) cachedCommandText = commandText;
 			}
 
@@ -105,7 +105,7 @@ namespace Kosson.KORM.ORM
 		public async Task<int> ExecuteAsync()
 		{
 			var token = LogStart();
-			var sql = command.ToString();
+			var sql = Command.ToString();
 			LogRaw(token, sql, Parameters);
 			var result = await DB.ExecuteNonQueryRawAsync(sql, Parameters);
 			LogEnd(token, result);
@@ -121,9 +121,9 @@ namespace Kosson.KORM.ORM
 			var commandText = useCachedCommandText ? cachedCommandText : null;
 			if (commandText == null)
 			{
-				command.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
-				if (rowVersionField != null) command.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
-				commandText = command.ToString();
+				Command.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
+				if (rowVersionField != null) Command.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
+				commandText = Command.ToString();
 				if (useCachedCommandText) cachedCommandText = commandText;
 			}
 
@@ -158,7 +158,7 @@ namespace Kosson.KORM.ORM
 
 		public override string ToString()
 		{
-			return useCachedCommandText ? cachedCommandText : command.ToString();
+			return useCachedCommandText ? cachedCommandText : Command.ToString();
 		}
 	}
 }

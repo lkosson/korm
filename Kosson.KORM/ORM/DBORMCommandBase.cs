@@ -155,24 +155,33 @@ namespace Kosson.KORM.ORM
 		where TRecord : IRecord
 		where TCommand : IDBCommand<TCommand>
 	{
-		private static TCommand template;
+		protected static TCommand template;
 
-		protected TCommand command;
+		private TCommand command;
+		protected TCommand Command
+		{
+			get
+			{
+				if (command == null)
+				{
+					var cb = DB.CommandBuilder;
+					var localTemplate = template;
+					if (localTemplate == null || localTemplate.Builder != cb)
+					{
+						localTemplate = BuildCommand(cb);
+						template = localTemplate;
+					}
+					command = localTemplate.Clone();
+				}
+				return command;
+			}
+		}
 
 		protected abstract TCommand BuildCommand(IDBCommandBuilder cb);
 
 		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
-			var cb = db.CommandBuilder;
-
-			var localTemplate = template;
-			if (localTemplate == null || localTemplate.Builder != cb)
-			{
-				localTemplate = BuildCommand(cb);
-				template = localTemplate;
-			}
-			command = localTemplate.Clone();
 		}
 	}
 }
