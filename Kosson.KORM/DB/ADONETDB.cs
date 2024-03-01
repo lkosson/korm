@@ -56,7 +56,7 @@ namespace Kosson.KORM.DB
 		/// <summary>
 		/// Determines whether ADO.NET provider expects command preparation before execution.
 		/// </summary>
-		protected virtual bool PrepareCommands => true;
+		protected virtual bool PrepareCommands => false;
 
 		/// <summary>
 		/// Determines whether ADO.NET provider supports command cancelation.
