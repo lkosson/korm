@@ -77,7 +77,7 @@ namespace Kosson.KORM.Tests
 		{
 			var rr1 = new RecordRef<Record1>(MARKER);
 			var rr2 = new RecordRef<Record2>(MARKER);
-			Assert.AreNotEqual(rr1, rr2);
+			Assert.AreNotEqual<IRecordRef>(rr1, rr2);
 			Assert.AreEqual(rr1.ID, rr2.ID);
 			//shouldn't compile:
 			//Assert.IsFalse(rr1 == rr2);
@@ -89,8 +89,8 @@ namespace Kosson.KORM.Tests
 		{
 			var rrBase = new RecordRef<Record>(MARKER);
 			var rrDerived = new RecordRef<Record1>(MARKER);
-			Assert.AreEqual(rrBase, rrDerived);
-			Assert.AreEqual(rrDerived, rrBase);
+			Assert.AreEqual<IRecordRef>(rrBase, rrDerived);
+			Assert.AreEqual<IRecordRef>(rrDerived, rrBase);
 			//shouldn't compile:
 			//Assert.IsTrue(rrBase == rrDerived);
 			//Assert.IsFalse(rrBase != rrDerived);

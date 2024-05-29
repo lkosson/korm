@@ -50,7 +50,7 @@ namespace Kosson.KORM.Tests
 		{
 			var r1 = new Record1() { ID = 1 };
 			var r2 = new Record2() { ID = 1 };
-			Assert.AreNotEqual(r1, r2);
+			Assert.AreNotEqual<Record>(r1, r2);
 			Assert.IsFalse(r1 == r2);
 			Assert.IsTrue(r1 != r2);
 		}
