@@ -188,6 +188,13 @@ namespace Kosson.KORM
 			return true;
 		}
 
+		/// <summary>
+		/// Converts this RecordRef to same reference of a derived type.
+		/// </summary>
+		/// <typeparam name="TDerived">Derived record type</typeparam>
+		/// <returns>Converted record reference</returns>
+		public readonly RecordRef<TDerived> Convert<TDerived>() where TDerived : T => new RecordRef<TDerived>(ID);
+
 		#region IConvertible implementation
 		TypeCode IConvertible.GetTypeCode()
 		{
