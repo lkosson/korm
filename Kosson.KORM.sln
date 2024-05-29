@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kosson.KORM.SQLite", "Kosso
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kosson.KORM.PGSQL", "Kosson.KORM.PGSQL\Kosson.KORM.PGSQL.csproj", "{20649718-526C-4D04-91AF-5C3F9CB86DB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kosson.KORM.Perf", "Kosson.KORM.Perf\Kosson.KORM.Perf.csproj", "{99920D39-B1DC-40E7-B4B8-1BE31602FFFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kosson.KORM.Perf", "Kosson.KORM.Perf\Kosson.KORM.Perf.csproj", "{99920D39-B1DC-40E7-B4B8-1BE31602FFFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
