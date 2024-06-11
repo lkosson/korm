@@ -25,17 +25,8 @@ namespace Kosson.KORM.ORM
 				cachedCommandTextDBType = dbType;
 			}
 
-			if (cachedCommandText == null)
-			{
-				var cachedCommand = Command.Clone(); // BuildCommand does not provide any SET clauses - need to manually call PrepareTemplate for cached version
-				PrepareTemplate(db.CommandBuilder, cachedCommand, meta);
-				commandText = cachedCommand.ToString();
-				cachedCommandText = commandText;
-			}
-			else
-			{
-				commandText = cachedCommandText;
-			}
+			if (cachedCommandText == null) cachedCommandText = commandText = BuildCommandTextForRecords();
+			else commandText = cachedCommandText;
 		}
 
 		protected override IDBUpdate BuildCommand(IDBCommandBuilder cb)
@@ -69,6 +60,13 @@ namespace Kosson.KORM.ORM
 
 			var rvfield = meta.RowVersion;
 			if (rvfield != null) template.Where(cb.Equal(cb.Identifier(rvfield.DBName), cb.Parameter(ROWVERSION_CURRENT)));
+		}
+
+		private string BuildCommandTextForRecords()
+		{
+			var command = Command.Clone();
+			PrepareTemplate(DB.CommandBuilder, command, meta);
+			return command.ToString();
 		}
 
 		public IORMUpdate<TRecord> Set(IDBIdentifier field, IDBExpression value)
@@ -120,7 +118,8 @@ namespace Kosson.KORM.ORM
 		public int Records(IEnumerable<TRecord> records)
 		{
 			var token = LogStart();
-			using (var cmdUpdate = DB.CreateCommand(commandText ?? Command.ToString()))
+
+			using (var cmdUpdate = DB.CreateCommand(commandText ?? BuildCommandTextForRecords()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -162,7 +161,8 @@ namespace Kosson.KORM.ORM
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
 			var token = LogStart();
-			using (var cmdUpdate = DB.CreateCommand(commandText ?? Command.ToString()))
+
+			using (var cmdUpdate = DB.CreateCommand(commandText ?? BuildCommandTextForRecords()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;

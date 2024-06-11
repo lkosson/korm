@@ -26,15 +26,8 @@ namespace Kosson.KORM.ORM
 				cachedCommandTextDBType = dbType;
 			}
 
-			if (cachedCommandText == null)
-			{
-				commandText = Command.ToString(); // indirectly calls BuildCommand
-				cachedCommandText = commandText;
-			}
-			else
-			{
-				commandText = cachedCommandText;
-			}
+			if (cachedCommandText == null) cachedCommandText = commandText = Command.ToString();
+			else commandText = cachedCommandText;
 		}
 
 		protected override IDBInsert BuildCommand(IDBCommandBuilder cb)

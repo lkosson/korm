@@ -24,17 +24,8 @@ namespace Kosson.KORM.ORM
 				cachedCommandTextDBType = dbType;
 			}
 
-			if (cachedCommandText == null)
-			{
-				var cachedCommand = Command.Clone(); // BuildCommand provides a DELETE command without WHERE clause - need to manually call PrepareTemplate for record version
-				PrepareTemplate(db.CommandBuilder, cachedCommand, meta);
-				commandText = cachedCommand.ToString();
-				cachedCommandText = commandText;
-			}
-			else
-			{
-				commandText = cachedCommandText;
-			}
+			if (cachedCommandText == null) cachedCommandText = commandText = BuildCommandTextForRecords();
+			else commandText = cachedCommandText;
 		}
 
 		protected override IDBDelete BuildCommand(IDBCommandBuilder cb)
@@ -50,6 +41,13 @@ namespace Kosson.KORM.ORM
 			var rowVersionField = meta.RowVersion;
 			template.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
 			if (rowVersionField != null) template.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
+		}
+
+		private string BuildCommandTextForRecords()
+		{
+			var command = Command.Clone();
+			PrepareTemplate(DB.CommandBuilder, command, meta);
+			return command.ToString();
 		}
 
 		public IORMDelete<TRecord> Where(IDBExpression expression)
@@ -88,9 +86,8 @@ namespace Kosson.KORM.ORM
 			var token = LogStart();
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
-			var cb = DB.CommandBuilder;
 
-			using (var cmdDelete = DB.CreateCommand(commandText ?? Command.ToString()))
+			using (var cmdDelete = DB.CreateCommand(commandText ?? BuildCommandTextForRecords()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -134,9 +131,8 @@ namespace Kosson.KORM.ORM
 			var token = LogStart();
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
-			var cb = DB.CommandBuilder;
 
-			using (var cmdDelete = DB.CreateCommand(commandText ?? Command.ToString()))
+			using (var cmdDelete = DB.CreateCommand(commandText ?? BuildCommandTextForRecords()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;

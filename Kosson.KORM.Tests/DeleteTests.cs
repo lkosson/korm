@@ -83,5 +83,22 @@ namespace Kosson.KORM.Tests
 			record.ID = -1;
 			ORM.Delete(record);
 		}
+
+		[TestMethod]
+		public void TaggedDeleteDeletesProvidedRecord()
+		{
+			var records = new[]
+			{
+					new MainTestTable(),
+					new MainTestTable(),
+					new MainTestTable()
+			};
+			ORM.StoreAll(records);
+
+			var deleted = ORM.Delete<MainTestTable>().Tag("Tagged delete").Records(records.Take(1));
+			var remaining = ORM.Select<MainTestTable>().Execute();
+			Assert.AreEqual(1, deleted);
+			Assert.AreEqual(2, remaining.Count);
+		}
 	}
 }

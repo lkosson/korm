@@ -129,5 +129,24 @@ namespace Kosson.KORM.Tests
 			var retrieved = ORM.Select<MainTestTable>().ByID(record.ID);
 			Assert.AreEqual(INTMARKER, retrieved.ReadOnly);
 		}
+
+		[TestMethod]
+		public void TaggedUpdateUpdatesProvidedRecord()
+		{
+			var records = new[]
+			{
+					new MainTestTable(),
+					new MainTestTable(),
+					new MainTestTable()
+			};
+			ORM.StoreAll(records);
+
+			var forUpdate = records.Take(1);
+			foreach (var record in forUpdate) record.Value = INTMARKER;
+			var deleted = ORM.Update<MainTestTable>().Tag("Tagged update").Records(forUpdate);
+			var retrieved = ORM.Select<MainTestTable>().Execute();
+			Assert.AreEqual(1, retrieved.Count(e => e.Value == INTMARKER));
+			Assert.AreEqual(2, retrieved.Count(e => e.Value != INTMARKER));
+		}
 	}
 }
