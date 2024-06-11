@@ -11,15 +11,30 @@ namespace Kosson.KORM.ORM
 	class DBORMInsert<TRecord> : DBORMCommandBase<TRecord, IDBInsert>, IORMInsert<TRecord> where TRecord : IRecord
 	{
 		private IConverter converter;
-		private bool useCachedCommandText;
+		private string commandText;
 		private static string cachedCommandText;
+		private static Type cachedCommandTextDBType;
 
 		public DBORMInsert(IDB db, IMetaBuilder metaBuilder, IConverter converter, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
 			this.converter = converter;
-			cachedCommandText ??= Command.ToString();
-			useCachedCommandText = true;
+			var dbType = db.GetType();
+			if (cachedCommandTextDBType != dbType)
+			{
+				cachedCommandText = null;
+				cachedCommandTextDBType = dbType;
+			}
+
+			if (cachedCommandText == null)
+			{
+				commandText = Command.ToString(); // indirectly calls BuildCommand
+				cachedCommandText = commandText;
+			}
+			else
+			{
+				commandText = cachedCommandText;
+			}
 		}
 
 		protected override IDBInsert BuildCommand(IDBCommandBuilder cb)
@@ -52,14 +67,14 @@ namespace Kosson.KORM.ORM
 
 		public IORMInsert<TRecord> Tag(IDBComment comment)
 		{
-			useCachedCommandText = false;
+			commandText = null;
 			Command.Tag(comment);
 			return this;
 		}
 
 		public IORMInsert<TRecord> WithProvidedID()
 		{
-			useCachedCommandText = false;
+			commandText = null;
 			var cb = DB.CommandBuilder;
 			var pk = meta.PrimaryKey;
 			Command.PrimaryKeyInsert(cb.Identifier(pk.DBName), cb.Parameter(pk.DBName));
@@ -71,7 +86,7 @@ namespace Kosson.KORM.ORM
 			var token = LogStart();
 			var getlastid = template.GetLastID;
 			var manualid = meta.IsManualID;
-			using (var cmdInsert = DB.CreateCommand(useCachedCommandText ? cachedCommandText : Command.ToString()))
+			using (var cmdInsert = DB.CreateCommand(commandText ?? Command.ToString()))
 			using (var cmdGetLastID = getlastid == null ? null : DB.CreateCommand(getlastid))
 			{
 				int count = 0;
@@ -114,7 +129,7 @@ namespace Kosson.KORM.ORM
 			var token = LogStart();
 			var getlastid = template.GetLastID;
 			var manualid = meta.IsManualID;
-			using (var cmdInsert = DB.CreateCommand(useCachedCommandText ? cachedCommandText : Command.ToString()))
+			using (var cmdInsert = DB.CreateCommand(commandText ?? Command.ToString()))
 			using (var cmdGetLastID = getlastid == null ? null : DB.CreateCommand(getlastid))
 			{
 				int count = 0;
@@ -146,7 +161,7 @@ namespace Kosson.KORM.ORM
 
 		public override string ToString()
 		{
-			return useCachedCommandText ? cachedCommandText : Command.ToString();
+			return commandText ?? Command.ToString();
 		}
 	}
 }

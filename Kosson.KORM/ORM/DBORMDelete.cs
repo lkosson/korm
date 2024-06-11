@@ -9,15 +9,32 @@ namespace Kosson.KORM.ORM
 {
 	class DBORMDelete<TRecord> : DBORMCommandBase<TRecord, IDBDelete>, IORMDelete<TRecord> where TRecord : IRecord
 	{
-		private bool useCachedCommandText;
-		private static string cachedCommandText;
-		
 		protected override bool UseFullFieldNames { get { return false; } }
+		private string commandText;
+		private static string cachedCommandText;
+		private static Type cachedCommandTextDBType;
 
 		public DBORMDelete(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
-			useCachedCommandText = true;
+			var dbType = db.GetType();
+			if (cachedCommandTextDBType != dbType)
+			{
+				cachedCommandText = null;
+				cachedCommandTextDBType = dbType;
+			}
+
+			if (cachedCommandText == null)
+			{
+				var cachedCommand = Command.Clone(); // BuildCommand provides a DELETE command without WHERE clause - need to manually call PrepareTemplate for record version
+				PrepareTemplate(db.CommandBuilder, cachedCommand, meta);
+				commandText = cachedCommand.ToString();
+				cachedCommandText = commandText;
+			}
+			else
+			{
+				commandText = cachedCommandText;
+			}
 		}
 
 		protected override IDBDelete BuildCommand(IDBCommandBuilder cb)
@@ -27,23 +44,31 @@ namespace Kosson.KORM.ORM
 			return template;
 		}
 
+		private static void PrepareTemplate(IDBCommandBuilder cb, IDBDelete template, IMetaRecord meta)
+		{
+			var idfield = meta.PrimaryKey.DBName;
+			var rowVersionField = meta.RowVersion;
+			template.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
+			if (rowVersionField != null) template.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
+		}
+
 		public IORMDelete<TRecord> Where(IDBExpression expression)
 		{
-			useCachedCommandText = false;
+			commandText = null;
 			Command.Where(expression);
 			return this;
 		}
 
 		public IORMDelete<TRecord> Or()
 		{
-			useCachedCommandText = false;
+			commandText = null;
 			Command.StartWhereGroup();
 			return this;
 		}
 
 		public IORMDelete<TRecord> Tag(IDBComment comment)
 		{
-			useCachedCommandText = false;
+			commandText = null;
 			Command.Tag(comment);
 			return this;
 		}
@@ -64,16 +89,8 @@ namespace Kosson.KORM.ORM
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
 			var cb = DB.CommandBuilder;
-			var commandText = useCachedCommandText ? cachedCommandText : null;
-			if (commandText == null)
-			{
-				Command.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
-				if (rowVersionField != null) Command.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
-				commandText = Command.ToString();
-				if (useCachedCommandText) cachedCommandText = commandText;
-			}
 
-			using (var cmdDelete = DB.CreateCommand(commandText))
+			using (var cmdDelete = DB.CreateCommand(commandText ?? Command.ToString()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -118,16 +135,8 @@ namespace Kosson.KORM.ORM
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
 			var cb = DB.CommandBuilder;
-			var commandText = useCachedCommandText ? cachedCommandText : null;
-			if (commandText == null)
-			{
-				Command.Where(cb.Equal(cb.Identifier(idfield), cb.Parameter(idfield)));
-				if (rowVersionField != null) Command.Where(cb.Equal(cb.Identifier(rowVersionField.DBName), cb.Parameter(rowVersionField.DBName)));
-				commandText = Command.ToString();
-				if (useCachedCommandText) cachedCommandText = commandText;
-			}
 
-			using (var cmdDelete = DB.CreateCommand(commandText))
+			using (var cmdDelete = DB.CreateCommand(commandText ?? Command.ToString()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -158,7 +167,7 @@ namespace Kosson.KORM.ORM
 
 		public override string ToString()
 		{
-			return useCachedCommandText ? cachedCommandText : Command.ToString();
+			return commandText ?? Command.ToString();
 		}
 	}
 }

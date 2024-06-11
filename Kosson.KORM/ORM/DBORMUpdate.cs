@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
@@ -10,19 +11,31 @@ namespace Kosson.KORM.ORM
 	{
 		private const string ROWVERSION_CURRENT = "ROWVERSION_CURRENT";
 		protected override bool UseFullFieldNames { get { return false; } }
-		private bool useCachedCommandText;
+		private string commandText;
 		private static string cachedCommandText;
+		private static Type cachedCommandTextDBType;
 
 		public DBORMUpdate(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
+			var dbType = db.GetType();
+			if (cachedCommandTextDBType != dbType)
+			{
+				cachedCommandText = null;
+				cachedCommandTextDBType = dbType;
+			}
+
 			if (cachedCommandText == null)
 			{
-				var cachedCommand = Command.Clone();
+				var cachedCommand = Command.Clone(); // BuildCommand does not provide any SET clauses - need to manually call PrepareTemplate for cached version
 				PrepareTemplate(db.CommandBuilder, cachedCommand, meta);
-				cachedCommandText = cachedCommand.ToString();
+				commandText = cachedCommand.ToString();
+				cachedCommandText = commandText;
 			}
-			useCachedCommandText = true;
+			else
+			{
+				commandText = cachedCommandText;
+			}
 		}
 
 		protected override IDBUpdate BuildCommand(IDBCommandBuilder cb)
@@ -60,28 +73,28 @@ namespace Kosson.KORM.ORM
 
 		public IORMUpdate<TRecord> Set(IDBIdentifier field, IDBExpression value)
 		{
-			useCachedCommandText = false;
+			commandText = null;
 			Command.Set(field, value);
 			return this;
 		}
 
 		public IORMUpdate<TRecord> Where(IDBExpression expression)
 		{
-			useCachedCommandText = false;
+			commandText = null;
 			Command.Where(expression);
 			return this;
 		}
 
 		public IORMUpdate<TRecord> Or()
 		{
-			useCachedCommandText = false;
+			commandText = null;
 			Command.StartWhereGroup();
 			return this;
 		}
 
 		public IORMUpdate<TRecord> Tag(IDBComment comment)
 		{
-			useCachedCommandText = false;
+			commandText = null;
 			Command.Tag(comment);
 			return this;
 		}
@@ -107,7 +120,7 @@ namespace Kosson.KORM.ORM
 		public int Records(IEnumerable<TRecord> records)
 		{
 			var token = LogStart();
-			using (var cmdUpdate = DB.CreateCommand(useCachedCommandText ? cachedCommandText : Command.ToString()))
+			using (var cmdUpdate = DB.CreateCommand(commandText ?? Command.ToString()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -149,7 +162,7 @@ namespace Kosson.KORM.ORM
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
 			var token = LogStart();
-			using (var cmdUpdate = DB.CreateCommand(useCachedCommandText ? cachedCommandText : Command.ToString()))
+			using (var cmdUpdate = DB.CreateCommand(commandText ?? Command.ToString()))
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
@@ -180,7 +193,7 @@ namespace Kosson.KORM.ORM
 
 		public override string ToString()
 		{
-			return useCachedCommandText ? cachedCommandText : Command.ToString();
+			return commandText ?? Command.ToString();
 		}
 	}
 }
