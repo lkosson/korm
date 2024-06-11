@@ -155,6 +155,58 @@ namespace Kosson.KORM.ORM
 			return reader;
 		}
 
+		public int ExecuteCount()
+		{
+			var countCommand = Command.Clone();
+			countCommand.ForCount();
+			var sql = countCommand.ToString();
+			var token = LogStart(sql);
+			using var dbcommand = DB.CreateCommand(sql);
+			DB.AddParameters(dbcommand, Parameters);
+			using var dbreader = DB.ExecuteReader(dbcommand);
+			try
+			{
+				if (!dbreader.Read()) return 0;
+				var count = dbreader.GetInt32(0);
+				return count;
+			}
+			catch (Exception exc)
+			{
+				if (DB is Kosson.KORM.DB.ADONETDB adonetdb) adonetdb.HandleException(exc, dbcommand, default);
+			}
+			finally
+			{
+				LogEnd(token);
+			}
+			return 0;
+		}
+
+		public async Task<int> ExecuteCountAsync()
+		{
+			var countCommand = Command.Clone();
+			countCommand.ForCount();
+			var sql = countCommand.ToString();
+			var token = LogStart(sql);
+			using var dbcommand = DB.CreateCommand(sql);
+			DB.AddParameters(dbcommand, Parameters);
+			using var dbreader = await DB.ExecuteReaderAsync(dbcommand);
+			try
+			{
+				if (!await dbreader.ReadAsync()) return 0;
+				var count = dbreader.GetInt32(0);
+				return count;
+			}
+			catch (Exception exc)
+			{
+				if (DB is Kosson.KORM.DB.ADONETDB adonetdb) adonetdb.HandleException(exc, dbcommand, default);
+			}
+			finally
+			{
+				LogEnd(token);
+			}
+			return 0;
+		}
+
 		public IORMSelect<TRecord> ForUpdate()
 		{
 			Command.ForUpdate();

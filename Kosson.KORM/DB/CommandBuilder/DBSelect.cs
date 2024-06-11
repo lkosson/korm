@@ -14,6 +14,11 @@ namespace Kosson.KORM.DB.CommandBuilder
 		protected bool forUpdate;
 
 		/// <summary>
+		/// SELECT COUNT(*) query type specifier.
+		/// </summary>
+		protected bool forCount;
+
+		/// <summary>
 		/// LIMIT clause value.
 		/// </summary>
 		protected int limit;
@@ -70,6 +75,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 			: base(template)
 		{
 			forUpdate = template.forUpdate;
+			forCount = template.forCount;
 			limit = template.limit;
 			columns = template.columns == null ? null : new List<DBCommandColumn>(template.columns);
 			subqueries = template.subqueries == null ? null : new List<DBCommandSubquery>(template.subqueries);
@@ -89,6 +95,11 @@ namespace Kosson.KORM.DB.CommandBuilder
 		void IDBSelect.ForUpdate()
 		{
 			forUpdate = true;
+		}
+
+		void IDBSelect.ForCount()
+		{
+			forCount = true;
 		}
 
 		void IDBSelect.Limit(int limit)
@@ -230,11 +241,26 @@ namespace Kosson.KORM.DB.CommandBuilder
 		}
 
 		/// <summary>
+		/// Appends COUNT(*) column to command text.
+		/// </summary>
+		/// <param name="sb">StringBuilder constructing a command text.</param>
+		protected virtual void AppendCountColumn(StringBuilder sb)
+		{
+			sb.Append("COUNT(*) AS COUNT");
+		}
+
+		/// <summary>
 		/// Appends column names and aliases to command text.
 		/// </summary>
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendColumns(StringBuilder sb)
 		{
+			if (forCount)
+			{
+				AppendCountColumn(sb);
+				return;
+			}
+
 			bool first = true;
 			string previousTable = null;
 			if (columns != null)

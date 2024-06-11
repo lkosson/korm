@@ -49,5 +49,15 @@ namespace Kosson.KORM.ORM
 			var reader = await fullSelect.ExecuteReaderAsync();
 			return new DBORMWrappedReader<TRecord, TResult>(reader, selector);
 		}
+
+		public int ExecuteCount()
+		{
+			return fullSelect.ExecuteCount();
+		}
+
+		public async Task<int> ExecuteCountAsync()
+		{
+			return await fullSelect.ExecuteCountAsync();
+		}
 	}
 }

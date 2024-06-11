@@ -464,6 +464,11 @@ namespace Kosson.KORM
 		void ForUpdate();
 
 		/// <summary>
+		/// Changes command type to SELECT COUNT(*).
+		/// </summary>
+		void ForCount();
+
+		/// <summary>
 		/// Appends LIMIT clause to the command.
 		/// </summary>
 		/// <param name="limit">Limit constant value.</param>

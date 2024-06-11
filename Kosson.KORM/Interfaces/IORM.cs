@@ -137,27 +137,40 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Executes the command and returns records built from its result.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Collection of records returned by the query.</returns>
 		IReadOnlyCollection<TRecord> Execute();
 
 		/// <summary>
 		/// Asynchronous version of Execute. Executes the command and returns records built from its result.
 		/// </summary>
-		/// <returns>A task representing the asynchronous operation.</returns>
+		/// <returns>Collection of records returned by the query.</returns>
 		Task<IReadOnlyCollection<TRecord>> ExecuteAsync();
 
 		/// <summary>
 		/// Executes the command and returns records build from its results as one-time, on-the-fly enumerable set.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Record reader providing records produced by the query.</returns>
 		IORMReader<TRecord> ExecuteReader();
 
 		/// <summary>
 		/// Asynchronous version of ExecuteReader.
 		/// Executes the command and returns records build from its results as one-time, on-the-fly enumerable set.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Record reader providing records produced by the query.</returns>
 		Task<IORMReader<TRecord>> ExecuteReaderAsync();
+
+		/// <summary>
+		/// Executes the command modified to select COUNT(*), returning number of matching records.
+		/// </summary>
+		/// <returns>Number of records returned by the command.</returns>
+		int ExecuteCount();
+
+		/// <summary>
+		/// Asynchronous version of ExecuteCount.
+		/// Executes the command modified to select COUNT(*), returning number of matching records.
+		/// </summary>
+		/// <returns>Number of records returned by the command.</returns>
+		Task<int> ExecuteCountAsync();
 	}
 
 	/// <summary>

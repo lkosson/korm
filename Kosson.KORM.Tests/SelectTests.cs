@@ -314,6 +314,51 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void ExecuteCountReturnsCount()
+		{
+			var inserted = new MainTestTable();
+			inserted.Value = INTMARKER;
+			ORM.Insert(inserted);
+			ORM.Insert(inserted);
+			ORM.Insert(inserted);
+			var count = ORM.Select<MainTestTable>().ExecuteCount();
+			Assert.AreEqual(3, count);
+		}
+
+		[TestMethod]
+		public async Task ExecuteCountAsyncReturnsCount()
+		{
+			var inserted = new MainTestTable();
+			inserted.Value = INTMARKER;
+			ORM.Insert(inserted);
+			ORM.Insert(inserted);
+			ORM.Insert(inserted);
+			var count = await ORM.Select<MainTestTable>().ExecuteCountAsync();
+			Assert.AreEqual(3, count);
+		}
+
+		[TestMethod]
+		public void ExecuteCountRespectsNarrows()
+		{
+			var inserted = new MainTestTable();
+			inserted.Value = INTMARKER;
+			ORM.Insert(inserted);
+			inserted.Value = INTMARKER + 1;
+			ORM.Insert(inserted);
+			inserted.Value = INTMARKER + 2;
+			ORM.Insert(inserted);
+			var count = ORM.Select<MainTestTable>().WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER).ExecuteCount();
+			Assert.AreEqual(1, count);
+		}
+
+		[TestMethod]
+		public void ExecuteCountReturnsZeroIfEmpty()
+		{
+			var count = ORM.Select<MainTestTable>().ExecuteCount();
+			Assert.AreEqual(0, count);
+		}
+
+		[TestMethod]
 		[ExpectedException(typeof(KORMException))]
 		public virtual void FailedSelectThrowsException()
 		{
