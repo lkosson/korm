@@ -143,7 +143,14 @@ namespace Kosson.KORM
 			where TRecord : IRecord
 		{
 			var value = ProcessExpression(query, unaryExpression.Operand);
-			if (unaryExpression.NodeType == ExpressionType.Convert) return value is IDBExpression ? value : value is IConvertible convertibleValue ? convertibleValue.ToType(unaryExpression.Type, null) : value;
+			if (unaryExpression.NodeType == ExpressionType.Convert)
+			{
+				if (value is IDBExpression) return value;
+				if (value is not IConvertible convertibleValue) return value;
+				var type = unaryExpression.Type;
+				if (Nullable.GetUnderlyingType(type) != null) type = Nullable.GetUnderlyingType(type);
+				return convertibleValue.ToType(type, null);
+			}
 
 			if (unaryExpression.NodeType == ExpressionType.Negate && value is int intValue) return -intValue;
 			if (unaryExpression.NodeType == ExpressionType.Negate && value is long longValue) return -longValue;
