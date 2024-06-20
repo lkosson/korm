@@ -35,6 +35,8 @@ namespace Kosson.KORM.Tests
 			inserted1.InlinedDirectly.Referenced = referenced1;
 			inserted1.InlinedDirectly.DoubleInline.Value = "A";
 			inserted1.DirectBoolean = true;
+			inserted1.NullableEnum = null;
+			inserted1.NullableValue = null;
 			ORM.Insert(inserted1);
 
 			var inserted2 = new LinqTestTable();
@@ -44,6 +46,8 @@ namespace Kosson.KORM.Tests
 			inserted2.InlinedDirectly.Referenced = referenced2;
 			inserted2.InlinedDirectly.DoubleInline.Value = "AA";
 			inserted2.DirectBoolean = false;
+			inserted2.NullableEnum = DayOfWeek.Monday;
+			inserted2.NullableValue = 1;
 			ORM.Insert(inserted2);
 
 			var inserted3 = new LinqTestTable();
@@ -54,6 +58,8 @@ namespace Kosson.KORM.Tests
 			inserted3.InlinedDirectly.Referenced = referenced1;
 			inserted3.InlinedDirectly.DoubleInline.Value = "AAA";
 			inserted3.DirectBoolean = false;
+			inserted3.NullableEnum = DayOfWeek.Tuesday;
+			inserted3.NullableValue = 2;
 			ORM.Insert(inserted3);
 
 			var inserted4 = new LinqTestTable();
@@ -64,6 +70,8 @@ namespace Kosson.KORM.Tests
 			inserted4.InlinedDirectly.Referenced = referenced2;
 			inserted4.InlinedDirectly.DoubleInline.Value = "AAAA";
 			inserted4.DirectBoolean = true;
+			inserted4.NullableEnum = null;
+			inserted4.NullableValue = null;
 			ORM.Insert(inserted4);
 
 			return new[] { inserted1, inserted2, inserted3, inserted4 };
@@ -111,6 +119,7 @@ namespace Kosson.KORM.Tests
 			Assert.AreEqual(inserted.Count(t => !t.DirectBoolean), retrieved.Count);
 			Assert.IsTrue(retrieved.All(t => !t.DirectBoolean));
 		}
+
 		[TestMethod]
 		public void SelectLinqByNull()
 		{
@@ -181,6 +190,57 @@ namespace Kosson.KORM.Tests
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(1, retrieved.Count);
 			Assert.AreEqual(INTMARKER, retrieved.Single().Value - 2);
+		}
+
+		[TestMethod]
+		public void SelectLinqByNullableValueNull()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.NullableValue == null).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(2, retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => !t.NullableValue.HasValue));
+		}
+
+		[TestMethod]
+		public void SelectLinqByNullableValueNotNull()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.NullableValue == 1).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(1, retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => t.NullableValue == 1));
+		}
+
+		[TestMethod]
+		public void SelectLinqByNullableEnumNull()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.NullableEnum == null).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(2, retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => !t.NullableEnum.HasValue));
+		}
+
+		[TestMethod]
+		public void SelectLinqByNullableEnumNotNull()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.NullableEnum == DayOfWeek.Monday).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(1, retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => t.NullableEnum == DayOfWeek.Monday));
+		}
+
+		[TestMethod]
+		public void SelectLinqByNullableEnumVariable()
+		{
+			var inserted = PrepareTestTables();
+			var value = DayOfWeek.Tuesday;
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.NullableEnum == value).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(1, retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => t.NullableEnum == value));
 		}
 
 		[TestMethod]
@@ -331,6 +391,12 @@ namespace Kosson.KORM.Tests
 
 			[Column]
 			public bool DirectBoolean { get; set; }
+
+			[Column]
+			public DayOfWeek? NullableEnum { get; set; }
+
+			[Column]
+			public int? NullableValue { get; set; }
 
 			[Inline]
 			public LinqInline InlinedDirectly { get; set; } = new LinqInline();
