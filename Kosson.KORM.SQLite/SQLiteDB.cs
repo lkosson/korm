@@ -26,10 +26,6 @@ namespace Kosson.KORM.SQLite
 		{
 		}
 
-		// Cancelling already completed query (e.g. getLastID during batch insert) causes next execution of the command to return no rows.
-		/// <inheritdoc/>
-		protected override bool SupportsCancel { get { return false; } }
-
 		/// <inheritdoc/>
 		protected override IDBCommandBuilder CreateCommandBuilder()
 		{

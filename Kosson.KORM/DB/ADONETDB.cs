@@ -58,10 +58,12 @@ namespace Kosson.KORM.DB
 		/// </summary>
 		protected virtual bool PrepareCommands => false;
 
-		/// <summary>
-		/// Determines whether ADO.NET provider supports command cancelation.
-		/// </summary>
-		protected virtual bool SupportsCancel => true;
+		/*
+		 * SupportsCancel removed due to multiple problems:
+		 *  - on MSSQL cancelling already completed query (e.g. getLastID during batch insert) causes another roundtrip to database.
+		 *  - on SQLite cancelling already completed query (e.g. getLastID during batch insert) causes next execution of the command to return no rows.
+		 *  - on PGSQL cancelling a command causes subsequent calls to be also aborted.
+		 */
 
 		/// <summary>
 		/// Determines whether new line characters in command text should be removed before passing to ADO.NET provider.
@@ -429,18 +431,17 @@ namespace Kosson.KORM.DB
 			}
 		}
 
-		IReadOnlyList<IRow> IDB.ExecuteQuery(DbCommand command, int limit)
+		IReadOnlyList<IRow> IDB.ExecuteQuery(DbCommand command)
 		{
 			var token = log.Start(command);
 			try
 			{
 				using (AcquireLock())
 				{
-					using (DbDataReader reader = command.ExecuteReader())
+					using (DbDataReader reader = command.ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult | CommandBehavior.SequentialAccess))
 					{
 						log.StopStart(ref token, "<PROCESS>");
-						var rows = ProcessReader(reader, limit);
-						if (limit != -1 && rows.Count == limit && SupportsCancel) command.Cancel();
+						var rows = ProcessReader(reader);
 						log.Stop(token, rows.Count);
 						return rows;
 					}
@@ -454,7 +455,7 @@ namespace Kosson.KORM.DB
 			}
 		}
 
-		async Task<IReadOnlyList<IRow>> IDB.ExecuteQueryAsync(DbCommand command, int limit)
+		async Task<IReadOnlyList<IRow>> IDB.ExecuteQueryAsync(DbCommand command)
 		{
 			var token = log.Start(command);
 			try
@@ -465,8 +466,7 @@ namespace Kosson.KORM.DB
 					using (reader)
 					{
 						log.StopStart(ref token, "<PROCESS>");
-						var rows = await ProcessReaderAsync(reader, limit);
-						if (limit != -1 && rows.Count == limit && SupportsCancel) command.Cancel();
+						var rows = await ProcessReaderAsync(reader);
 						log.Stop(token, rows.Count);
 						return rows;
 					}
@@ -521,28 +521,26 @@ namespace Kosson.KORM.DB
 		}
 		#endregion
 		#region Reader processing
-		private IReadOnlyList<IRow> ProcessReader(DbDataReader reader, int limit)
+		private IReadOnlyList<IRow> ProcessReader(DbDataReader reader)
 		{
-			List<IRow> rows = limit == -1 ? new List<IRow>() : new List<IRow>(limit);
+			List<IRow> rows = new List<IRow>();
 			Dictionary<string, int> meta = CreateMetaFromReader(reader);
-			while (limit != 0 && reader.Read())
+			while (reader.Read())
 			{
 				IRow row = CreateRowFromReader(reader, meta);
 				rows.Add(row);
-				limit--;
 			}
 			return rows;
 		}
 
-		private async Task<IReadOnlyList<IRow>> ProcessReaderAsync(DbDataReader reader, int limit)
+		private async Task<IReadOnlyList<IRow>> ProcessReaderAsync(DbDataReader reader)
 		{
-			List<IRow> rows = limit == -1 ? new List<IRow>() : new List<IRow>(limit);
+			List<IRow> rows = new List<IRow>();
 			Dictionary<string, int> meta = CreateMetaFromReader(reader);
-			while (limit != 0 && await reader.ReadAsync())
+			while (await reader.ReadAsync())
 			{
 				IRow row = CreateRowFromReader(reader, meta);
 				rows.Add(row);
-				limit--;
 			}
 			return rows;
 		}

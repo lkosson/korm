@@ -95,17 +95,10 @@ namespace Kosson.KORM.ORM
 					LogRecord(LogLevel.Information, token, record);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record, ref parameters);
 
-					if (cmdGetLastID == null)
-					{
-						var row = DB.ExecuteQuery(cmdInsert, 1).Single();
-						if (!manualid) record.ID = converter.Convert<long>(row[0]);
-					}
-					else
-					{
-						DB.ExecuteNonQuery(cmdInsert);
-						var row = DB.ExecuteQuery(cmdGetLastID, 1).Single();
-						if (!manualid) record.ID = converter.Convert<long>(row[0]);
-					}
+					if (cmdGetLastID != null) DB.ExecuteNonQuery(cmdInsert);
+					var rows = DB.ExecuteQuery(cmdGetLastID ?? cmdInsert);
+					if (!manualid && rows.Any()) record.ID = converter.Convert<long>(rows.First()[0]);
+
 					LogID(token, record);
 
 					count++;
@@ -139,7 +132,7 @@ namespace Kosson.KORM.ORM
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record, ref parameters);
 
 					if (cmdGetLastID != null) await DB.ExecuteNonQueryAsync(cmdInsert);
-					var rows = await DB.ExecuteQueryAsync(cmdGetLastID ?? cmdInsert, 1);
+					var rows = await DB.ExecuteQueryAsync(cmdGetLastID ?? cmdInsert);
 					if (!manualid && rows.Any()) record.ID = converter.Convert<long>(rows.First()[0]);
 					LogID(token, record);
 

@@ -30,10 +30,6 @@ namespace Kosson.KORM.PGSQL
 		/// <inheritdoc/>
 		protected override bool PrepareCommands { get { return false; } }
 
-		// Cancelling a command causes subsequent calls to be also aborted
-		/// <inheritdoc/>
-		protected override bool SupportsCancel { get { return false; } }
-
 		/// <inheritdoc/>
 		protected override bool ReplaceNewLines { get { return true; } }
 

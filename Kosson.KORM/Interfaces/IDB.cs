@@ -110,18 +110,16 @@ namespace Kosson.KORM
 		/// Executes given database query, returning non-null array of rows based on the command result and handling and wrapping potential database engine-specific exceptions.
 		/// </summary>
 		/// <param name="command">Database command to execute.</param>
-		/// <param name="limit">Optional maximum number of rows to process.</param>
 		/// <returns>Array (possibly empty) of rows representing result of the command.</returns>
-		IReadOnlyList<IRow> ExecuteQuery(DbCommand command, int limit = -1);
+		IReadOnlyList<IRow> ExecuteQuery(DbCommand command);
 
 		/// <summary>
 		/// Asynchronous version of ExecuteQuery.
 		/// Executes given database query, returning non-null array of rows based on the command result and handling and wrapping potential database engine-specific exceptions.
 		/// </summary>
 		/// <param name="command">Database command to execute.</param>
-		/// <param name="limit">Optional maximum number of rows to process.</param>
 		/// <returns>A task representing the asynchronous operation returning an Array (possibly empty) of rows representing result of the command.</returns>
-		Task<IReadOnlyList<IRow>> ExecuteQueryAsync(DbCommand command, int limit = -1);
+		Task<IReadOnlyList<IRow>> ExecuteQueryAsync(DbCommand command);
 
 		/// <summary>
 		/// Executes given database query, returning a reader providing one-time, on-the-fly enumerator of rows based on the command result and handling and wrapping potential database engine-specific exceptions.
