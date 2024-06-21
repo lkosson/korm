@@ -324,7 +324,7 @@ namespace Kosson.KORM.DB
 
 		DbParameter IDB.AddParameter(DbCommand command, string name, object value)
 		{
-			if (!name.StartsWith(CommandBuilder.ParameterPrefix)) name = CommandBuilder.ParameterPrefix + name;
+			if (!name.StartsWith(CommandBuilder.ParameterPrefix, StringComparison.Ordinal)) name = CommandBuilder.ParameterPrefix + name;
 			DbParameter param = command.CreateParameter();
 			param.ParameterName = name;
 			((IDB)this).SetParameter(param, value);
