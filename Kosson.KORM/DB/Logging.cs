@@ -42,7 +42,7 @@ namespace Kosson.KORM.DB
 			if (!TraceWarningEnabled) return default(TraceToken);
 			int id = Interlocked.Increment(ref nextTraceId);
 			// Keep LogLevel.Information in sync with Log(Exception) method
-			Trace(LogLevel.Information, id, msg);
+			if (TraceInformationEnabled) Trace(LogLevel.Information, id, msg);
 			TraceToken token = new TraceToken();
 			token.id = id;
 			token.start = queryTimer.ElapsedMilliseconds;
