@@ -70,6 +70,11 @@ namespace Kosson.KORM
 		bool SupportsPrimaryKeyInsert { get; }
 
 		/// <summary>
+		/// Maximum number of parameters passed to a database in a single query/batch.
+		/// </summary>
+		int MaxParameterCount { get; }
+
+		/// <summary>
 		/// Creates a new SELECT command builder for a given database dialect.
 		/// </summary>
 		/// <returns>New SELECT command builder.</returns>

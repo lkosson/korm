@@ -7,6 +7,9 @@ namespace Kosson.KORM.MSSQL
 {
 	class CommandBuilder : DBCommandBuilder
 	{
+		/// <inheritdoc/>
+		public override int MaxParameterCount => 2100;
+
 		public override IDBSelect Select()
 		{
 			return new Select(this);

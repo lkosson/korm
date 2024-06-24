@@ -44,6 +44,9 @@ namespace Kosson.KORM.DB.CommandBuilder
 		public virtual bool SupportsPrimaryKeyInsert => true;
 
 		/// <inheritdoc/>
+		public virtual int MaxParameterCount => Int32.MaxValue;
+
+		/// <inheritdoc/>
 		public virtual IDBSelect Select() => new DBSelect(this);
 
 		/// <inheritdoc/>

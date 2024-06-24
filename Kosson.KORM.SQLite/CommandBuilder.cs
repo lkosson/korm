@@ -6,6 +6,9 @@ namespace Kosson.KORM.SQLite
 {
 	class CommandBuilder : DBCommandBuilder
 	{
+		/// <inheritdoc/>
+		public override int MaxParameterCount => 999;
+
 		public override IDBCreateTable CreateTable()
 		{
 			return new CreateTable(this);

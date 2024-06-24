@@ -6,6 +6,9 @@ namespace Kosson.KORM.PGSQL
 {
 	class CommandBuilder : DBCommandBuilder
 	{
+		/// <inheritdoc/>
+		public override int MaxParameterCount => 65534;
+
 		public override IDBCreateTable CreateTable()
 		{
 			return new CreateTable(this);
