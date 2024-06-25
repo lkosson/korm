@@ -71,6 +71,10 @@ namespace Kosson.KORM.Meta
 			Type = property.PropertyType;
 			IsEagerLookup = typeof(IRecord).IsAssignableFrom(Type);
 			IsRecordRef = typeof(IRecordRef).IsAssignableFrom(Type);
+
+			if (IsRecordRef) ForeignType = Type.GetGenericArguments()[0];
+			else if (IsEagerLookup) ForeignType = Type;
+			else ForeignType = null;
 		}
 
 		private void ProcessDBNameAttribute(PropertyInfo property)
@@ -120,7 +124,13 @@ namespace Kosson.KORM.Meta
 			if (type == typeof(byte[])) return DbType.Binary;
 			if (type == typeof(Guid)) return DbType.Guid;
 			if (type == typeof(DateTime)) return DbType.DateTime2;
-			if (IsRecordRef || IsEagerLookup) return DbType.Int64;
+			if (IsRecordRef || IsEagerLookup)
+			{
+				if (typeof(Record32).IsAssignableFrom(ForeignType)) return DbType.Int32;
+				if (typeof(Record16).IsAssignableFrom(ForeignType)) return DbType.Int16;
+				if (typeof(Record8).IsAssignableFrom(ForeignType)) return DbType.Byte; 
+				return DbType.Int64;
+			}
 			if (type.GetTypeInfo().IsEnum) return DbType.Int32;
 			return DbType.Object;
 		}
@@ -145,13 +155,6 @@ namespace Kosson.KORM.Meta
 			IsForeignKey = true;
 			IsCascade = fk.IsCascade;
 			IsSetNull = fk.IsSetNull;
-
-			if (IsRecordRef) ForeignType = Type.GetGenericArguments()[0];
-			else ForeignType = Type;
-
-			if (typeof(Record32).IsAssignableFrom(ForeignType) && DBType == DbType.Int64) DBType = DbType.Int32;
-			if (typeof(Record16).IsAssignableFrom(ForeignType) && DBType == DbType.Int64) DBType = DbType.Int16;
-			if (typeof(Record8).IsAssignableFrom(ForeignType) && DBType == DbType.Int64) DBType = DbType.Byte;
 		}
 
 		private void ProcessSubqueryAttribute(PropertyInfo property)
