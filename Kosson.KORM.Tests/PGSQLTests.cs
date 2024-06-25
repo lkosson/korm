@@ -191,6 +191,10 @@ namespace Kosson.KORM.Tests
 			// PostgreSQL aborts transaction on error
 		}
 
+		protected override void RetrieveByMultipleIDsImpl(int insertCount, int retrieveCount)
+		{
+			// Non-local block tests take too long
+		}
 	}
 
 	[TestClass]

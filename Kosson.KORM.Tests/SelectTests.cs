@@ -190,7 +190,7 @@ namespace Kosson.KORM.Tests
 			RetrieveByMultipleIDsImpl(DB.CommandBuilder.MaxParameterCount * 3, DB.CommandBuilder.MaxParameterCount * 2);
 		}
 
-		private void RetrieveByMultipleIDsImpl(int insertCount, int retrieveCount)
+		protected virtual void RetrieveByMultipleIDsImpl(int insertCount, int retrieveCount)
 		{
 			ORM.Delete<MainTestTable>().Execute();
 			var ids = new List<long>();

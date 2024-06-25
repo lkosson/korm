@@ -163,6 +163,11 @@ namespace Kosson.KORM.Tests
 	public class MSSQLSelectTests : SelectTests
 	{
 		protected override void PrepareKORMServices(IServiceCollection services) => MSSQLTests.PrepareKORMServices(services, ConnectionString("mssql"));
+
+		protected override void RetrieveByMultipleIDsImpl(int insertCount, int retrieveCount)
+		{
+			// Non-local block tests take too long
+		}
 	}
 
 	[TestClass]

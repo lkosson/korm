@@ -345,7 +345,38 @@ namespace Kosson.KORM
 		/// <param name="ids">Primary KEY (ID) values of the records to select.</param>
 		/// <returns>Records with matching primary key values or empty collection.</returns>
 		public static IReadOnlyCollection<TRecord> ByIDs<TRecord>(this IORMSelect<TRecord> query, IEnumerable<long> ids) where TRecord : IRecord
-			=> query.WhereIDIn(ids).Execute();
+		{
+			var usableParameters = query.DB.CommandBuilder.MaxParameterCount * 9 / 10;
+			var countIDs = ids.Count();
+			if (countIDs <= usableParameters) return query.WhereIDIn(ids).Execute();
+
+			var countDB = query.ExecuteCount();
+			if (countDB < countIDs * 10)
+			{
+				var allRecords = query.Execute();
+				var idSet = new HashSet<long>(ids);
+				return allRecords.Where(id => idSet.Contains(id.ID)).ToList();
+			}
+
+			var result = new List<TRecord>();
+			var idBlock = new List<long>(usableParameters);
+			foreach (var id in ids)
+			{
+				idBlock.Add(id);
+				if (idBlock.Count >= usableParameters)
+				{
+					var blockResult = query.Clone().WhereIDIn(idBlock).Execute();
+					result.AddRange(blockResult);
+					idBlock.Clear();
+				}
+			}
+			if (idBlock.Count > 0)
+			{
+				var blockResult = query.Clone().WhereIDIn(idBlock).Execute();
+				result.AddRange(blockResult);
+			}
+			return result;
+		}
 
 		/// <summary>
 		/// Executes SELECT command after adding to it equality comparison between primary key (ID) and given constant value.
@@ -390,8 +421,39 @@ namespace Kosson.KORM
 		/// <param name="query">SELECT command to execute.</param>
 		/// <param name="ids">Primary KEY (ID) values of the records to select.</param>
 		/// <returns>Records with matching primary key values or empty collection.</returns>
-		public static Task<IReadOnlyCollection<TRecord>> ByIDsAsync<TRecord>(this IORMSelect<TRecord> query, IEnumerable<long> ids) where TRecord : IRecord
-			=> query.WhereIDIn(ids).ExecuteAsync();
+		public static async Task<IReadOnlyCollection<TRecord>> ByIDsAsync<TRecord>(this IORMSelect<TRecord> query, IEnumerable<long> ids) where TRecord : IRecord
+		{
+			var usableParameters = query.DB.CommandBuilder.MaxParameterCount;
+			var countIDs = ids.Count();
+			if (countIDs <= usableParameters) return await query.WhereIDIn(ids).ExecuteAsync();
+
+			var countDB = await query.ExecuteCountAsync();
+			if (countDB < countIDs * 10)
+			{
+				var allRecords = await query.ExecuteAsync();
+				var idSet = new HashSet<long>(ids);
+				return allRecords.Where(id => idSet.Contains(id.ID)).ToList();
+			}
+
+			var result = new List<TRecord>();
+			var idBlock = new List<long>(usableParameters);
+			foreach (var id in ids)
+			{
+				idBlock.Add(id);
+				if (idBlock.Count >= usableParameters)
+				{
+					var blockResult = await query.Clone().WhereIDIn(idBlock).ExecuteAsync();
+					result.AddRange(blockResult);
+					idBlock.Clear();
+				}
+			}
+			if (idBlock.Count > 0)
+			{
+				var blockResult = await query.Clone().WhereIDIn(idBlock).ExecuteAsync();
+				result.AddRange(blockResult);
+			}
+			return result;
+		}
 
 		/// <summary>
 		/// Asynchronous version of ByRef.
