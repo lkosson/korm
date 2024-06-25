@@ -22,6 +22,16 @@ namespace Kosson.KORM.ORM
 			this.loaderFromReader = loaderFromReader;
 		}
 
+		private DBORMSelect(DBORMSelect<TRecord> template)
+			: base(template)
+		{
+			converter = template.converter;
+			factory = template.factory;
+			loaderFromReader = template.loaderFromReader;
+		}
+
+		IORMSelect<TRecord> IORMCommand<IORMSelect<TRecord>>.Clone() => new DBORMSelect<TRecord>(this);
+
 		protected override IDBSelect BuildCommand(IDBCommandBuilder cb)
 		{
 			var template = cb.Select();
@@ -74,7 +84,7 @@ namespace Kosson.KORM.ORM
 				if (!field.IsFromDB) continue;
 				if (!field.IsEagerLookup) continue;
 
-				var eagerMeta = metaBuilder.Get(field.Type);
+				var eagerMeta = field.ForeignMeta;
 				var localName = cb.Identifier(tableAliasForColumns, field.DBName);
 				var remoteAlias = tableAliasForJoins + "." + field.Name;
 				var remoteKey = eagerMeta.PrimaryKey;

@@ -30,6 +30,15 @@ namespace Kosson.KORM.ORM
 			else commandText = cachedCommandText;
 		}
 
+		private DBORMInsert(DBORMInsert<TRecord> template)
+			: base(template)
+		{
+			converter = template.converter;
+			commandText = template.commandText;
+		}
+
+		IORMInsert<TRecord> IORMCommand<IORMInsert<TRecord>>.Clone() => new DBORMInsert<TRecord>(this);
+
 		protected override IDBInsert BuildCommand(IDBCommandBuilder cb)
 		{
 			var template = cb.Insert();

@@ -20,7 +20,6 @@ namespace Kosson.KORM.ORM
 		where TRecord : IRecord
 	{
 		protected static IMetaRecord meta;
-		protected readonly IMetaBuilder metaBuilder;
 		private List<object> parameters;
 		protected virtual bool UseFullFieldNames { get { return true; } }
 		protected IEnumerable<object> Parameters { get { return parameters ?? Enumerable.Empty<object>(); } }
@@ -34,11 +33,18 @@ namespace Kosson.KORM.ORM
 		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 		{
 			this.DB = db;
-			this.metaBuilder = metaBuilder;
 			this.operationLogger = operationLogger;
 			this.recordLogger = recordLogger;
 			if (meta == null) meta = metaBuilder.Get(typeof(TRecord));
 			if (opStopwatch == null) opStopwatch = Stopwatch.StartNew();
+		}
+
+		protected DBORMCommandBase(DBORMCommandBase<TRecord> template)
+		{
+			DB = template.DB;
+			operationLogger = template.operationLogger;
+			recordLogger = template.recordLogger;
+			if (template.parameters != null) parameters = new List<object>(template.parameters);
 		}
 
 		public IDBExpression Parameter(object value)
@@ -182,6 +188,12 @@ namespace Kosson.KORM.ORM
 		public DBORMCommandBase(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
 		{
+		}
+
+		protected DBORMCommandBase(DBORMCommandBase<TRecord, TCommand> template)
+			: base(template)
+		{
+			if (template.command != null) command = template.command.Clone();
 		}
 	}
 }

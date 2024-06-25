@@ -28,6 +28,14 @@ namespace Kosson.KORM.ORM
 			else commandText = cachedCommandText;
 		}
 
+		private DBORMDelete(DBORMDelete<TRecord> template)
+			: base(template)
+		{
+			commandText = template.commandText;
+		}
+
+		IORMDelete<TRecord> IORMCommand<IORMDelete<TRecord>>.Clone() => new DBORMDelete<TRecord>(this);
+
 		protected override IDBDelete BuildCommand(IDBCommandBuilder cb)
 		{
 			var template = cb.Delete();

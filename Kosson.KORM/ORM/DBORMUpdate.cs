@@ -29,6 +29,14 @@ namespace Kosson.KORM.ORM
 			else commandText = cachedCommandText;
 		}
 
+		private DBORMUpdate(DBORMUpdate<TRecord> template)
+			: base(template)
+		{
+			commandText = template.commandText;
+		}
+
+		IORMUpdate<TRecord> IORMCommand<IORMUpdate<TRecord>>.Clone() => new DBORMUpdate<TRecord>(this);
+
 		protected override IDBUpdate BuildCommand(IDBCommandBuilder cb)
 		{
 			var template = cb.Update();

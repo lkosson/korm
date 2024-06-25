@@ -100,5 +100,60 @@ namespace Kosson.KORM.Tests
 			Assert.AreEqual(1, deleted);
 			Assert.AreEqual(2, remaining.Count);
 		}
+
+		[TestMethod]
+		public void ClonedIsIndependent()
+		{
+			var records = new[]
+			{
+				new MainTestTable { Value = INTMARKER },
+				new MainTestTable { Value = INTMARKER + 1 }
+			};
+			ORM.StoreAll(records);
+
+			var cmd = ORM.Delete<MainTestTable>().WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER);
+			cmd.Clone().WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER + 1);
+			cmd.Execute();
+
+			var result = ORM.Select<MainTestTable>().Execute();
+			Assert.AreEqual(1, result.Count);
+		}
+
+		[TestMethod]
+		public void CloneIsIndependent()
+		{
+			var records = new[]
+			{
+				new MainTestTable { Value = INTMARKER },
+				new MainTestTable { Value = INTMARKER + 1 }
+			};
+			ORM.StoreAll(records);
+
+			var cmd1 = ORM.Delete<MainTestTable>();
+			var cmd2 = cmd1.Clone().WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER + 1);
+			cmd1.WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER);
+			cmd2.Execute();
+
+			var result = ORM.Select<MainTestTable>().Execute();
+			Assert.AreEqual(1, result.Count);
+			Assert.AreEqual(records[0].Value, result.Single().Value);
+		}
+
+		[TestMethod]
+		public void CloneRetainsOriginalState()
+		{
+			var records = new[]
+			{
+				new MainTestTable { Value = INTMARKER },
+				new MainTestTable { Value = INTMARKER + 1 }
+			};
+			ORM.StoreAll(records);
+
+			var cmd1 = ORM.Delete<MainTestTable>().WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER);
+			cmd1.Clone().WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER + 1).Execute();
+
+			var result = ORM.Select<MainTestTable>().Execute();
+			Assert.AreEqual(2, result.Count);
+		}
 	}
 }

@@ -95,6 +95,12 @@ namespace Kosson.KORM
 		/// <param name="comment">Comment to include in database command.</param>
 		/// <returns>Original command with tag comment added to it.</returns>
 		TCommand Tag(IDBComment comment);
+
+		/// <summary>
+		/// Creates a deep, independent clone of this command.
+		/// </summary>
+		/// <returns>Copy of the command.</returns>
+		TCommand Clone();
 	}
 
 	/// <summary>

@@ -167,16 +167,39 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
-		public void RetrieveByMultipleIDs()
+		public void RetrieveByMultipleIDsOneBatchSmall()
+		{
+			RetrieveByMultipleIDsImpl(10, 3);
+		}
+
+		[TestMethod]
+		public void RetrieveByMultipleIDsOneBatchLarge()
+		{
+			RetrieveByMultipleIDsImpl(DB.CommandBuilder.MaxParameterCount, DB.CommandBuilder.MaxParameterCount * 9 / 10);
+		}
+
+		[TestMethod]
+		public void RetrieveByMultipleIDsByBlocks()
+		{
+			RetrieveByMultipleIDsImpl(DB.CommandBuilder.MaxParameterCount * 25, DB.CommandBuilder.MaxParameterCount * 2);
+		}
+
+		[TestMethod]
+		public void RetrieveByMultipleIDsWholeTable()
+		{
+			RetrieveByMultipleIDsImpl(DB.CommandBuilder.MaxParameterCount * 3, DB.CommandBuilder.MaxParameterCount * 2);
+		}
+
+		private void RetrieveByMultipleIDsImpl(int insertCount, int retrieveCount)
 		{
 			ORM.Delete<MainTestTable>().Execute();
 			var ids = new List<long>();
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < insertCount; i++)
 			{
 				var item = new MainTestTable();
-				item.Value = INTMARKER + i;
+				item.Value = i;
 				ORM.Insert(item);
-				if (i % 3 == 0) ids.Add(item.ID);
+				if (i < (insertCount - retrieveCount) / 2 && ids.Count < retrieveCount) ids.Add(item.ID);
 			}
 			var retrieved = ORM.Select<MainTestTable>().ByIDs(ids);
 			Assert.AreEqual(ids.Count, retrieved.Count);
@@ -392,6 +415,60 @@ namespace Kosson.KORM.Tests
 			ORM.Insert(record);
 			await Assert.ThrowsExceptionAsync<KORMException>(ORM.Select<DivideByZeroTable>().ExecuteAsync);
 			await ORM.Select<MainTestTable>().ExecuteAsync();
+		}
+
+		[TestMethod]
+		public void ClonedIsIndependent()
+		{
+			var inserted1 = new MainTestTable();
+			inserted1.Value = INTMARKER;
+			ORM.Insert(inserted1);
+			var inserted2 = new MainTestTable();
+			inserted2.Value = INTMARKER + 1;
+			ORM.Insert(inserted2);
+
+			var q1 = ORM.Select<MainTestTable>().WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER);
+			q1.Clone().WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER + 1);
+
+			var result = q1.Execute();
+			Assert.AreEqual(1, result.Count);
+			Assert.AreEqual(inserted1.Value, result.Single().Value);
+		}
+
+		[TestMethod]
+		public void CloneIsIndependent()
+		{
+			var inserted1 = new MainTestTable();
+			inserted1.Value = INTMARKER;
+			ORM.Insert(inserted1);
+			var inserted2 = new MainTestTable();
+			inserted2.Value = INTMARKER + 1;
+			ORM.Insert(inserted2);
+
+			var q1 = ORM.Select<MainTestTable>();
+			var q2 = q1.Clone().WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER + 1);
+			q1.WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER);
+
+			var result = q2.Execute();
+			Assert.AreEqual(1, result.Count);
+			Assert.AreEqual(inserted2.Value, result.Single().Value);
+		}
+
+		[TestMethod]
+		public void CloneRetainsOriginalState()
+		{
+			var inserted1 = new MainTestTable();
+			inserted1.Value = INTMARKER;
+			ORM.Insert(inserted1);
+			var inserted2 = new MainTestTable();
+			inserted2.Value = INTMARKER + 1;
+			ORM.Insert(inserted2);
+
+			var q1 = ORM.Select<MainTestTable>().WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER);
+			var q2 = q1.Clone().WhereFieldEquals(nameof(MainTestTable.Value), INTMARKER + 1);
+
+			var result = q2.Execute();
+			Assert.AreEqual(0, result.Count);
 		}
 
 		[Table(Prefix = "dbzt", Query = "SELECT 1/0 as \"dbzt_ID\" FROM \"MainTestTable\"")]
