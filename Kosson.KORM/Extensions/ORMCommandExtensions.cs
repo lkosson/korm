@@ -125,12 +125,11 @@ namespace Kosson.KORM
 			where TCommand : IORMNarrowableCommand<TCommand>
 		{
 			if (values == null) throw new ArgumentNullException("values");
-			if (values.Length == 0) throw new ArgumentOutOfRangeException("values", "Values cannot be empty.");
+			if (values.Length == 0) return query.Where(query.DB.CommandBuilder.Const(false));
 			if (values.Length == 1 && values[0] is TValue[] nested) values = nested;
 
-			var cb = query.DB.CommandBuilder;
 			var pexpr = query.Array(values);
-			var eexpr = cb.Comparison(query.Field(field), DBExpressionComparison.In, pexpr);
+			var eexpr = query.DB.CommandBuilder.Comparison(query.Field(field), DBExpressionComparison.In, pexpr);
 			return query.Where(eexpr);
 		}
 
