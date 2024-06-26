@@ -113,7 +113,7 @@ namespace Kosson.KORM.ORM
 					if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
 					DB.SetParameter(idParameter, record.ID);
 					int lcount = DB.ExecuteNonQuery(cmdDelete);
-					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete);
+					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete.CommandText, cmdDelete.Parameters);
 
 					count += lcount;
 					if (notify != null) result = notify.OnDeleted();
@@ -158,7 +158,7 @@ namespace Kosson.KORM.ORM
 					if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
 					DB.SetParameter(idParameter, record.ID);
 					int lcount = await DB.ExecuteNonQueryAsync(cmdDelete);
-					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete);
+					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete.CommandText, cmdDelete.Parameters);
 
 					count += lcount;
 					if (notify != null) result = notify.OnDeleted();

@@ -55,18 +55,18 @@ namespace Kosson.KORM.PGSQL
 		}
 
 		/// <inheritdoc/>
-		protected override KORMException TranslateException(Exception exc, DbCommand cmd)
+		protected override KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
 		{
 			var pe = exc as PostgresException;
 			if (pe != null)
 			{
-				if (pe.SqlState == "23503") return new KORMForeignKeyException(exc, cmd, pe.TableName);
+				if (pe.SqlState == "23503") return new KORMForeignKeyException(exc, commandText, commandParameters, pe.TableName);
 				// TODO: Use ErrorCode instead of parsing messages
-				if (pe.Message.StartsWith("ERROR: 55P03:")) return new KORMLockException(exc, cmd);
-				if (pe.Message.StartsWith("A timeout has occured.")) return new KORMLockException(exc, cmd);
+				if (pe.Message.StartsWith("ERROR: 55P03:")) return new KORMLockException(exc, commandText, commandParameters);
+				if (pe.Message.StartsWith("A timeout has occured.")) return new KORMLockException(exc, commandText, commandParameters);
 				// All exceptions cause transaction to rollback anyway
 			}
-			return base.TranslateException(exc, cmd);
+			return base.TranslateException(exc, commandText, commandParameters);
 		}
 	}
 }

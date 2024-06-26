@@ -53,6 +53,9 @@ namespace Kosson.KORM.DB
 		/// <inheritdoc/>
 		public virtual bool IsImplicitTransaction => isImplicit;
 
+		/// <inheritdoc/>
+		public virtual bool IsBatchSupported => dbconn.CanCreateBatch;
+
 		/// <summary>
 		/// Determines whether ADO.NET provider expects command preparation before execution.
 		/// </summary>
@@ -141,7 +144,7 @@ namespace Kosson.KORM.DB
 			}
 			catch (Exception exc)
 			{
-				HandleException(exc, null);
+				HandleException(exc);
 				throw;
 			}
 		}
@@ -235,12 +238,12 @@ namespace Kosson.KORM.DB
 				{
 					if (dontThrow)
 					{
-						var translated = TranslateException(exc, null);
+						var translated = TranslateException(exc, null, null);
 						log.Log(translated, default(TraceToken));
 					}
 					else
 					{
-						HandleException(exc, null);
+						HandleException(exc);
 						throw;
 					}
 				}
@@ -257,12 +260,12 @@ namespace Kosson.KORM.DB
 				{
 					if (dontThrow)
 					{
-						var translated = TranslateException(exc, null);
+						var translated = TranslateException(exc, null, null);
 						log.Log(translated, default(TraceToken));
 					}
 					else
 					{
-						HandleException(exc, null);
+						HandleException(exc);
 						throw;
 					}
 				}
@@ -575,20 +578,35 @@ namespace Kosson.KORM.DB
 		/// <param name="exc">Caught exception to translate.</param>
 		/// <param name="cmd">Command causing the exception.</param>
 		/// <returns>Provider-independent exception.</returns>
-		protected virtual KORMException TranslateException(Exception exc, DbCommand cmd)
+		protected virtual KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
 		{
-			if (exc is System.Data.Common.DbException) return new KORMException(exc.Message, exc, cmd);
-			else if (exc is InvalidOperationException) return new KORMException(exc.Message, exc, cmd);
+			if (exc is System.Data.Common.DbException) return new KORMException(exc.Message, exc, commandText, commandParameters);
+			else if (exc is InvalidOperationException) return new KORMException(exc.Message, exc, commandText, commandParameters);
 			else if (exc is KORMException) return null; // rethrown in catch block calling HandleException
-			return new KORMException(exc.Message, exc, cmd);
+			return new KORMException(exc.Message, exc, commandText, commandParameters);
 		}
 
-		internal void HandleException(Exception exc, DbCommand cmd, TraceToken token = default(TraceToken))
+		private void HandleException(Exception exc, string commandText, DbParameterCollection commandParameters, TraceToken token = default(TraceToken))
 		{
-			var translated = TranslateException(exc, cmd);
+			var translated = TranslateException(exc, commandText, commandParameters);
 			if (translated == null) return; // untranslated exceptions will be rethrown by caller
 			log.Log(translated, token);
 			throw translated;
+		}
+
+		internal void HandleException(Exception exc)
+		{
+			HandleException(exc, null, null, default);
+		}
+
+		internal void HandleException(Exception exc, DbCommand command, TraceToken token = default(TraceToken))
+		{
+			HandleException(exc, command.CommandText, command.Parameters, token);
+		}
+
+		internal void HandleException(Exception exc, DbBatchCommand command, TraceToken token = default(TraceToken))
+		{
+			HandleException(exc, command.CommandText, command.Parameters, token);
 		}
 		#endregion
 	}

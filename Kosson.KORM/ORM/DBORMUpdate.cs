@@ -145,7 +145,7 @@ namespace Kosson.KORM.ORM
 					ApplyRowVersion(rowVersion, rowVersionParameter);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record, ref parameters);
 					int lcount = DB.ExecuteNonQuery(cmdUpdate);
-					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate);
+					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate.CommandText, cmdUpdate.Parameters);
 
 					count += lcount;
 					if (notify != null) result = notify.OnUpdated();
@@ -188,7 +188,7 @@ namespace Kosson.KORM.ORM
 					ApplyRowVersion(rowVersion, rowVersionParameter);
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record, ref parameters);
 					int lcount = await DB.ExecuteNonQueryAsync(cmdUpdate);
-					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate);
+					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate.CommandText, cmdUpdate.Parameters);
 
 					count += lcount;
 					if (notify != null) result = notify.OnUpdated();

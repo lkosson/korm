@@ -86,33 +86,33 @@ namespace Kosson.KORM.MSSQL
 		}
 
 		/// <inheritdoc/>
-		protected override KORMException TranslateException(Exception exc, DbCommand cmd)
+		protected override KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
 		{
 			SqlException se = exc as SqlException;
 			if (se != null)
 			{
-				if (se.Number == 1222) return new KORMLockException(exc, cmd);
-				else if (se.Number == 2601) return new KORMDuplicateValueException(exc, cmd); // duplicate unique key
-				else if (se.Number == 2627) return new KORMDuplicateValueException(exc, cmd); // duplicate primary key
-				else if (se.Number == 2628) return new KORMDataLengthException(exc, cmd); // data truncated
-				else if (se.Number == 3701) return new KORMInvalidStructureException(exc, cmd); // permissions
-				else if (se.Number == 1785) return new KORMInvalidStructureException(exc, cmd); // multiple cascade paths
-				else if (se.Number == 2714) return new KORMObjectExistsException(exc, cmd); // object exists
-				else if (se.Number == 2705) return new KORMObjectExistsException(exc, cmd); // column exists
+				if (se.Number == 1222) return new KORMLockException(exc, commandText, commandParameters);
+				else if (se.Number == 2601) return new KORMDuplicateValueException(exc, commandText, commandParameters); // duplicate unique key
+				else if (se.Number == 2627) return new KORMDuplicateValueException(exc, commandText, commandParameters); // duplicate primary key
+				else if (se.Number == 2628) return new KORMDataLengthException(exc, commandText, commandParameters); // data truncated
+				else if (se.Number == 3701) return new KORMInvalidStructureException(exc, commandText, commandParameters); // permissions
+				else if (se.Number == 1785) return new KORMInvalidStructureException(exc, commandText, commandParameters); // multiple cascade paths
+				else if (se.Number == 2714) return new KORMObjectExistsException(exc, commandText, commandParameters); // object exists
+				else if (se.Number == 2705) return new KORMObjectExistsException(exc, commandText, commandParameters); // column exists
 				else if (se.Number == 10054) return new KORMConnectionException(exc); // winsock - connection reset
 				else if (se.Number == 64) return new KORMConnectionException(exc); // name no longer available
 				else if (se.Number == 1231) return new KORMConnectionException(exc); // conn err
 				else if (se.Number == 547)
 				{
 					var idx = se.Message.IndexOf("table");
-					if (idx < 0) return new KORMForeignKeyException(exc, cmd, se.Message);
+					if (idx < 0) return new KORMForeignKeyException(exc, commandText, commandParameters, se.Message);
 					string tab = se.Message.Substring(idx);
 					tab = tab.Substring(tab.IndexOf('"') + 1);
 					tab = tab.Substring(0, tab.IndexOf('"'));
-					return new KORMForeignKeyException(exc, cmd, tab);
+					return new KORMForeignKeyException(exc, commandText, commandParameters, tab);
 				}
 			}
-			return base.TranslateException(exc, cmd);
+			return base.TranslateException(exc, commandText, commandParameters);
 		}
 	}
 }

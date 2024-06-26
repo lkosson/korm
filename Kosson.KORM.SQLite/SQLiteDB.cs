@@ -52,16 +52,16 @@ namespace Kosson.KORM.SQLite
 		}
 
 		/// <inheritdoc/>
-		protected override KORMException TranslateException(Exception exc, DbCommand cmd)
+		protected override KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
 		{
 			var se = exc as SqliteException;
 			if (se != null)
 			{
-				if (se.SqliteExtendedErrorCode == 787) return new KORMForeignKeyException(se, cmd, null);
-				if (se.Message.Contains("duplicate column name")) return new KORMObjectExistsException(se, cmd);
-				if (se.Message.Contains("already exists")) return new KORMObjectExistsException(se, cmd);
+				if (se.SqliteExtendedErrorCode == 787) return new KORMForeignKeyException(se, commandText, commandParameters, null);
+				if (se.Message.Contains("duplicate column name")) return new KORMObjectExistsException(se, commandText, commandParameters);
+				if (se.Message.Contains("already exists")) return new KORMObjectExistsException(se, commandText, commandParameters);
 			}
-			return base.TranslateException(exc, cmd);
+			return base.TranslateException(exc, commandText, commandParameters);
 		}
 	}
 }
