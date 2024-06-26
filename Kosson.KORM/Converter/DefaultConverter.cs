@@ -6,7 +6,6 @@ namespace Kosson.KORM.Converter
 {
 	class DefaultConverter : IConverter
 	{
-		private static readonly Type typeObject = typeof(object);
 		private static readonly Type typeByte = typeof(byte);
 		private static readonly Type typeInt = typeof(int);
 		private static readonly Type typeLong = typeof(long);
@@ -78,8 +77,7 @@ namespace Kosson.KORM.Converter
 			var nullable = Nullable.GetUnderlyingType(type);
 			if (nullable != null) return ((IConverter)this).Convert(value, nullable);
 
-			IConvertible convertible = value as IConvertible;
-			if (convertible != null) return FromConvertible(convertible, type);
+			if (value is IConvertible convertible) return FromConvertible(convertible, type);
 
 			if (from == typeBlob) return FromBlob((byte[])value, type);
 			// handled by IsInstanceOfType
@@ -94,7 +92,7 @@ namespace Kosson.KORM.Converter
 			throw new InvalidCastException("Value \"" + value + "\" of type " + value.GetType() + " cannot be converted to type " + type + ".");
 		}
 
-		private object DefaultValueForTypeCode(TypeCode typeCode)
+		private static object DefaultValueForTypeCode(TypeCode typeCode)
 		{
 			return defaultByTypeCode[(int)typeCode];
 		}
@@ -103,8 +101,7 @@ namespace Kosson.KORM.Converter
 		{
 			var typeCode = Type.GetTypeCode(type);
 			if (typeCode != TypeCode.Object) return DefaultValueForTypeCode(typeCode);
-			object result;
-			if (defaultValues.TryGetValue(type, out result)) return result;
+			if (defaultValues.TryGetValue(type, out var result)) return result;
 
 			if (type.IsArray) result = Array.CreateInstance(type.GetElementType(), 0);
 			else if (!type.IsValueType) result = null;
@@ -122,7 +119,7 @@ namespace Kosson.KORM.Converter
 			return Convert.ToBoolean(value);
 		}
 
-		private object ToString(object value, Type from)
+		private string ToString(object value, Type from)
 		{
 			if (from == typeDateTime)
 			{
@@ -133,7 +130,7 @@ namespace Kosson.KORM.Converter
 			if (from == typeDecimal) return ((decimal)value).ToString("G", Culture);
 			if (from == typeFloat) return ((float)value).ToString("R", Culture);
 			if (from == typeDouble) return ((double)value).ToString("R", Culture);
-			if (value is IConvertible) return ((IConvertible)value).ToString(Culture);
+			if (value is IConvertible convertible) return convertible.ToString(Culture);
 			return value.ToString();
 		}
 

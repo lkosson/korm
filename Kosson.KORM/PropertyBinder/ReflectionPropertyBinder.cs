@@ -52,15 +52,13 @@ namespace Kosson.KORM.PropertyBinder
 		private PropertyInfo GetProperty(object target, string propname)
 		{
 			var type = target.GetType();
-			Dictionary<string, PropertyInfo> properties;
-			if (!cache.TryGetValue(type, out properties))
+			if (!cache.TryGetValue(type, out var properties))
 			{
 				properties = GetProperties(target);
 				cache[type] = properties;
 			}
 
-			PropertyInfo property;
-			if (!properties.TryGetValue(propname, out property)) throw new ArgumentException("Property \"" + propname + "\" not found in \"" + type + "\".", "expression");
+			if (!properties.TryGetValue(propname, out var property)) throw new ArgumentException("Property \"" + propname + "\" not found in \"" + type + "\".", "expression");
 			return property;
 		}
 

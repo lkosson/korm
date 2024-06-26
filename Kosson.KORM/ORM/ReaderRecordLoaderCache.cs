@@ -13,7 +13,7 @@ namespace Kosson.KORM.ORM
 		public ReaderRecordLoaderCache(IMetaBuilder metaBuilder)
 		{
 			builder = new ReaderRecordLoaderBuilder(metaBuilder);
-			cache = new Dictionary<Type, Delegate>();
+			cache = [];
 			rwlock = new ReaderWriterLockSlim();
 		}
 

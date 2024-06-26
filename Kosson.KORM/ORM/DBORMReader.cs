@@ -85,7 +85,7 @@ namespace Kosson.KORM.ORM
 			return record;
 		}
 
-		private void ThrowDisposed()
+		private static void ThrowDisposed()
 		{
 			throw new ObjectDisposedException("Reader already disposed.");
 		}
@@ -115,7 +115,7 @@ namespace Kosson.KORM.ORM
 			if (reader == null) ThrowDisposed();
 			try
 			{
-				var result = aborted ? false : reader.Read();
+				var result = !aborted && reader.Read();
 				if (!result) Dispose();
 				return result;
 			}
@@ -131,7 +131,7 @@ namespace Kosson.KORM.ORM
 			if (reader == null) ThrowDisposed();
 			try
 			{
-				var result = aborted ? false : await reader.ReadAsync();
+				var result = !aborted && await reader.ReadAsync();
 				if (!result) Dispose();
 				return result;
 			}

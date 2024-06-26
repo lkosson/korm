@@ -3,13 +3,8 @@ using System.Text;
 
 namespace Kosson.KORM.PGSQL
 {
-	class CreateColumn : DBCreateColumn
+	class CreateColumn(IDBCommandBuilder builder) : DBCreateColumn(builder)
 	{
-		public CreateColumn(IDBCommandBuilder builder)
-			: base(builder)
-		{
-		}
-
 		protected override void AppendName(StringBuilder sb)
 		{
 			sb.Append("IF NOT EXISTS ");

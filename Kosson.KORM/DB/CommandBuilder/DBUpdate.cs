@@ -32,15 +32,15 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		void IDBUpdate.Table(IDBIdentifier table)
 		{
-			if (table == null) throw new ArgumentNullException("table");
+			ArgumentNullException.ThrowIfNull(table);
 			this.table = table;
 		}
 
 		void IDBUpdate.Set(IDBIdentifier field, IDBExpression expression)
 		{
-			if (expression == null) throw new ArgumentNullException("expression");
-			if (field == null) throw new ArgumentNullException("field");
-			if (sets == null) sets = new List<SetInfo>();
+			ArgumentNullException.ThrowIfNull(expression);
+			ArgumentNullException.ThrowIfNull(field);
+			sets ??= [];
 			sets.Add(new SetInfo(field, expression));
 		}
 

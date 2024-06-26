@@ -10,9 +10,9 @@ namespace Kosson.KORM.ORM
 {
 	class DBORMSelect<TRecord> : DBORMCommandBase<TRecord, IDBSelect>, IORMSelect<TRecord> where TRecord : class, IRecord, new()
 	{
-		private IConverter converter;
-		private IFactory factory;
-		private LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader;
+		private readonly IConverter converter;
+		private readonly IFactory factory;
+		private readonly LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader;
 
 		public DBORMSelect(IDB db, IMetaBuilder metaBuilder, IConverter converter, IFactory factory, LoaderFromReaderByIndexDelegate<TRecord> loaderFromReader, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
@@ -43,7 +43,7 @@ namespace Kosson.KORM.ORM
 			return template;
 		}
 
-		private void PrepareTemplate(IDBCommandBuilder cb, IDBSelect template, IMetaRecord meta, string tableAliasForColumns, string tableAliasForJoins, string fieldPrefix, Stack<long> descentPath)
+		private static void PrepareTemplate(IDBCommandBuilder cb, IDBSelect template, IMetaRecord meta, string tableAliasForColumns, string tableAliasForJoins, string fieldPrefix, Stack<long> descentPath)
 		{
 			// keep order in sync with ReaderRecordLoaderBuilder
 			foreach (var field in meta.Fields)
@@ -102,35 +102,31 @@ namespace Kosson.KORM.ORM
 		public IReadOnlyCollection<TRecord> Execute()
 		{
 			var token = LogStart(dbcommand: Command);
-			using (var reader = ExecuteReaderNoLog())
+			using var reader = ExecuteReaderNoLog();
+			var result = new List<TRecord>();
+			while (reader.MoveNext())
 			{
-				var result = new List<TRecord>();
-				while (reader.MoveNext())
-				{
-					var record = reader.Read();
-					result.Add(record);
-					LogRecord(LogLevel.Debug, token, record);
-				}
-				LogEnd(token, result.Count);
-				return result;
+				var record = reader.Read();
+				result.Add(record);
+				LogRecord(LogLevel.Debug, token, record);
 			}
+			LogEnd(token, result.Count);
+			return result;
 		}
 
 		public async Task<IReadOnlyCollection<TRecord>> ExecuteAsync()
 		{
 			var token = LogStart(dbcommand: Command);
-			using (var reader = await ExecuteReaderAsyncNoLog())
+			using var reader = await ExecuteReaderAsyncNoLog();
+			var result = new List<TRecord>();
+			while (await reader.MoveNextAsync())
 			{
-				var result = new List<TRecord>();
-				while (await reader.MoveNextAsync())
-				{
-					var record = reader.Read();
-					result.Add(record);
-					LogRecord(LogLevel.Debug, token, record);
-				}
-				LogEnd(token, result.Count);
-				return result;
+				var record = reader.Read();
+				result.Add(record);
+				LogRecord(LogLevel.Debug, token, record);
 			}
+			LogEnd(token, result.Count);
+			return result;
 		}
 
 		public IORMReader<TRecord> ExecuteReader()
@@ -170,7 +166,7 @@ namespace Kosson.KORM.ORM
 			var countCommand = Command.Clone();
 			countCommand.ForCount();
 			var sql = countCommand.ToString();
-			var token = LogStart(sql);
+			var token = LogStart(countCommand);
 			using var dbcommand = DB.CreateCommand(sql);
 			DB.AddParameters(dbcommand, Parameters);
 			using var dbreader = DB.ExecuteReader(dbcommand);
@@ -196,7 +192,7 @@ namespace Kosson.KORM.ORM
 			var countCommand = Command.Clone();
 			countCommand.ForCount();
 			var sql = countCommand.ToString();
-			var token = LogStart(sql);
+			var token = LogStart(countCommand);
 			using var dbcommand = DB.CreateCommand(sql);
 			DB.AddParameters(dbcommand, Parameters);
 			using var dbreader = await DB.ExecuteReaderAsync(dbcommand);

@@ -124,7 +124,7 @@ namespace Kosson.KORM
 		public static TCommand WhereFieldIn<TCommand, TValue>(this TCommand query, string field, params TValue[] values)
 			where TCommand : IORMNarrowableCommand<TCommand>
 		{
-			if (values == null) throw new ArgumentNullException("values");
+			ArgumentNullException.ThrowIfNull(values);
 			if (values.Length == 0) return query.Where(query.DB.CommandBuilder.Const(false));
 			if (values.Length == 1 && values[0] is TValue[] nested) values = nested;
 
@@ -486,12 +486,9 @@ namespace Kosson.KORM
 		/// <returns>Record returned by the query or null if empty resultset is returned.</returns>
 		public static TRecord ExecuteFirst<TRecord>(this IORMSelect<TRecord> query) where TRecord : IRecord
 		{
-			//return query.Limit(1).Execute().FirstOrDefault();
-			using (var reader = query.Limit(1).ExecuteReader())
-			{
-				if (!reader.MoveNext()) return default;
-				return reader.Read();
-			}
+			using var reader = query.Limit(1).ExecuteReader();
+			if (!reader.MoveNext()) return default;
+			return reader.Read();
 		}
 
 		/// <summary>
@@ -503,13 +500,9 @@ namespace Kosson.KORM
 		/// <returns>Record returned by the query or null if empty resultset is returned.</returns>
 		public async static Task<TRecord> ExecuteFirstAsync<TRecord>(this IORMSelect<TRecord> query) where TRecord : IRecord
 		{
-			using (var reader = await query.Limit(1).ExecuteReaderAsync())
-			{
-				if (!await reader.MoveNextAsync()) return default;
-				return reader.Read();
-			}
-			//var records = await query.Limit(1).ExecuteAsync();
-			//return records.FirstOrDefault();
+			using var reader = await query.Limit(1).ExecuteReaderAsync();
+			if (!await reader.MoveNextAsync()) return default;
+			return reader.Read();
 		}
 
 		/// <summary>

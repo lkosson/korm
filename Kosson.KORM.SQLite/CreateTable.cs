@@ -3,13 +3,8 @@ using System.Text;
 
 namespace Kosson.KORM.SQLite
 {
-	class CreateTable : DBCreateTable
+	class CreateTable(IDBCommandBuilder builder) : DBCreateTable(builder)
 	{
-		public CreateTable(IDBCommandBuilder builder)
-			: base(builder)
-		{
-		}
-
 		protected override void AppendTable(StringBuilder sb)
 		{
 			sb.Append("IF NOT EXISTS");

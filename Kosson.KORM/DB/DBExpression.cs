@@ -110,7 +110,7 @@ namespace Kosson.KORM.DB
 
 		public DBBlobConst(byte[] value)
 		{
-			if (value == null) throw new ArgumentNullException("value");
+			ArgumentNullException.ThrowIfNull(value);
 			this.value = value;
 		}
 
@@ -132,14 +132,9 @@ namespace Kosson.KORM.DB
 		}
 	}
 
-	class DBParameter : DBRawExpression
+	class DBParameter(IDBCommandBuilder builder, string name) : DBRawExpression(builder, name)
 	{
 		public override bool IsSimple => true;
-
-		public DBParameter(IDBCommandBuilder builder, string name)
-			: base(builder, name)
-		{
-		}
 
 		public override void Append(StringBuilder sb)
 		{
@@ -148,16 +143,9 @@ namespace Kosson.KORM.DB
 		}
 	}
 
-	class DBArray : DBRawExpression
+	class DBArray(IDBCommandBuilder builder, IDBExpression[] values) : DBRawExpression(builder, null)
 	{
-		private readonly IDBExpression[] values;
 		public override bool IsSimple => true;
-
-		public DBArray(IDBCommandBuilder builder, IDBExpression[] values)
-			: base(builder, null)
-		{
-			this.values = values;
-		}
 
 		public override void Append(StringBuilder sb)
 		{
@@ -169,18 +157,9 @@ namespace Kosson.KORM.DB
 		}
 	}
 
-	class DBCompoundCondition : DBRawExpression
+	class DBCompoundCondition(IDBCommandBuilder builder, string conditionOperator, IDBExpression[] conditions) : DBRawExpression(builder, null)
 	{
-		private readonly string conditionOperator;
-		private readonly IDBExpression[] conditions;
 		public override bool IsSimple => false;
-
-		public DBCompoundCondition(IDBCommandBuilder builder, string conditionOperator, IDBExpression[] conditions)
-			: base(builder, null)
-		{
-			this.conditionOperator = conditionOperator;
-			this.conditions = conditions;
-		}
 
 		public override void Append(StringBuilder sb)
 		{
@@ -202,7 +181,7 @@ namespace Kosson.KORM.DB
 		public DBIdentifier(IDBCommandBuilder builder, string identifier)
 			: base(builder, identifier)
 		{
-			if (identifier.Contains(builder.IdentifierQuoteRight)) throw new ArgumentException("Identifier contains invalid character: " + builder.IdentifierQuoteRight, "identifier");
+			if (identifier.Contains(builder.IdentifierQuoteRight)) throw new ArgumentException("Identifier contains invalid character: " + builder.IdentifierQuoteRight, nameof(identifier));
 		}
 
 		public override void Append(StringBuilder sb)
@@ -226,7 +205,7 @@ namespace Kosson.KORM.DB
 			foreach (var fragment in fragments)
 			{
 				if (fragment == null) hasNull = true;
-				else if (fragment.Contains(builder.IdentifierQuoteRight)) throw new ArgumentException("Identifier fragment contains invalid character: " + builder.IdentifierQuoteRight, "identifier");
+				else if (fragment.Contains(builder.IdentifierQuoteRight)) throw new ArgumentException("Identifier fragment contains invalid character: " + builder.IdentifierQuoteRight, nameof(fragments));
 			}
 			if (hasNull)
 			{
@@ -272,8 +251,8 @@ namespace Kosson.KORM.DB
 		public DBComparison(IDBCommandBuilder builder, IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr)
 			: base(builder)
 		{
-			if (lexpr == null) throw new ArgumentNullException("lexpr");
-			if (rexpr == null && comparison != DBExpressionComparison.Equal && comparison != DBExpressionComparison.NotEqual) throw new ArgumentNullException("rexpr");
+			ArgumentNullException.ThrowIfNull(lexpr);
+			if (rexpr == null && comparison != DBExpressionComparison.Equal && comparison != DBExpressionComparison.NotEqual) throw new ArgumentNullException(nameof(rexpr));
 			this.lexpr = lexpr;
 			this.rexpr = rexpr;
 			this.comparison = comparison;
@@ -306,7 +285,7 @@ namespace Kosson.KORM.DB
 				rexpr.Append(sb);
 				if (!rexpr.IsSimple) sb.Append(builder.ConditionParenthesisRight);
 
-				if (comparison == DBExpressionComparison.In) sb.Append(")");
+				if (comparison == DBExpressionComparison.In) sb.Append(')');
 			}
 		}
 
@@ -329,7 +308,7 @@ namespace Kosson.KORM.DB
 		public DBUnaryExpression(IDBCommandBuilder builder, IDBExpression expr, DBUnaryOperator op)
 			: base(builder)
 		{
-			if (expr == null) throw new ArgumentNullException("expr");
+			ArgumentNullException.ThrowIfNull(expr);
 			this.expr = expr;
 			this.op = op;
 		}
@@ -337,7 +316,7 @@ namespace Kosson.KORM.DB
 		public virtual void Append(StringBuilder sb)
 		{
 			if (op == DBUnaryOperator.Not) sb.Append("NOT");
-			else if (op == DBUnaryOperator.Negate) sb.Append("-");
+			else if (op == DBUnaryOperator.Negate) sb.Append('-');
 			else throw new ArgumentOutOfRangeException("op", op, "Unsupported operator type.");
 
 			if (!expr.IsSimple) sb.Append(builder.ConditionParenthesisLeft);
@@ -365,8 +344,8 @@ namespace Kosson.KORM.DB
 		public DBBinaryExpression(IDBCommandBuilder builder, IDBExpression lexpr, DBBinaryOperator op, IDBExpression rexpr)
 			: base(builder)
 		{
-			if (lexpr == null) throw new ArgumentNullException("lexpr");
-			if (rexpr == null) throw new ArgumentNullException("rexpr");
+			ArgumentNullException.ThrowIfNull(lexpr);
+			ArgumentNullException.ThrowIfNull(rexpr);
 			this.lexpr = lexpr;
 			this.rexpr = rexpr;
 			this.op = op;

@@ -3,13 +3,8 @@ using System.Text;
 
 namespace Kosson.KORM.SQLite
 {
-	class CreateColumn : DBCreateColumn
+	class CreateColumn(IDBCommandBuilder builder) : DBCreateColumn(builder)
 	{
-		public CreateColumn(IDBCommandBuilder builder)
-			: base(builder)
-		{
-		}
-
 		protected override void AppendNotNull(StringBuilder sb)
 		{
 			// SQLite requires default value for added NOT NULL columns.

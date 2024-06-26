@@ -7,7 +7,7 @@ namespace Kosson.KORM.PropertyBinder
 	{
 		public static Func<TInput, TOutput> BuildAccesor<TInput, TOutput>(string expression)
 		{
-			var dm = new DynamicMethod("Accessor-" + expression, typeof(TOutput), new Type[] { typeof(TInput) }, true);
+			var dm = new DynamicMethod("Accessor-" + expression, typeof(TOutput), [typeof(TInput)], true);
 			var il = dm.GetILGenerator();
 
 			var propertyExpr = expression;

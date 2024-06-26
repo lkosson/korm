@@ -3,13 +3,8 @@ using System.Text;
 
 namespace Kosson.KORM.PGSQL
 {
-	class CreateForeignKey : DBCreateForeignKey
+	class CreateForeignKey(IDBCommandBuilder builder) : DBCreateForeignKey(builder)
 	{
-		public CreateForeignKey(IDBCommandBuilder builder)
-			: base(builder)
-		{
-		}
-
 		protected override void AppendHeader(StringBuilder sb)
 		{
 			sb.Append("DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM information_schema.table_constraints WHERE table_name = '");

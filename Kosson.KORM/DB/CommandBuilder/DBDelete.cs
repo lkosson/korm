@@ -25,7 +25,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		void IDBDelete.Table(IDBIdentifier table)
 		{
-			if (table == null) throw new ArgumentNullException("table");
+			ArgumentNullException.ThrowIfNull(table);
 			this.table = table;
 		}
 

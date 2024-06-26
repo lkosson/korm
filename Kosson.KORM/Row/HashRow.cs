@@ -19,8 +19,8 @@ namespace Kosson.KORM
 		/// </summary>
 		public HashRow()
 		{
-			names = new Dictionary<string, int>();
-			values = new List<object>();
+			names = [];
+			values = [];
 		}
 
 		/// <summary>
@@ -30,8 +30,7 @@ namespace Kosson.KORM
 		/// <param name="value">Value to add.</param>
 		public void Add(string name, object value)
 		{
-			int index;
-			if (names.TryGetValue(name, out index))
+			if (names.TryGetValue(name, out var index))
 			{
 				values[index] = value;
 			}
@@ -44,8 +43,7 @@ namespace Kosson.KORM
 
 		int IRow.GetIndex(string name)
 		{
-			int index;
-			if (names.TryGetValue(name, out index)) return index;
+			if (names.TryGetValue(name, out var index)) return index;
 			return -1;
 		}
 

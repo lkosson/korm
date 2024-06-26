@@ -44,31 +44,31 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		void IDBForeignKey.ConstraintName(IDBIdentifier name)
 		{
-			if (name == null) throw new ArgumentNullException("name");
+			ArgumentNullException.ThrowIfNull(name);
 			this.name = name;
 		}
 
 		void IDBCreateForeignKey.Table(IDBIdentifier table)
 		{
-			if (table == null) throw new ArgumentNullException("table");
+			ArgumentNullException.ThrowIfNull(table);
 			this.table = table;
 		}
 
 		void IDBCreateForeignKey.Column(IDBIdentifier column)
 		{
-			if (column == null) throw new ArgumentNullException("column");
+			ArgumentNullException.ThrowIfNull(column);
 			this.column = column;
 		}
 
 		void IDBForeignKey.TargetTable(IDBIdentifier targetTable)
 		{
-			if (targetTable == null) throw new ArgumentNullException("targetTable");
+			ArgumentNullException.ThrowIfNull(targetTable);
 			this.targetTable = targetTable;
 		}
 
 		void IDBForeignKey.TargetColumn(IDBIdentifier targetColumn)
 		{
-			if (targetColumn == null) throw new ArgumentNullException("targetColumn");
+			ArgumentNullException.ThrowIfNull(targetColumn);
 			this.targetColumn = targetColumn;
 		}
 
@@ -95,9 +95,9 @@ namespace Kosson.KORM.DB.CommandBuilder
 			AppendColumn(sb);
 			sb.Append(") REFERENCES ");
 			AppendTargetTable(sb);
-			sb.Append("(");
+			sb.Append('(');
 			AppendTargetColumn(sb);
-			sb.Append(")");
+			sb.Append(')');
 			AppendOnDelete(sb);
 		}
 
@@ -108,9 +108,9 @@ namespace Kosson.KORM.DB.CommandBuilder
 			AppendName(sb);
 			sb.Append(" REFERENCES ");
 			AppendTargetTable(sb);
-			sb.Append("(");
+			sb.Append('(');
 			AppendTargetColumn(sb);
-			sb.Append(")");
+			sb.Append(')');
 			AppendOnDelete(sb);
 		}
 
@@ -120,7 +120,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendName(StringBuilder sb)
 		{
-			if (name == null) throw new ArgumentNullException("name");
+			ArgumentNullException.ThrowIfNull(name);
 			name.Append(sb);
 		}
 
@@ -130,7 +130,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendColumn(StringBuilder sb)
 		{
-			if (column == null) throw new ArgumentNullException("column");
+			ArgumentNullException.ThrowIfNull(column);
 			column.Append(sb);
 		}
 
@@ -140,7 +140,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendTargetTable(StringBuilder sb)
 		{
-			if (targetTable == null) throw new ArgumentNullException("targetTable");
+			ArgumentNullException.ThrowIfNull(targetTable);
 			targetTable.Append(sb);
 		}
 
@@ -150,7 +150,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendTargetColumn(StringBuilder sb)
 		{
-			if (targetColumn == null) throw new ArgumentNullException("targetColumn");
+			ArgumentNullException.ThrowIfNull(targetColumn);
 			targetColumn.Append(sb);
 		}
 

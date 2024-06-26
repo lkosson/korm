@@ -122,43 +122,39 @@ namespace Kosson.KORM.ORM
 
 			var token = LogStart();
 
-			using (var cmdUpdate = DB.CreateCommand(commandText ?? BuildCommandTextForRecords()))
+			using var cmdUpdate = DB.CreateCommand(commandText ?? BuildCommandTextForRecords());
+			int count = 0;
+			RecordNotifyResult result = RecordNotifyResult.Continue;
+			foreach (var record in records)
 			{
-				int count = 0;
-				RecordNotifyResult result = RecordNotifyResult.Continue;
-				foreach (var record in records)
+				var notify = record as IRecordNotifyUpdate;
+				if (notify != null) result = notify.OnUpdate();
+				if (result == RecordNotifyResult.Break) break;
+				if (result == RecordNotifyResult.Skip) continue;
+
+				LogRecord(LogLevel.Information, token, record);
+				DB.ClearParameters(cmdUpdate);
+				if (record is IRecordWithRowVersion rowVersionRecord)
 				{
-					var notify = record as IRecordNotifyUpdate;
-					if (notify != null) result = notify.OnUpdate();
-					if (result == RecordNotifyResult.Break) break;
-					if (result == RecordNotifyResult.Skip) continue;
-
-					LogRecord(LogLevel.Information, token, record);
-					DB.ClearParameters(cmdUpdate);
-					if (record is IRecordWithRowVersion rowVersionRecord)
-					{
-						DB.AddParameter(cmdUpdate, ROWVERSION_CURRENT, rowVersionRecord.RowVersion);
-						rowVersionRecord.RowVersion++;
-					}
-					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record);
-					int lcount = DB.ExecuteNonQuery(cmdUpdate);
-					if (lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate.CommandText, cmdUpdate.Parameters);
-
-					count += lcount;
-					if (notify != null) result = notify.OnUpdated();
-					if (result == RecordNotifyResult.Break) break;
+					DB.AddParameter(cmdUpdate, ROWVERSION_CURRENT, rowVersionRecord.RowVersion);
+					rowVersionRecord.RowVersion++;
 				}
-				LogEnd(token, count);
-				return count;
+				DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record);
+				int lcount = DB.ExecuteNonQuery(cmdUpdate);
+				if (lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate.CommandText, cmdUpdate.Parameters);
+
+				count += lcount;
+				if (notify != null) result = notify.OnUpdated();
+				if (result == RecordNotifyResult.Break) break;
 			}
+			LogEnd(token, count);
+			return count;
 		}
 
 		private int RecordsBatch(IEnumerable<TRecord> records)
 		{
 			var token = LogStart();
-
 			using var batch = DB.CreateBatch();
-
 			foreach (var record in records)
 			{
 				LogRecord(LogLevel.Information, token, record);
@@ -195,39 +191,35 @@ namespace Kosson.KORM.ORM
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
 			if (DB.IsBatchSupported && commandText != null && records.Count() > 1 && records.First() is not IRecordNotifyUpdate) return await RecordsBatchAsync(records);
-
 			var token = LogStart();
-
-			using (var cmdUpdate = DB.CreateCommand(commandText ?? BuildCommandTextForRecords()))
+			using var cmdUpdate = DB.CreateCommand(commandText ?? BuildCommandTextForRecords());
+			int count = 0;
+			RecordNotifyResult result = RecordNotifyResult.Continue;
+			DbParameter rowVersionParameter = meta.RowVersion == null ? null : DB.AddParameter(cmdUpdate, ROWVERSION_CURRENT, null);
+			foreach (var record in records)
 			{
-				int count = 0;
-				RecordNotifyResult result = RecordNotifyResult.Continue;
-				DbParameter rowVersionParameter = meta.RowVersion == null ? null : DB.AddParameter(cmdUpdate, ROWVERSION_CURRENT, null);
-				foreach (var record in records)
+				var notify = record as IRecordNotifyUpdate;
+				if (notify != null) result = notify.OnUpdate();
+				if (result == RecordNotifyResult.Break) break;
+				if (result == RecordNotifyResult.Skip) continue;
+
+				LogRecord(LogLevel.Information, token, record);
+				DB.ClearParameters(cmdUpdate);
+				if (record is IRecordWithRowVersion rowVersionRecord)
 				{
-					var notify = record as IRecordNotifyUpdate;
-					if (notify != null) result = notify.OnUpdate();
-					if (result == RecordNotifyResult.Break) break;
-					if (result == RecordNotifyResult.Skip) continue;
-
-					LogRecord(LogLevel.Information, token, record);
-					DB.ClearParameters(cmdUpdate);
-					if (record is IRecordWithRowVersion rowVersionRecord)
-					{
-						DB.AddParameter(cmdUpdate, ROWVERSION_CURRENT, rowVersionRecord.RowVersion);
-						rowVersionRecord.RowVersion++;
-					}
-					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record);
-					int lcount = await DB.ExecuteNonQueryAsync(cmdUpdate);
-					if (lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate.CommandText, cmdUpdate.Parameters);
-
-					count += lcount;
-					if (notify != null) result = notify.OnUpdated();
-					if (result == RecordNotifyResult.Break) break;
+					DB.AddParameter(cmdUpdate, ROWVERSION_CURRENT, rowVersionRecord.RowVersion);
+					rowVersionRecord.RowVersion++;
 				}
-				LogEnd(token, count);
-				return count;
+				DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record);
+				int lcount = await DB.ExecuteNonQueryAsync(cmdUpdate);
+				if (lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate.CommandText, cmdUpdate.Parameters);
+
+				count += lcount;
+				if (notify != null) result = notify.OnUpdated();
+				if (result == RecordNotifyResult.Break) break;
 			}
+			LogEnd(token, count);
+			return count;
 		}
 
 		private async Task<int> RecordsBatchAsync(IEnumerable<TRecord> records)

@@ -40,7 +40,7 @@ namespace Kosson.KORM
 			var expectedCount = records.Count();
 			if (expectedCount == 0) return;
 			var actualCount = orm.Insert<TRecord>().Records(records);
-			if (actualCount != expectedCount && !(records.First() is IRecordNotifyInsert)) throw new KORMInsertFailedException();
+			if (actualCount != expectedCount && records.First() is not IRecordNotifyInsert) throw new KORMInsertFailedException();
 		}
 
 		/// <summary>
@@ -55,7 +55,7 @@ namespace Kosson.KORM
 			var expectedCount = records.Count();
 			if (expectedCount == 0) return;
 			var actualCount = await orm.Insert<TRecord>().RecordsAsync(records);
-			if (actualCount != expectedCount && !(records.First() is IRecordNotifyInsert)) throw new KORMInsertFailedException();
+			if (actualCount != expectedCount && records.First() is not IRecordNotifyInsert) throw new KORMInsertFailedException();
 		}
 
 		/// <summary>
@@ -88,7 +88,7 @@ namespace Kosson.KORM
 			var expectedCount = records.Count();
 			if (expectedCount == 0) return;
 			var actualCount = orm.Update<TRecord>().Records(records);
-			if (actualCount != expectedCount && !(records.First() is IRecordNotifyUpdate)) throw new KORMUpdateFailedException();
+			if (actualCount != expectedCount && records.First() is not IRecordNotifyUpdate) throw new KORMUpdateFailedException();
 		}
 
 		/// <summary>
@@ -103,7 +103,7 @@ namespace Kosson.KORM
 			var expectedCount = records.Count();
 			if (expectedCount == 0) return;
 			var actualCount = await orm.Update<TRecord>().RecordsAsync(records);
-			if (actualCount != expectedCount && !(records.First() is IRecordNotifyUpdate)) throw new KORMUpdateFailedException();
+			if (actualCount != expectedCount && records.First() is not IRecordNotifyUpdate) throw new KORMUpdateFailedException();
 		}
 
 		/// <summary>
@@ -190,7 +190,7 @@ namespace Kosson.KORM
 			var expectedCount = records.Count();
 			if (expectedCount == 0) return;
 			var actualCount = orm.Delete<TRecord>().Records(records);
-			if (actualCount != expectedCount && !(records.First() is IRecordNotifyDelete)) throw new KORMDeleteFailedException();
+			if (actualCount != expectedCount && records.First() is not IRecordNotifyDelete) throw new KORMDeleteFailedException();
 		}
 
 		/// <summary>
@@ -203,7 +203,7 @@ namespace Kosson.KORM
 		public async static Task DeleteAllAsync<TRecord>(this IORM orm, IEnumerable<TRecord> records) where TRecord : IRecord
 		{
 			var count = await orm.Delete<TRecord>().RecordsAsync(records);
-			if (count != records.Count() && !(records.First() is IRecordNotifyDelete)) throw new KORMDeleteFailedException();
+			if (count != records.Count() && records.First() is not IRecordNotifyDelete) throw new KORMDeleteFailedException();
 		}
 
 		/// <summary>

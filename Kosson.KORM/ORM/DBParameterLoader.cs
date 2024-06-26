@@ -17,7 +17,7 @@ namespace Kosson.KORM.ORM
 		{
 			miInvokeDelegate = typeof(ParameterAdder).GetMethod(nameof(ParameterAdder.Invoke));
 			miVerifyStringParameter = typeof(DBParameterLoader).GetMethod(nameof(VerifyStringParameter), BindingFlags.NonPublic | BindingFlags.Static);
-			delegates = new Dictionary<Type, object>();
+			delegates = [];
 		}
 
 		private static string VerifyStringParameter(string value, string name, int maxlen, bool trim)
@@ -35,8 +35,7 @@ namespace Kosson.KORM.ORM
 
 		internal static TDelegate GetOrBuildLoader<TDelegate>(IMetaRecord meta, bool untyped)
 		{
-			object untypedDelegate;
-			if (delegates.TryGetValue(meta.Type, out untypedDelegate)) return (TDelegate)untypedDelegate;
+			if (delegates.TryGetValue(meta.Type, out var untypedDelegate)) return (TDelegate)untypedDelegate;
 			untypedDelegate = BuildLoader(meta, untyped);
 			delegates[meta.Type] = untypedDelegate;
 			return (TDelegate)untypedDelegate;

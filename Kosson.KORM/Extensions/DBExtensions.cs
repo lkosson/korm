@@ -46,20 +46,16 @@ namespace Kosson.KORM
 
 		private static T CreateAndExecuteCommand<T>(IDB db, string command, IEnumerable<object> parameters, Func<DbCommand, T> executor)
 		{
-			using (var cmd = db.CreateCommand(command))
-			{
-				db.AddParameters(cmd, parameters);
-				return executor(cmd);
-			}
+			using var cmd = db.CreateCommand(command);
+			db.AddParameters(cmd, parameters);
+			return executor(cmd);
 		}
 
 		private static async Task<T> CreateAndExecuteCommandAsync<T>(IDB db, string command, IEnumerable<object> parameters, Func<DbCommand, Task<T>> executor)
 		{
-			using (var cmd = db.CreateCommand(command))
-			{
-				db.AddParameters(cmd, parameters);
-				return await executor(cmd);
-			}
+			using var cmd = db.CreateCommand(command);
+			db.AddParameters(cmd, parameters);
+			return await executor(cmd);
 		}
 
 		private static T FormatQueryAndExecute<T>(IDB db, FormattableString command, Func<IDB, string, object[], T> executor)

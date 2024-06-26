@@ -30,13 +30,13 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		void IDBCreateTable.Table(IDBIdentifier table)
 		{
-			if (table == null) throw new ArgumentNullException("table");
+			ArgumentNullException.ThrowIfNull(table);
 			this.table = table;
 		}
 
 		void IDBCreateTable.PrimaryKey(IDBIdentifier column, IDBExpression type)
 		{
-			if (column == null) throw new ArgumentNullException("column");
+			ArgumentNullException.ThrowIfNull(column);
 			this.primaryKey = column;
 			this.type = type;
 		}
@@ -63,9 +63,9 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendPrimaryKey(StringBuilder sb)
 		{
-			if (primaryKey == null) throw new ArgumentNullException("primaryKey");
+			ArgumentNullException.ThrowIfNull(primaryKey);
 			primaryKey.Append(sb);
-			sb.Append(" ");
+			sb.Append(' ');
 			type.Append(sb);
 			sb.Append(" PRIMARY KEY");
 			if (autoincrement) AppendAutoIncrement(sb);

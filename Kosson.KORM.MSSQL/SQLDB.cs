@@ -38,8 +38,8 @@ namespace Kosson.KORM.MSSQL
 
 			if (CommandTimeout.HasValue)
 			{
-				using (var cmd = new SqlCommand(@"SET LOCK_TIMEOUT " + CommandTimeout.Value, conn))
-					cmd.ExecuteNonQuery();
+				using var cmd = new SqlCommand(@"SET LOCK_TIMEOUT " + CommandTimeout.Value, conn);
+				cmd.ExecuteNonQuery();
 			}
 
 			return conn;
@@ -52,15 +52,11 @@ namespace Kosson.KORM.MSSQL
 			string orgdb = csb.InitialCatalog;
 			csb.InitialCatalog = "master";
 			csb.Pooling = false; // there will be only one such connection
-			using (SqlConnection conn = new SqlConnection(csb.ToString()))
-			{
-				conn.Open();
-				using (var cmd = new SqlCommand("IF NOT EXISTS(SELECT name FROM sysdatabases WHERE name = @DB) BEGIN CREATE DATABASE [" + orgdb + "]; ALTER DATABASE [" + orgdb + "] SET READ_COMMITTED_SNAPSHOT ON; ALTER DATABASE [" + orgdb + "] SET ALLOW_SNAPSHOT_ISOLATION ON; END", conn))
-				{
-					((IDB)this).AddParameter(cmd, "@DB", orgdb);
-					cmd.ExecuteNonQuery();
-				}
-			}
+			using SqlConnection conn = new SqlConnection(csb.ToString());
+			conn.Open();
+			using var cmd = new SqlCommand("IF NOT EXISTS(SELECT name FROM sysdatabases WHERE name = @DB) BEGIN CREATE DATABASE [" + orgdb + "]; ALTER DATABASE [" + orgdb + "] SET READ_COMMITTED_SNAPSHOT ON; ALTER DATABASE [" + orgdb + "] SET ALLOW_SNAPSHOT_ISOLATION ON; END", conn);
+			((IDB)this).AddParameter(cmd, "@DB", orgdb);
+			cmd.ExecuteNonQuery();
 		}
 
 		/// <inheritdoc/>
@@ -78,12 +74,11 @@ namespace Kosson.KORM.MSSQL
 				if (sd.Precision < 38) sp.Precision = 38;
 				if (sd.Scale < 8) sp.Scale = 8;
 			}
-			else if (parameter.Value is string)
+			else if (parameter.Value is string stringValue)
 			{
-				var s = (string)parameter.Value;
 				int len = parameter.Size;
 				if (len < 4000) len = 4000;
-				if (s.Length > 4000) len = -1;
+				if (stringValue.Length > 4000) len = -1;
 				parameter.Size = len;
 			}
 		}
@@ -91,8 +86,7 @@ namespace Kosson.KORM.MSSQL
 		/// <inheritdoc/>
 		protected override KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
 		{
-			SqlException se = exc as SqlException;
-			if (se != null)
+			if (exc is SqlException se)
 			{
 				if (se.Number == 1222) return new KORMLockException(exc, commandText, commandParameters);
 				else if (se.Number == 2601) return new KORMDuplicateValueException(exc, commandText, commandParameters); // duplicate unique key

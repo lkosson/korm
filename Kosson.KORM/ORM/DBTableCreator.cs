@@ -8,10 +8,10 @@ namespace Kosson.KORM.ORM
 {
 	class DBTableCreator
 	{
-		private IMetaBuilder metaBuilder;
-		private IDB db;
-		private IDBCommandBuilder cb;
-		private Action<IDBCommand> executor;
+		private readonly IMetaBuilder metaBuilder;
+		private readonly IDB db;
+		private readonly IDBCommandBuilder cb;
+		private readonly Action<IDBCommand> executor;
 		private readonly ILogger logger;
 
 		public DBTableCreator(IDB db, IMetaBuilder metaBuilder, ILogger logger, Action<IDBCommand> customExecutor = null)

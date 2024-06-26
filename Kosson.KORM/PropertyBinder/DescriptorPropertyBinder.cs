@@ -33,16 +33,13 @@ namespace Kosson.KORM.PropertyBinder
 		private PropertyDescriptor GetProperty(object target, string propname)
 		{
 			var type = target.GetType();
-			PropertyDescriptorCollection properties;
-			if (!cache.TryGetValue(type, out properties))
+			if (!cache.TryGetValue(type, out var properties))
 			{
 				properties = TypeDescriptor.GetProperties(target);
 				cache[type] = properties;
 			}
 
-			var property = properties.Find(propname, true);
-			if (property == null) throw new ArgumentException("Property \"" + propname + "\" not found in \"" + type + "\".", "expression");
-			return property;
+			return properties.Find(propname, true) ?? throw new ArgumentException("Property \"" + propname + "\" not found in \"" + type + "\".", "expression");
 		}
 
 		object IPropertyBinder.Get(object target, string expression)

@@ -15,10 +15,10 @@ namespace Kosson.KORM.DB
 	/// </summary>
 	public abstract class ADONETDB : IDB
 	{
-		private Logging log;
-		private IDBCommandBuilder commandBuilder;
+		private readonly Logging log;
+		private readonly IDBCommandBuilder commandBuilder;
 		private bool isImplicit;
-		private IDisposable optionsMonitorDisposer;
+		private readonly IDisposable optionsMonitorDisposer;
 
 		/// <summary>
 		/// Synchronization root for accessing ADO.NET objects.
@@ -108,7 +108,7 @@ namespace Kosson.KORM.DB
 		}
 
 		#region Synchronization
-		private IDisposable AcquireLock()
+		private SemaphoreSlimReleaser AcquireLock()
 		{
 			syncroot.Wait();
 			return new SemaphoreSlimReleaser(syncroot);
@@ -120,15 +120,8 @@ namespace Kosson.KORM.DB
 			return new SemaphoreSlimReleaser(syncroot);
 		}
 
-		class SemaphoreSlimReleaser : IDisposable
+		class SemaphoreSlimReleaser(SemaphoreSlim sem) : IDisposable
 		{
-			private SemaphoreSlim sem;
-
-			public SemaphoreSlimReleaser(SemaphoreSlim sem)
-			{
-				this.sem = sem;
-			}
-
 			public void Dispose()
 			{
 				sem.Release();
@@ -239,7 +232,7 @@ namespace Kosson.KORM.DB
 					if (dontThrow)
 					{
 						var translated = TranslateException(exc, null, null);
-						log.Log(translated, default(TraceToken));
+						log.Log(translated, default);
 					}
 					else
 					{
@@ -261,7 +254,7 @@ namespace Kosson.KORM.DB
 					if (dontThrow)
 					{
 						var translated = TranslateException(exc, null, null);
-						log.Log(translated, default(TraceToken));
+						log.Log(translated, default);
 					}
 					else
 					{
@@ -280,19 +273,20 @@ namespace Kosson.KORM.DB
 			Close(true);
 			syncroot.Dispose();
 			optionsMonitorDisposer.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
-		private StackTrace CaptureStackTrace()
+		private static StackTrace CaptureStackTrace()
 		{
 			if (!Debugger.IsAttached) return null;
 			return new StackTrace();
 		}
 		#endregion
 		#region Parameters handling
-		private bool IsNull(object val)
+		private static bool IsNull(object val)
 		{
 			if (val == null) return true;
-			if (val is DateTime && ((DateTime)val).Ticks == 0) return true;
+			if (val is DateTime date && date.Ticks == 0) return true;
 			if (val is bool?) return !((bool?)val).HasValue;
 			if (val is int?) return !((int?)val).HasValue;
 			if (val is long?) return !((long?)val).HasValue;
@@ -311,17 +305,8 @@ namespace Kosson.KORM.DB
 		{
 			if (IsNull(val)) return DBNull.Value;
 			else if (val is Enum) return (int)val;
-			else if (val is IHasID)
-			{
-				var id = (val as IHasID).ID;
-				if (id == 0) return DBNull.Value;
-				return id;
-			}
-			else if (val is bool)
-				if ((bool)val)
-					return 1;
-				else
-					return 0;
+			else if (val is IHasID id) return id.ID == 0 ? DBNull.Value : id.ID;
+			else if (val is bool boolValue) return boolValue ? 1 : 0;
 			else return val;
 		}
 
@@ -409,11 +394,10 @@ namespace Kosson.KORM.DB
 
 		DbBatchCommand IDB.CreateCommand(DbBatch batch, string command)
 		{
-			DbBatchCommand cmd = null;
 			try
 			{
 				Open(true);
-				cmd = batch.CreateBatchCommand();
+				var cmd = batch.CreateBatchCommand();
 				if (ReplaceNewLines) command = command.Replace('\r', ' ').Replace('\n', ' ');
 				cmd.CommandText = command;
 				batch.BatchCommands.Add(cmd);
@@ -572,13 +556,11 @@ namespace Kosson.KORM.DB
 			{
 				using (AcquireLock())
 				{
-					using (DbDataReader reader = command.ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult | CommandBehavior.SequentialAccess))
-					{
-						log.StopStart(ref token, "<PROCESS>");
-						var rows = ProcessReader(reader);
-						log.Stop(token, rows.Count);
-						return rows;
-					}
+					using var reader = command.ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult | CommandBehavior.SequentialAccess);
+					log.StopStart(ref token, "<PROCESS>");
+					var rows = ProcessReader(reader);
+					log.Stop(token, rows.Count);
+					return rows;
 				}
 			}
 			catch (Exception exc)
@@ -655,10 +637,10 @@ namespace Kosson.KORM.DB
 		}
 		#endregion
 		#region Reader processing
-		private IReadOnlyList<IRow> ProcessReader(DbDataReader reader)
+		private static List<IRow> ProcessReader(DbDataReader reader)
 		{
-			List<IRow> rows = new List<IRow>();
-			Dictionary<string, int> meta = CreateMetaFromReader(reader);
+			var rows = new List<IRow>();
+			var meta = CreateMetaFromReader(reader);
 			while (reader.Read())
 			{
 				IRow row = CreateRowFromReader(reader, meta);
@@ -667,21 +649,21 @@ namespace Kosson.KORM.DB
 			return rows;
 		}
 
-		private async Task<IReadOnlyList<IRow>> ProcessReaderAsync(DbDataReader reader)
+		private static async Task<IReadOnlyList<IRow>> ProcessReaderAsync(DbDataReader reader)
 		{
-			List<IRow> rows = new List<IRow>();
-			Dictionary<string, int> meta = CreateMetaFromReader(reader);
+			var rows = new List<IRow>();
+			var meta = CreateMetaFromReader(reader);
 			while (await reader.ReadAsync())
 			{
-				IRow row = CreateRowFromReader(reader, meta);
+				var row = CreateRowFromReader(reader, meta);
 				rows.Add(row);
 			}
 			return rows;
 		}
 
-		private IRow CreateRowFromReader(DbDataReader reader, Dictionary<string, int> meta)
+		private static ArrayBasedRow CreateRowFromReader(DbDataReader reader, Dictionary<string, int> meta)
 		{
-			object[] items = new object[reader.FieldCount];
+			var items = new object[reader.FieldCount];
 			reader.GetValues(items);
 			for (int i = 0; i < items.Length; i++)
 			{
@@ -690,10 +672,10 @@ namespace Kosson.KORM.DB
 			return new ArrayBasedRow(items, meta);
 		}
 
-		private Dictionary<string, int> CreateMetaFromReader(DbDataReader reader)
+		private static Dictionary<string, int> CreateMetaFromReader(DbDataReader reader)
 		{
 			int count = reader.FieldCount;
-			Dictionary<string, int> meta = new Dictionary<string, int>(count * 2 /* is it worth it? */, StringComparer.OrdinalIgnoreCase);
+			var meta = new Dictionary<string, int>(count * 2 /* is it worth it? */, StringComparer.OrdinalIgnoreCase);
 			for (int i = 0; i < count; i++)
 			{
 				string name = reader.GetName(i);
@@ -707,7 +689,8 @@ namespace Kosson.KORM.DB
 		/// Translates ADO.NET provider-specific exception to KORMException or its subtype.
 		/// </summary>
 		/// <param name="exc">Caught exception to translate.</param>
-		/// <param name="cmd">Command causing the exception.</param>
+		/// <param name="commandText">Text of the command that caused the exception.</param>
+		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
 		/// <returns>Provider-independent exception.</returns>
 		protected virtual KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
 		{
@@ -717,7 +700,7 @@ namespace Kosson.KORM.DB
 			return new KORMException(exc.Message, exc, commandText, commandParameters);
 		}
 
-		private void HandleException(Exception exc, string commandText, DbParameterCollection commandParameters, TraceToken token = default(TraceToken))
+		private void HandleException(Exception exc, string commandText, DbParameterCollection commandParameters, TraceToken token = default)
 		{
 			var translated = TranslateException(exc, commandText, commandParameters);
 			if (translated == null) return; // untranslated exceptions will be rethrown by caller
@@ -725,18 +708,18 @@ namespace Kosson.KORM.DB
 			throw translated;
 		}
 
-		internal void HandleException(Exception exc, TraceToken token = default(TraceToken))
+		internal void HandleException(Exception exc, TraceToken token = default)
 		{
 			if (exc is DbException dbException && dbException.BatchCommand != null) HandleException(exc, dbException.BatchCommand, token);
 			HandleException(exc, null, null, token);
 		}
 
-		internal void HandleException(Exception exc, DbCommand command, TraceToken token = default(TraceToken))
+		internal void HandleException(Exception exc, DbCommand command, TraceToken token = default)
 		{
 			HandleException(exc, command.CommandText, command.Parameters, token);
 		}
 
-		internal void HandleException(Exception exc, DbBatchCommand command, TraceToken token = default(TraceToken))
+		internal void HandleException(Exception exc, DbBatchCommand command, TraceToken token = default)
 		{
 			HandleException(exc, command.CommandText, command.Parameters, token);
 		}

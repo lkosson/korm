@@ -205,17 +205,9 @@ namespace Kosson.KORM
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord => new PartialIdentifier(query.Meta);
 
-		class PartialIdentifier
+		class PartialIdentifier(IMetaRecord meta, ORMCommandLinqExtensions.PartialIdentifier parent = null)
 		{
 			private readonly List<string> path = [];
-			private readonly IMetaRecord meta;
-			private readonly PartialIdentifier parent;
-
-			public PartialIdentifier(IMetaRecord meta, PartialIdentifier parent = null)
-			{
-				this.meta = meta;
-				this.parent = parent;
-			}
 
 			public IMetaRecord Meta => meta;
 			public string CurrentPath => String.Join(".", path);

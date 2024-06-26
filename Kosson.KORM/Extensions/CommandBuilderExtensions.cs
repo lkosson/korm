@@ -54,26 +54,19 @@ namespace Kosson.KORM
 		public static IDBExpression Const(this IDBCommandBuilder builder, object value)
 		{
 			if (value == null) return builder.Null();
-			if (value is byte) return builder.Const((byte)value);
-			if (value is short) return builder.Const((short)value);
-			if (value is int) return builder.Const((int)value);
-			if (value is long) return builder.Const((long)value);
-			if (value is float) return builder.Const((float)value);
-			if (value is double) return builder.Const((double)value);
-			if (value is decimal) return builder.Const((decimal)value);
-			if (value is string) return builder.Const((string)value);
-			if (value is DateTime) return builder.Const((DateTime)value);
+			if (value is byte byteValue) return builder.Const(byteValue);
+			if (value is short shortValue) return builder.Const(shortValue);
+			if (value is int intValue) return builder.Const(intValue);
+			if (value is long longValue) return builder.Const(longValue);
+			if (value is float floatValue) return builder.Const(floatValue);
+			if (value is double doubleValue) return builder.Const(doubleValue);
+			if (value is decimal decimalValue) return builder.Const(decimalValue);
+			if (value is string stringValue) return builder.Const(stringValue);
+			if (value is DateTime dateValue) return builder.Const(dateValue);
 			if (value is Enum) return builder.Const((int)value);
-			if (value is bool) return builder.Const((bool)value);
-			if (value is byte[]) return builder.Const((byte[])value);
-			if (value is IHasID)
-			{
-				var id = ((IHasID)value).ID;
-				if (id == 0)
-					return builder.Null();
-				else
-					return builder.Const(id);
-			}
+			if (value is bool boolValue) return builder.Const(boolValue);
+			if (value is byte[] blobValue) return builder.Const(blobValue);
+			if (value is IHasID idValue) return idValue.ID == 0 ? builder.Null() : builder.Const(idValue.ID);
 			throw new InvalidCastException("Type " + value.GetType().Name + " is not supported.");
 		}
 	}

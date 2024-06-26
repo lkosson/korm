@@ -25,17 +25,17 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Determines whether there is no referenced record.
 		/// </summary>
-		public bool IsNull { get { return ID == 0; } }
+		public readonly bool IsNull { get { return ID == 0; } }
 
 		/// <summary>
 		/// Determines whether there is a referenced record.
 		/// </summary>
-		public bool IsNotNull {  get { return !IsNull; } }
+		public readonly bool IsNotNull { get { return !IsNull; } }
 
 		/// <summary>
 		/// Primary key of referenced record as nullable value.
 		/// </summary>
-		public long? IDOrNull { get { if (IsNull) return null; return ID; } set { ID = value.GetValueOrDefault(); } }
+		public long? IDOrNull { readonly get { if (IsNull) return null; return ID; } set { ID = value.GetValueOrDefault(); } }
 
 		/// <summary>
 		/// Creates a new record reference from a given primary key (ID) value.
@@ -60,9 +60,9 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="obj">Record reference to compare to.</param>
 		/// <returns>True if given record reference references record of a same type and same primary key (ID) value.</returns>
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 		{
-			if (!(obj is IRecordRef)) return false;
+			if (obj is not IRecordRef) return false;
 			var other = (IRecordRef)obj;
 			return other.ID == ID && (other.RecordType == RecordType || other.RecordType.IsAssignableFrom(RecordType) || RecordType.IsAssignableFrom(other.RecordType));
 		}
@@ -132,7 +132,7 @@ namespace Kosson.KORM
 		/// Returns hash code of the record reference.
 		/// </summary>
 		/// <returns>Record reference hash code.</returns>
-		public override int GetHashCode()
+		public override readonly int GetHashCode()
 		{
 			return ID.GetHashCode();
 		}
@@ -141,7 +141,7 @@ namespace Kosson.KORM
 		/// Converts record reference to its string representation.
 		/// </summary>
 		/// <returns>String representation of a record reference.</returns>
-		public override string ToString()
+		public override readonly string ToString()
 		{
 			return typeof(T).Name + "@" + ID;
 		}
@@ -196,85 +196,36 @@ namespace Kosson.KORM
 		public readonly RecordRef<TDerived> Convert<TDerived>() where TDerived : T => new RecordRef<TDerived>(ID);
 
 		#region IConvertible implementation
-		TypeCode IConvertible.GetTypeCode()
-		{
-			return TypeCode.Object;
-		}
+		readonly TypeCode IConvertible.GetTypeCode() => TypeCode.Object;
 
-		private TTargetType ThrowInvalidCast<TTargetType>()
+		private readonly TTargetType ThrowInvalidCast<TTargetType>()
 		{
 			ThrowInvalidCast(typeof(TTargetType));
-			return default(TTargetType)!;
+			return default!;
 		}
 
-		private void ThrowInvalidCast(Type type)
-		{
-			throw new InvalidCastException("Record \"" + this + "\" cannot be converted to type " + type + ".");
-		}
+		private readonly void ThrowInvalidCast(Type type) => throw new InvalidCastException("Record \"" + this + "\" cannot be converted to type " + type + ".");
 
-		bool IConvertible.ToBoolean(IFormatProvider provider)
-		{
-			return ThrowInvalidCast<bool>();
-		}
+		readonly bool IConvertible.ToBoolean(IFormatProvider? provider) => ThrowInvalidCast<bool>();
+		readonly byte IConvertible.ToByte(IFormatProvider? provider) => ThrowInvalidCast<byte>();
+		readonly char IConvertible.ToChar(IFormatProvider? provider) => ThrowInvalidCast<char>();
+		readonly DateTime IConvertible.ToDateTime(IFormatProvider? provider) => ThrowInvalidCast<DateTime>();
+		readonly decimal IConvertible.ToDecimal(IFormatProvider? provider) => ThrowInvalidCast<decimal>();
+		readonly double IConvertible.ToDouble(IFormatProvider? provider) => ThrowInvalidCast<double>();
+		readonly short IConvertible.ToInt16(IFormatProvider? provider) { checked { return (short)ID; } }
+		readonly int IConvertible.ToInt32(IFormatProvider? provider) { checked { return (int)ID; } }
+		readonly long IConvertible.ToInt64(IFormatProvider? provider) => ID;
+		readonly sbyte IConvertible.ToSByte(IFormatProvider? provider) { checked { return (sbyte)ID; } }
+		readonly float IConvertible.ToSingle(IFormatProvider? provider) => ThrowInvalidCast<float>();
 
-		byte IConvertible.ToByte(IFormatProvider provider)
-		{
-			return ThrowInvalidCast<byte>();
-		}
-
-		char IConvertible.ToChar(IFormatProvider provider)
-		{
-			return ThrowInvalidCast<char>();
-		}
-
-		DateTime IConvertible.ToDateTime(IFormatProvider provider)
-		{
-			return ThrowInvalidCast<DateTime>();
-		}
-
-		decimal IConvertible.ToDecimal(IFormatProvider provider)
-		{
-			return ThrowInvalidCast<decimal>();
-		}
-
-		double IConvertible.ToDouble(IFormatProvider provider)
-		{
-			return ThrowInvalidCast<double>();
-		}
-
-		short IConvertible.ToInt16(IFormatProvider provider)
-		{
-			checked { return (short)ID; }
-		}
-
-		int IConvertible.ToInt32(IFormatProvider provider)
-		{
-			checked { return (int)ID; }
-		}
-
-		long IConvertible.ToInt64(IFormatProvider provider)
-		{
-			return ID;
-		}
-
-		sbyte IConvertible.ToSByte(IFormatProvider provider)
-		{
-			checked { return (sbyte)ID; }
-		}
-
-		float IConvertible.ToSingle(IFormatProvider provider)
-		{
-			return ThrowInvalidCast<float>();
-		}
-
-		string IConvertible.ToString(IFormatProvider provider)
+		readonly string IConvertible.ToString(IFormatProvider? provider)
 		{
 			// important for Select control's SelectedValue property
 			if (ID == 0) return "";
 			return ID.ToString();
 		}
 
-		object? IConvertible.ToType(Type type, IFormatProvider provider)
+		readonly object IConvertible.ToType(Type type, IFormatProvider? provider)
 		{
 			//if (typeof(IRecordRef).IsAssignableFrom(type))
 			//{
@@ -284,23 +235,12 @@ namespace Kosson.KORM
 			//	return recordref;
 			//}
 			ThrowInvalidCast(type);
-			return null;
+			return null!;
 		}
 
-		ushort IConvertible.ToUInt16(IFormatProvider provider)
-		{
-			checked { return (ushort)ID; }
-		}
-
-		uint IConvertible.ToUInt32(IFormatProvider provider)
-		{
-			checked { return (uint)ID; }
-		}
-
-		ulong IConvertible.ToUInt64(IFormatProvider provider)
-		{
-			checked { return (ulong)ID; }
-		}
+		readonly ushort IConvertible.ToUInt16(IFormatProvider? provider) { checked { return (ushort)ID; } }
+		readonly uint IConvertible.ToUInt32(IFormatProvider? provider) { checked { return (uint)ID; } }
+		readonly ulong IConvertible.ToUInt64(IFormatProvider? provider) { checked { return (ulong)ID; } }
 		#endregion
 	}
 }

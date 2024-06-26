@@ -60,8 +60,7 @@ namespace Kosson.KORM.PGSQL
 		/// <inheritdoc/>
 		protected override KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
 		{
-			var pe = exc as PostgresException;
-			if (pe != null)
+			if (exc is PostgresException pe)
 			{
 				if (pe.SqlState == "23503") return new KORMForeignKeyException(exc, commandText, commandParameters, pe.TableName);
 				// TODO: Use ErrorCode instead of parsing messages

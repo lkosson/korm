@@ -59,13 +59,13 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		void IDBCreateColumn.Table(IDBIdentifier table)
 		{
-			if (table == null) throw new ArgumentNullException("table");
+			ArgumentNullException.ThrowIfNull(table);
 			this.table = table;
 		}
 
 		void IDBCreateColumn.Name(IDBIdentifier name)
 		{
-			if (name == null) throw new ArgumentNullException("name");
+			ArgumentNullException.ThrowIfNull(name);
 			this.name = name;
 		}
 
@@ -86,19 +86,19 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		void IDBForeignKey.ConstraintName(IDBIdentifier name)
 		{
-			if (name == null) throw new ArgumentNullException("name");
+			ArgumentNullException.ThrowIfNull(name);
 			this.foreignKeyName = name;
 		}
 
 		void IDBForeignKey.TargetTable(IDBIdentifier targetTable)
 		{
-			if (targetTable == null) throw new ArgumentNullException("targetTable");
+			ArgumentNullException.ThrowIfNull(targetTable);
 			this.targetTable = targetTable;
 		}
 
 		void IDBForeignKey.TargetColumn(IDBIdentifier targetColumn)
 		{
-			if (targetColumn == null) throw new ArgumentNullException("targetColumn");
+			ArgumentNullException.ThrowIfNull(targetColumn);
 			this.targetColumn = targetColumn;
 		}
 
@@ -121,9 +121,9 @@ namespace Kosson.KORM.DB.CommandBuilder
 			AppendTable(sb);
 			sb.Append(" ADD ");
 			AppendName(sb);
-			sb.Append(" ");
+			sb.Append(' ');
 			AppendType(sb);
-			sb.Append(" ");
+			sb.Append(' ');
 			AppendNotNull(sb);
 			AppendDefaultValue(sb);
 			AppendForeignKey(sb);
@@ -135,7 +135,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendName(StringBuilder sb)
 		{
-			if (name == null) throw new ArgumentNullException("name");
+			ArgumentNullException.ThrowIfNull(name);
 			name.Append(sb);
 		}
 
@@ -145,7 +145,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendType(StringBuilder sb)
 		{
-			if (type == null) throw new ArgumentNullException("type");
+			ArgumentNullException.ThrowIfNull(type);
 			type.Append(sb);
 		}
 

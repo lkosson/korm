@@ -40,7 +40,7 @@ namespace Kosson.KORM.DB
 
 		public TraceToken Start(string msg)
 		{
-			if (!TraceWarningEnabled) return default(TraceToken);
+			if (!TraceWarningEnabled) return default;
 			int id = Interlocked.Increment(ref nextTraceId);
 			// Keep LogLevel.Information in sync with Log(Exception) method
 			if (TraceInformationEnabled) Trace(LogLevel.Information, id, msg);
@@ -53,7 +53,7 @@ namespace Kosson.KORM.DB
 
 		public TraceToken Start(DbCommand command)
 		{
-			if (!TraceWarningEnabled) return default(TraceToken);
+			if (!TraceWarningEnabled) return default;
 			var sql = command.CommandText;
 			var token = Start(sql);
 			TraceQueryParameters(LogLevel.Debug, token, command.Parameters);
@@ -62,7 +62,7 @@ namespace Kosson.KORM.DB
 
 		public TraceToken Start(DbBatch batch)
 		{
-			if (!TraceWarningEnabled) return default(TraceToken);
+			if (!TraceWarningEnabled) return default;
 
 			if (TraceDebugEnabled)
 			{

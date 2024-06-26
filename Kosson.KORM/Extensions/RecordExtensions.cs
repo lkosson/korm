@@ -142,7 +142,7 @@ namespace Kosson.KORM
 		/// <returns>Reference to a record.</returns>
 		public static RecordRef<TRecord> Ref<TRecord>(this TRecord record) where TRecord : IRecord
 		{
-			if (record == null) return default(RecordRef<TRecord>);
+			if (record == null) return default;
 			return new RecordRef<TRecord>(record.ID);
 		}
 
@@ -215,16 +215,16 @@ namespace Kosson.KORM
 				{
 					if (sb.Length > 0) sb.Append(", ");
 					sb.Append(field.Name);
-					sb.Append("=");
+					sb.Append('=');
 					if (value == null)
 					{
 						sb.Append("null");
 					}
 					else
 					{
-						if (field.Type == typeof(string)) sb.Append("\"");
+						if (field.Type == typeof(string)) sb.Append('"');
 						sb.Append(value);
-						if (field.Type == typeof(string)) sb.Append("\"");
+						if (field.Type == typeof(string)) sb.Append('"');
 					}
 				}
 			}

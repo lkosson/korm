@@ -31,8 +31,8 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <inheritdoc/>
 		public void Where(IDBExpression expression)
 		{
-			if (expression == null) throw new ArgumentNullException("expression");
-			if (wheres == null) wheres = new List<IDBExpression>();
+			ArgumentNullException.ThrowIfNull(expression);
+			wheres ??= new List<IDBExpression>();
 			wheres.Add(expression);
 		}
 
@@ -73,7 +73,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 			{
 				if (where == null)
 				{
-					currentGroup = new List<IDBExpression>();
+					currentGroup = [];
 					groups.Add(currentGroup);
 				}
 				else

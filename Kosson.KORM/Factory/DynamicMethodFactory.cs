@@ -29,8 +29,7 @@ namespace Kosson.KORM.Factory
 				}
 				else
 				{
-					var typeconstr = type.GetConstructor(Type.EmptyTypes);
-					if (typeconstr == null) throw new MissingMethodException("Missing default constructor in type " + type + ".");
+					var typeconstr = type.GetConstructor(Type.EmptyTypes) ?? throw new MissingMethodException("Missing default constructor in type " + type + ".");
 					il.Emit(OpCodes.Newobj, typeconstr);
 				}
 				il.Emit(OpCodes.Ret);

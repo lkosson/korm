@@ -56,13 +56,13 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		void IDBInsert.Table(IDBIdentifier table)
 		{
-			if (table == null) throw new ArgumentNullException("table");
+			ArgumentNullException.ThrowIfNull(table);
 			this.table = table;
 		}
 
 		void IDBInsert.PrimaryKeyReturn(IDBIdentifier primaryKey)
 		{
-			if (primaryKey == null) throw new ArgumentNullException("primaryKey");
+			ArgumentNullException.ThrowIfNull(primaryKey);
 			primaryKeyReturn = true;
 			this.primaryKey = primaryKey;
 		}
@@ -76,9 +76,9 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		void IDBInsert.Column(IDBIdentifier column, IDBExpression value)
 		{
-			if (column == null) throw new ArgumentNullException("column");
-			if (value == null) throw new ArgumentNullException("value");
-			if (columns == null) columns = new List<InsertInfo>();
+			ArgumentNullException.ThrowIfNull(column);
+			ArgumentNullException.ThrowIfNull(value);
+			columns ??= [];
 			columns.Add(new InsertInfo(column, value));
 		}
 
@@ -115,7 +115,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 				}
 			}
 
-			if (!first) sb.Append(")");
+			if (!first) sb.Append(')');
 		}
 
 		/// <summary>
@@ -153,7 +153,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 				{
 					if (first)
 					{
-						sb.Append("(");
+						sb.Append('(');
 						first = false;
 					}
 					else
@@ -163,7 +163,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 					AppendValue(sb, column.Value);
 				}
 			}
-			if (!first) sb.Append(")");
+			if (!first) sb.Append(')');
 		}
 
 		/// <summary>

@@ -26,21 +26,13 @@ namespace Kosson.KORM.Meta
 		public IReadOnlyCollection<IMetaRecordField> Fields => fields;
 		public IReadOnlyCollection<IMetaRecordIndex> Indices => indices;
 		public IMetaRecordField RowVersion => GetField(IRecordWithRowVersionINT.NAME);
-		public IMetaRecordField PrimaryKey
-		{
-			get
-			{
-				var idfield = GetField(PKNAME);
-				if (idfield == null) throw new ArgumentException("type", "Type " + Name + " does not have primary key.");
-				return idfield;
-			}
-		}
+		public IMetaRecordField PrimaryKey => GetField(PKNAME) ?? throw new ArgumentException("type", "Type " + Name + " does not have primary key.");
 
 		public MetaRecord(IFactory factory, Type record, IMetaRecordField inlineParent = null)
 		{
-			fields = new List<MetaRecordField>();
-			indices = new List<MetaRecordIndex>();
-			fieldsLookup = new Dictionary<string, MetaRecordField>();
+			fields = [];
+			indices = [];
+			fieldsLookup = [];
 			Type = record;
 			Name = GenerateName(record);
 
@@ -74,8 +66,7 @@ namespace Kosson.KORM.Meta
 
 		private MetaRecordField GetField(string name)
 		{
-			MetaRecordField field;
-			if (fieldsLookup.TryGetValue(name, out field)) return field;
+			if (fieldsLookup.TryGetValue(name, out var field)) return field;
 			return null;
 		}
 
@@ -117,7 +108,7 @@ namespace Kosson.KORM.Meta
 			ProcessRecursive(record, ProcessIndexAttributes);
 		}
 
-		private void ProcessRecursive(Type record, Action<Type> processor)
+		private static void ProcessRecursive(Type record, Action<Type> processor)
 		{
 			var typeInfo = record.GetTypeInfo();
 			if (typeInfo.BaseType != null) ProcessRecursive(typeInfo.BaseType, processor);
@@ -152,15 +143,13 @@ namespace Kosson.KORM.Meta
 			IsConverted |= table.IsConverted;
 		}
 
-		private string GenerateName(Type type)
+		private static string GenerateName(Type type)
 		{
-			if (type.DeclaringType == null)
-				return type.Name;
-			else
-				return type.DeclaringType.Name + type.Name;
+			if (type.DeclaringType == null) return type.Name;
+			else return type.DeclaringType.Name + type.Name;
 		}
 
-		private string GeneratePrefix(string name)
+		private static string GeneratePrefix(string name)
 		{
 			string prefix = "";
 			bool prevUpper = false;

@@ -4,26 +4,13 @@ using System.Text;
 
 namespace Kosson.KORM.DB
 {
-	class Transaction : ITransaction
+	class Transaction(IDB db) : ITransaction
 	{
-		private readonly IDB db;
-
 		bool ITransaction.IsOpen => db.IsTransactionOpen && !db.IsImplicitTransaction;
 
-		public Transaction(IDB db)
-		{
-			this.db = db;
-		}
+		void ITransaction.Commit() => db.Commit();
 
-		void ITransaction.Commit()
-		{
-			db.Commit();
-		}
-
-		void ITransaction.Rollback()
-		{
-			db.Rollback();
-		}
+		void ITransaction.Rollback() => db.Rollback();
 
 		void IDisposable.Dispose()
 		{

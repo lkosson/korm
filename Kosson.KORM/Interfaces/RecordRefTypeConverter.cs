@@ -10,8 +10,8 @@ namespace Kosson.KORM
 {
 	class RecordRefTypeConverter : TypeConverter
 	{
-		private Func<long, object> constructor;
-		private string recordTypeName;
+		private readonly Func<long, object> constructor;
+		private readonly string recordTypeName;
 
 		public RecordRefTypeConverter(Type recordRefType)
 		{
@@ -44,6 +44,5 @@ namespace Kosson.KORM
 		{
 			return new RecordRef<TEntity>(id);
 		}
-
 	}
 }

@@ -5,7 +5,7 @@ namespace Kosson.KORM.Perf;
 class ConsoleLogger : ILogger
 {
 	LogLevel MinLevel => LogLevel.Warning;
-	IDisposable ILogger.BeginScope<TState>(TState state) => null;
+	IDisposable ILogger.BeginScope<TState>(TState state) => null!;
 	bool ILogger.IsEnabled(LogLevel logLevel) => logLevel >= MinLevel;
 
 	void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)

@@ -29,16 +29,14 @@ namespace Kosson.KORM
 				return otherObj.FullRangeID == FullRangeID;
 			}
 
-			var otherRef = obj as IRecordRef;
-			if (otherRef != null)
+			if (obj is IRecordRef otherRef)
 			{
 				var refType = otherRef.GetType().GetGenericArguments().FirstOrDefault();
 				if (refType == null || (!refType.IsAssignableFrom(GetType()) && !GetType().IsAssignableFrom(refType))) return false;
 				return otherRef.ID == FullRangeID;
 			}
 
-			var otherID = obj as IHasID;
-			if (otherID != null) return otherID.ID == FullRangeID;
+			if (obj is IHasID otherID) return otherID.ID == FullRangeID;
 			return false;
 		}
 
@@ -59,7 +57,7 @@ namespace Kosson.KORM
 		/// <returns>True if both records are of the same type and have same primary key (ID) value.</returns>
 		public static bool operator ==(RecordCore r1, RecordCore r2)
 		{
-			if (ReferenceEquals(r1, null)) return ReferenceEquals(r2, null);
+			if (r1 is null) return r2 is null;
 			return r1.Equals(r2);
 		}
 
@@ -83,7 +81,7 @@ namespace Kosson.KORM
 		private T ThrowInvalidCast<T>()
 		{
 			ThrowInvalidCast(typeof(T));
-			return default(T);
+			return default;
 		}
 
 		private void ThrowInvalidCast(Type type)

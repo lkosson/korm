@@ -4,13 +4,8 @@ using System.Text;
 
 namespace Kosson.KORM.MSSQL
 {
-	class CreateSchema : DBCreateSchema
+	class CreateSchema(IDBCommandBuilder builder) : DBCreateSchema(builder)
 	{
-		public CreateSchema(IDBCommandBuilder builder)
-			: base(builder)
-		{
-		}
-
 		protected override void AppendHeader(StringBuilder sb)
 		{
 			sb.Append("IF NOT EXISTS(SELECT name FROM sys.schemas WHERE name='");

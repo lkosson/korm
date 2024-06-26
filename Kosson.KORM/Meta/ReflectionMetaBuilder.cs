@@ -6,15 +6,15 @@ namespace Kosson.KORM.Meta
 {
 	class ReflectionMetaBuilder : IMetaBuilder
 	{
-		private IFactory factory;
-		private object syncroot;
-		private Dictionary<Type, IMetaRecord> cache;
+		private readonly IFactory factory;
+		private readonly object syncroot;
+		private readonly Dictionary<Type, IMetaRecord> cache;
 
 		public ReflectionMetaBuilder(IFactory factory)
 		{
 			this.factory = factory;
 			syncroot = new object();
-			cache = new Dictionary<Type, IMetaRecord>();
+			cache = [];
 		}
 
 		IMetaRecord IMetaBuilder.Get(Type type)

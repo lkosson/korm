@@ -36,27 +36,27 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		void IDBCreateIndex.Name(IDBIdentifier name)
 		{
-			if (name == null) throw new ArgumentNullException("name");
+			ArgumentNullException.ThrowIfNull(name);
 			this.name = name;
 		}
 
 		void IDBCreateIndex.Table(IDBIdentifier table)
 		{
-			if (table == null) throw new ArgumentNullException("table");
+			ArgumentNullException.ThrowIfNull(table);
 			this.table = table;
 		}
 
 		void IDBCreateIndex.Column(IDBIdentifier column)
 		{
-			if (column == null) throw new ArgumentNullException("column");
-			if (columns == null) columns = new List<IDBIdentifier>();
+			ArgumentNullException.ThrowIfNull(column);
+			columns ??= [];
 			columns.Add(column);
 		}
 
 		void IDBCreateIndex.Include(IDBIdentifier column)
 		{
-			if (column == null) throw new ArgumentNullException("column");
-			if (included == null) included = new List<IDBIdentifier>();
+			ArgumentNullException.ThrowIfNull(column);
+			included ??= [];
 			included.Add(column);
 		}
 
@@ -75,9 +75,9 @@ namespace Kosson.KORM.DB.CommandBuilder
 			AppendName(sb);
 			sb.Append(" ON ");
 			AppendTable(sb);
-			sb.Append("(");
+			sb.Append('(');
 			AppendColumns(sb);
-			sb.Append(")");
+			sb.Append(')');
 		}
 
 		/// <summary>
@@ -86,7 +86,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendName(StringBuilder sb)
 		{
-			if (name == null) throw new ArgumentNullException("name");
+			ArgumentNullException.ThrowIfNull(name);
 			name.Append(sb);
 		}
 
@@ -147,7 +147,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="column">Column identifier to append.</param>
 		protected virtual void AppendColumn(StringBuilder sb, IDBIdentifier column)
 		{
-			if (column == null) throw new ArgumentNullException("column");
+			ArgumentNullException.ThrowIfNull(column);
 			column.Append(sb);
 		}
 	}

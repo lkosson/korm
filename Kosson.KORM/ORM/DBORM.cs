@@ -22,7 +22,7 @@ namespace Kosson.KORM.ORM
 		/// </summary>
 		public DBORM(IDB db, IMetaBuilder metaBuilder, IConverter converter, IFactory factory, ILoggerFactory loggerFactory)
 		{
-			if (cache == null) cache = new ReaderRecordLoaderCache(metaBuilder);
+			cache ??= new ReaderRecordLoaderCache(metaBuilder);
 			this.db = db;
 			this.metaBuilder = metaBuilder;
 			this.converter = converter;

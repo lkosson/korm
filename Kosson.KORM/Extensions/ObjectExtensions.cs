@@ -19,7 +19,6 @@ namespace System
 		{
 			var originalDelegate = (Delegate)(object)target;
 			var method = originalDelegate.Method;
-			var originalGenericArgument = method.GetGenericArguments().First();
 			var genericMethod = method.GetGenericMethodDefinition();
 			var changedMethod = genericMethod.MakeGenericMethod(argumentType);
 			var changedDelegate = changedMethod.CreateDelegate(target.GetType(), originalDelegate.Target);

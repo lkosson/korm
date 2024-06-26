@@ -28,7 +28,7 @@
 				{
 					value = ((IRecordCloner)this).Clone(value);
 				}
-				field.Property.SetMethod.Invoke(clone, new[] { value });
+				field.Property.SetMethod.Invoke(clone, [value]);
 			}
 			return clone;
 		}

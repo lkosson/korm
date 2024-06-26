@@ -10,7 +10,7 @@ namespace Kosson.KORM
 	/// </summary>
 	public static class RecordBasedRow
 	{
-		private static readonly Dictionary<Type, Func<IMetaRecord, IRecord, IRow>> builders = new Dictionary<Type, Func<IMetaRecord, IRecord, IRow>>();
+		private static readonly Dictionary<Type, Func<IMetaRecord, IRecord, IRow>> builders = [];
 
 		/// <summary>
 		/// Creates a new IRow for a given record;
@@ -60,7 +60,7 @@ namespace Kosson.KORM
 		where TRecord : IRecord
 	{
 		private static RecordBasedRowInfo info;
-		private TRecord record;
+		private readonly TRecord record;
 
 		private static object GetValue<TValue>(Func<TRecord, TValue> propertyGetter, TRecord record)
 		{
@@ -69,7 +69,7 @@ namespace Kosson.KORM
 
 		public RecordBasedRow(IMetaRecord meta, TRecord record)
 		{
-			if (info == null) info = new RecordBasedRowInfo(meta);
+			info ??= new RecordBasedRowInfo(meta);
 			this.record = record;
 		}
 
@@ -86,12 +86,12 @@ namespace Kosson.KORM
 		{
 			int index;
 			if (info.indices.TryGetValue(name, out index)) return index;
-			throw new ArgumentOutOfRangeException("name", name, "Field not found.");
+			throw new ArgumentOutOfRangeException(nameof(name), name, "Field not found.");
 		}
 
 		string IRow.GetName(int index)
 		{
-			if (index < 0 || index >= info.names.Length) throw new ArgumentOutOfRangeException("index", index, "Index out of range.");
+			if (index < 0 || index >= info.names.Length) throw new ArgumentOutOfRangeException(nameof(index), index, "Index out of range.");
 			return info.names[index];
 		}
 
@@ -99,7 +99,7 @@ namespace Kosson.KORM
 		{
 			get
 			{
-				if (index < 0 || index >= info.getters.Length) throw new ArgumentOutOfRangeException("index", index, "Index out of range.");
+				if (index < 0 || index >= info.getters.Length) throw new ArgumentOutOfRangeException(nameof(index), index, "Index out of range.");
 				return info.getters[index](record);
 			}
 		}
@@ -125,10 +125,10 @@ namespace Kosson.KORM
 			{
 				var fields = meta.Fields;
 				getters = new Func<TRecord, object>[fields.Count];
-				indices = new Dictionary<string, int>();
+				indices = [];
 				names = new string[fields.Count];
 				int i = 0;
-				var getValueMethod = typeof(RecordBasedRow<TRecord>).GetMethod("GetValue", BindingFlags.Static | BindingFlags.NonPublic);
+				var getValueMethod = typeof(RecordBasedRow<TRecord>).GetMethod(nameof(GetValue), BindingFlags.Static | BindingFlags.NonPublic);
 				foreach (var field in fields)
 				{
 					var getMethod = field.Property.GetMethod;

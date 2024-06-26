@@ -47,15 +47,14 @@ namespace Kosson.KORM.SQLite
 		protected override object NativeToSQL(object val)
 		{
 			if (val is bool) return val;
-			if (val is DateTime) return ((DateTime)val).ToString("yyyy-MM-dd HH:mm:ss.ffff", System.Globalization.CultureInfo.InvariantCulture);
+			if (val is DateTime date) return date.ToString("yyyy-MM-dd HH:mm:ss.ffff", System.Globalization.CultureInfo.InvariantCulture);
 			return base.NativeToSQL(val);
 		}
 
 		/// <inheritdoc/>
 		protected override KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
 		{
-			var se = exc as SqliteException;
-			if (se != null)
+			if (exc is SqliteException se)
 			{
 				if (se.SqliteExtendedErrorCode == 787) return new KORMForeignKeyException(se, commandText, commandParameters, null);
 				if (se.Message.Contains("duplicate column name")) return new KORMObjectExistsException(se, commandText, commandParameters);

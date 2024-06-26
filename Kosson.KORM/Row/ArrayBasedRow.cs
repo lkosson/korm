@@ -27,8 +27,7 @@ namespace Kosson.KORM
 
 		int IRow.GetIndex(string name)
 		{
-			int index;
-			if (names.TryGetValue(name, out index)) return index;
+			if (names.TryGetValue(name, out var index)) return index;
 			return -1;
 		}
 

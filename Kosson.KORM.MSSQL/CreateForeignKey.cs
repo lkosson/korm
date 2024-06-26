@@ -4,13 +4,8 @@ using System.Text;
 
 namespace Kosson.KORM.MSSQL
 {
-	class CreateForeignKey : DBCreateForeignKey
+	class CreateForeignKey(IDBCommandBuilder builder) : DBCreateForeignKey(builder)
 	{
-		public CreateForeignKey(IDBCommandBuilder builder)
-			: base(builder)
-		{
-		}
-
 		protected override void AppendHeader(StringBuilder sb)
 		{
 			sb.Append("IF NOT EXISTS(SELECT name FROM sys.foreign_keys WHERE name='");
@@ -21,7 +16,7 @@ namespace Kosson.KORM.MSSQL
 				if (dottedTable.Fragments.Length == 1)
 				{
 					sb.Append(dottedTable.Fragments[0]);
-					sb.Append("'");
+					sb.Append('\'');
 				}
 				else
 				{
@@ -34,7 +29,7 @@ namespace Kosson.KORM.MSSQL
 			else
 			{
 				sb.Append(table.RawValue);
-				sb.Append("'");
+				sb.Append('\'');
 			}
 			sb.AppendLine("))");
 			base.AppendHeader(sb);

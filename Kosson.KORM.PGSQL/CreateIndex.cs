@@ -3,13 +3,8 @@ using System.Text;
 
 namespace Kosson.KORM.PGSQL
 {
-	class CreateIndex : DBCreateIndex
+	class CreateIndex(IDBCommandBuilder builder) : DBCreateIndex(builder)
 	{
-		public CreateIndex(IDBCommandBuilder builder)
-			: base(builder)
-		{
-		}
-
 		protected override void AppendName(StringBuilder sb)
 		{
 			sb.Append("IF NOT EXISTS");

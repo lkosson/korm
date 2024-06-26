@@ -15,7 +15,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 
 		void IDBCreateSchema.Schema(IDBIdentifier schema)
 		{
-			if (schema == null) throw new ArgumentNullException("schema");
+			ArgumentNullException.ThrowIfNull(schema);
 			this.table = schema;
 		}
 

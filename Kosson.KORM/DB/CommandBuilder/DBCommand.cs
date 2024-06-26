@@ -92,7 +92,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendTable(StringBuilder sb)
 		{
-			if (table == null) throw new ArgumentNullException("table");
+			ArgumentNullException.ThrowIfNull(table);
 			table.Append(sb);
 		}
 

@@ -11,7 +11,7 @@ namespace Kosson.KORM.ORM
 {
 	class DBORMCommandBase
 	{
-		internal static string[] parametersNameCache = new[] { "P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7" };
+		internal static string[] parametersNameCache = ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7"];
 		internal static int nextTraceId;
 		internal static Stopwatch opStopwatch = Stopwatch.StartNew();
 	}
@@ -35,8 +35,8 @@ namespace Kosson.KORM.ORM
 			this.DB = db;
 			this.operationLogger = operationLogger;
 			this.recordLogger = recordLogger;
-			if (meta == null) meta = metaBuilder.Get(typeof(TRecord));
-			if (opStopwatch == null) opStopwatch = Stopwatch.StartNew();
+			meta ??= metaBuilder.Get(typeof(TRecord));
+			opStopwatch ??= Stopwatch.StartNew();
 		}
 
 		protected DBORMCommandBase(DBORMCommandBase<TRecord> template)
@@ -49,7 +49,7 @@ namespace Kosson.KORM.ORM
 
 		public IDBExpression Parameter(object value)
 		{
-			if (parameters == null) parameters = new List<object>(8);
+			parameters ??= new List<object>(8);
 			var pnum = parameters.Count;
 			var pname = pnum < parametersNameCache.Length ? parametersNameCache[pnum] : "P" + pnum;
 			parameters.Add(value);
@@ -90,7 +90,7 @@ namespace Kosson.KORM.ORM
 			return desc;
 		}
 
-		protected TraceToken LogStart([CallerMemberName] string method = "", IDBSelect dbcommand = null)
+		protected TraceToken LogStart(IDBSelect dbcommand = null)
 		{
 			if (operationLogger == null) return default;
 			if (!operationLogger.IsEnabled(LogLevel.Warning)) return default;

@@ -90,35 +90,33 @@ namespace Kosson.KORM.ORM
 			var token = LogStart();
 			var getlastid = template.GetLastID;
 			var manualid = meta.IsManualID;
-			using (var cmdInsert = DB.CreateCommand(commandText ?? Command.ToString()))
-			using (var cmdGetLastID = getlastid == null ? null : DB.CreateCommand(getlastid))
+			using var cmdInsert = DB.CreateCommand(commandText ?? Command.ToString());
+			using var cmdGetLastID = getlastid == null ? null : DB.CreateCommand(getlastid);
+			int count = 0;
+			RecordNotifyResult result = RecordNotifyResult.Continue;
+			foreach (var record in records)
 			{
-				int count = 0;
-				RecordNotifyResult result = RecordNotifyResult.Continue;
-				foreach (var record in records)
-				{
-					var notify = record as IRecordNotifyInsert;
-					if (notify != null) result = notify.OnInsert();
-					if (result == RecordNotifyResult.Break) break;
-					if (result == RecordNotifyResult.Skip) continue;
+				var notify = record as IRecordNotifyInsert;
+				if (notify != null) result = notify.OnInsert();
+				if (result == RecordNotifyResult.Break) break;
+				if (result == RecordNotifyResult.Skip) continue;
 
-					LogRecord(LogLevel.Information, token, record);
-					DB.ClearParameters(cmdInsert);
-					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record);
+				LogRecord(LogLevel.Information, token, record);
+				DB.ClearParameters(cmdInsert);
+				DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record);
 
-					if (cmdGetLastID != null) DB.ExecuteNonQuery(cmdInsert);
-					var rows = DB.ExecuteQuery(cmdGetLastID ?? cmdInsert);
-					if (!manualid && rows.Any()) record.ID = converter.Convert<long>(rows.First()[0]);
+				if (cmdGetLastID != null) DB.ExecuteNonQuery(cmdInsert);
+				var rows = DB.ExecuteQuery(cmdGetLastID ?? cmdInsert);
+				if (!manualid && rows.Any()) record.ID = converter.Convert<long>(rows[0][0]);
 
-					LogID(token, record);
+				LogID(token, record);
 
-					count++;
-					if (notify != null) result = notify.OnInserted();
-					if (result == RecordNotifyResult.Break) break;
-				}
-				LogEnd(token, count);
-				return count;
+				count++;
+				if (notify != null) result = notify.OnInserted();
+				if (result == RecordNotifyResult.Break) break;
 			}
+			LogEnd(token, count);
+			return count;
 		}
 
 		private int RecordsBatch(IEnumerable<TRecord> records)
@@ -163,34 +161,32 @@ namespace Kosson.KORM.ORM
 			var token = LogStart();
 			var getlastid = template.GetLastID;
 			var manualid = meta.IsManualID;
-			using (var cmdInsert = DB.CreateCommand(commandText ?? Command.ToString()))
-			using (var cmdGetLastID = getlastid == null ? null : DB.CreateCommand(getlastid))
+			using var cmdInsert = DB.CreateCommand(commandText ?? Command.ToString());
+			using var cmdGetLastID = getlastid == null ? null : DB.CreateCommand(getlastid);
+			int count = 0;
+			RecordNotifyResult result = RecordNotifyResult.Continue;
+			foreach (var record in records)
 			{
-				int count = 0;
-				RecordNotifyResult result = RecordNotifyResult.Continue;
-				foreach (var record in records)
-				{
-					var notify = record as IRecordNotifyInsert;
-					if (notify != null) result = notify.OnInsert();
-					if (result == RecordNotifyResult.Break) break;
-					if (result == RecordNotifyResult.Skip) continue;
+				var notify = record as IRecordNotifyInsert;
+				if (notify != null) result = notify.OnInsert();
+				if (result == RecordNotifyResult.Break) break;
+				if (result == RecordNotifyResult.Skip) continue;
 
-					LogRecord(LogLevel.Information, token, record);
-					DB.ClearParameters(cmdInsert);
-					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record);
+				LogRecord(LogLevel.Information, token, record);
+				DB.ClearParameters(cmdInsert);
+				DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record);
 
-					if (cmdGetLastID != null) await DB.ExecuteNonQueryAsync(cmdInsert);
-					var rows = await DB.ExecuteQueryAsync(cmdGetLastID ?? cmdInsert);
-					if (!manualid && rows.Any()) record.ID = converter.Convert<long>(rows.First()[0]);
-					LogID(token, record);
+				if (cmdGetLastID != null) await DB.ExecuteNonQueryAsync(cmdInsert);
+				var rows = await DB.ExecuteQueryAsync(cmdGetLastID ?? cmdInsert);
+				if (!manualid && rows.Any()) record.ID = converter.Convert<long>(rows[0][0]);
+				LogID(token, record);
 
-					count++;
-					if (notify != null) result = notify.OnInserted();
-					if (result == RecordNotifyResult.Break) break;
-				}
-				LogEnd(token, count);
-				return count;
+				count++;
+				if (notify != null) result = notify.OnInserted();
+				if (result == RecordNotifyResult.Break) break;
 			}
+			LogEnd(token, count);
+			return count;
 		}
 
 		private async Task<int> RecordsBatchAsync(IEnumerable<TRecord> records)

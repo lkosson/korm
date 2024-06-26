@@ -25,14 +25,13 @@ namespace Kosson.KORM.Meta
 
 		private IMetaRecordField[] ResolveFields(string[] names)
 		{
-			if (names == null) return new IMetaRecordField[0];
+			if (names == null) return [];
 			var fields = new IMetaRecordField[names.Length];
 			for (int i = 0; i < names.Length; i++)
 			{
 				var name = names[i];
-				var field = Record.GetField(names[i]);
-				if (field == null) throw new ArgumentException("Property " + name + " not found in type " + Record.Name + ".");
-				fields[i] = field;
+				var field = Record.GetField(name);
+				fields[i] = field ?? throw new ArgumentException("Property " + name + " not found in type " + Record.Name + ".");
 			}
 			return fields;
 		}

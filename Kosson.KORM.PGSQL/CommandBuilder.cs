@@ -74,7 +74,7 @@ namespace Kosson.KORM.PGSQL
 			throw new ArgumentException("Unsupported type " + type);
 		}
 
-		private string TrimIdentifier(string name)
+		private static string TrimIdentifier(string name)
 		{
 			if (String.IsNullOrEmpty(name)) return name;
 			if (name.Length <= 63) return name;

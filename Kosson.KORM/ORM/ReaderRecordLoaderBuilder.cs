@@ -43,8 +43,8 @@ namespace Kosson.KORM.ORM
 			miGetGuid = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetGuid));
 			miGetString = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetString));
 			miGetValue = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetValue));
-			miConvert = typeof(IConverter).GetMethod(nameof(IConverter.Convert), new[] { typeof(object), typeof(Type) });
-			miCreate = typeof(FactoryExtensions).GetMethod(nameof(FactoryExtensions.Create), new[] { typeof(IFactory), typeof(Type) });
+			miConvert = typeof(IConverter).GetMethod(nameof(IConverter.Convert), [typeof(object), typeof(Type)]);
+			miCreate = typeof(FactoryExtensions).GetMethod(nameof(FactoryExtensions.Create), [typeof(IFactory), typeof(Type)]);
 			miGetType = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
 		}
 
@@ -56,7 +56,7 @@ namespace Kosson.KORM.ORM
 			int fieldIndex = 0;
 			PrepareIndices(meta, "this", ref fieldIndex, indices, new Stack<long>());
 
-			var dm = new DynamicMethod("Load", null, new[] { typeof(TRecord), typeof(DbDataReader), typeof(IConverter), typeof(IFactory) }, true);
+			var dm = new DynamicMethod("Load", null, [typeof(TRecord), typeof(DbDataReader), typeof(IConverter), typeof(IFactory)], true);
 			il = dm.GetILGenerator();
 
 			var localRecord = il.DeclareLocal(typeof(TRecord));
@@ -281,7 +281,7 @@ namespace Kosson.KORM.ORM
 			il.Emit(OpCodes.Ldc_I8, 0L); // ST: record, 0L
 
 			il.MarkLabel(labSet); // ST: record, long
-			il.Emit(OpCodes.Newobj, field.Type.GetConstructor(new[] { typeof(long) })); // ST: record, RecordRef
+			il.Emit(OpCodes.Newobj, field.Type.GetConstructor([typeof(long)])); // ST: record, RecordRef
 			il.EmitCall(OpCodes.Callvirt, field.Property.SetMethod, null); // ST: 0
 		}
 

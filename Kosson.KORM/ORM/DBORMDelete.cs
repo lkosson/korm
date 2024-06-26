@@ -97,33 +97,31 @@ namespace Kosson.KORM.ORM
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
 
-			using (var cmdDelete = DB.CreateCommand(commandText ?? BuildCommandTextForRecords()))
+			using var cmdDelete = DB.CreateCommand(commandText ?? BuildCommandTextForRecords());
+			int count = 0;
+			RecordNotifyResult result = RecordNotifyResult.Continue;
+			DbParameter idParameter = DB.AddParameter(cmdDelete, idfield, null);
+			DbParameter rowVersionParameter = rowVersionField == null ? null : DB.AddParameter(cmdDelete, rowVersionField.DBName, null);
+			foreach (var record in records)
 			{
-				int count = 0;
-				RecordNotifyResult result = RecordNotifyResult.Continue;
-				DbParameter idParameter = DB.AddParameter(cmdDelete, idfield, null);
-				DbParameter rowVersionParameter = rowVersionField == null ? null : DB.AddParameter(cmdDelete, rowVersionField.DBName, null);
-				foreach (var record in records)
-				{
-					var notify = record as IRecordNotifyDelete;
-					if (notify != null) result = notify.OnDelete();
-					if (result == RecordNotifyResult.Break) break;
-					if (result == RecordNotifyResult.Skip) continue;
+				var notify = record as IRecordNotifyDelete;
+				if (notify != null) result = notify.OnDelete();
+				if (result == RecordNotifyResult.Break) break;
+				if (result == RecordNotifyResult.Skip) continue;
 
-					LogRecord(LogLevel.Information, token, record);
-					var rowVersion = record as IRecordWithRowVersion;
-					if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
-					DB.SetParameter(idParameter, record.ID);
-					int lcount = DB.ExecuteNonQuery(cmdDelete);
-					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete.CommandText, cmdDelete.Parameters);
+				LogRecord(LogLevel.Information, token, record);
+				var rowVersion = record as IRecordWithRowVersion;
+				if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
+				DB.SetParameter(idParameter, record.ID);
+				int lcount = DB.ExecuteNonQuery(cmdDelete);
+				if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete.CommandText, cmdDelete.Parameters);
 
-					count += lcount;
-					if (notify != null) result = notify.OnDeleted();
-					if (result == RecordNotifyResult.Break) break;
-				}
-				LogEnd(token, count);
-				return count;
+				count += lcount;
+				if (notify != null) result = notify.OnDeleted();
+				if (result == RecordNotifyResult.Break) break;
 			}
+			LogEnd(token, count);
+			return count;
 		}
 
 		private int RecordsBatch(IEnumerable<TRecord> records)
@@ -171,33 +169,31 @@ namespace Kosson.KORM.ORM
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
 
-			using (var cmdDelete = DB.CreateCommand(commandText ?? BuildCommandTextForRecords()))
+			using var cmdDelete = DB.CreateCommand(commandText ?? BuildCommandTextForRecords());
+			int count = 0;
+			RecordNotifyResult result = RecordNotifyResult.Continue;
+			DbParameter idParameter = DB.AddParameter(cmdDelete, idfield, null);
+			DbParameter rowVersionParameter = rowVersionField == null ? null : DB.AddParameter(cmdDelete, rowVersionField.DBName, null);
+			foreach (var record in records)
 			{
-				int count = 0;
-				RecordNotifyResult result = RecordNotifyResult.Continue;
-				DbParameter idParameter = DB.AddParameter(cmdDelete, idfield, null);
-				DbParameter rowVersionParameter = rowVersionField == null ? null : DB.AddParameter(cmdDelete, rowVersionField.DBName, null);
-				foreach (var record in records)
-				{
-					var notify = record as IRecordNotifyDelete;
-					if (notify != null) result = notify.OnDelete();
-					if (result == RecordNotifyResult.Break) break;
-					if (result == RecordNotifyResult.Skip) continue;
+				var notify = record as IRecordNotifyDelete;
+				if (notify != null) result = notify.OnDelete();
+				if (result == RecordNotifyResult.Break) break;
+				if (result == RecordNotifyResult.Skip) continue;
 
-					LogRecord(LogLevel.Information, token, record);
-					var rowVersion = record as IRecordWithRowVersion;
-					if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
-					DB.SetParameter(idParameter, record.ID);
-					int lcount = await DB.ExecuteNonQueryAsync(cmdDelete);
-					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete.CommandText, cmdDelete.Parameters);
+				LogRecord(LogLevel.Information, token, record);
+				var rowVersion = record as IRecordWithRowVersion;
+				if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
+				DB.SetParameter(idParameter, record.ID);
+				int lcount = await DB.ExecuteNonQueryAsync(cmdDelete);
+				if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete.CommandText, cmdDelete.Parameters);
 
-					count += lcount;
-					if (notify != null) result = notify.OnDeleted();
-					if (result == RecordNotifyResult.Break) break;
-				}
-				LogEnd(token, count);
-				return count;
+				count += lcount;
+				if (notify != null) result = notify.OnDeleted();
+				if (result == RecordNotifyResult.Break) break;
 			}
+			LogEnd(token, count);
+			return count;
 		}
 
 		private async Task<int> RecordsBatchAsync(IEnumerable<TRecord> records)

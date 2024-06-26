@@ -4,13 +4,8 @@ using System.Text;
 
 namespace Kosson.KORM.MSSQL
 {
-	class CreateTable : DBCreateTable
+	class CreateTable(IDBCommandBuilder builder) : DBCreateTable(builder)
 	{
-		public CreateTable(IDBCommandBuilder builder)
-			: base(builder)
-		{
-		}
-
 		protected override void AppendHeader(StringBuilder sb)
 		{
 			if (table is IDBDottedIdentifier dottedTable)
@@ -19,7 +14,7 @@ namespace Kosson.KORM.MSSQL
 				if (dottedTable.Fragments.Length == 1)
 				{
 					sb.Append(dottedTable.Fragments[0]);
-					sb.Append("'");
+					sb.Append('\'');
 				}
 				else
 				{
@@ -28,7 +23,7 @@ namespace Kosson.KORM.MSSQL
 					sb.Append(dottedTable.Fragments[0]);
 					sb.Append("')");
 				}
-				sb.Append(")");
+				sb.Append(')');
 			}
 			else
 			{
