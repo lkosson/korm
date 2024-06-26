@@ -116,14 +116,6 @@ namespace Kosson.KORM.ORM
 			return result;
 		}
 
-		private void ApplyRowVersion(IRecordWithRowVersion record, DbParameter rowVersionParameter)
-		{
-			if (record == null) return;
-			long current = record.RowVersion;
-			DB.SetParameter(rowVersionParameter, current);
-			record.RowVersion++;
-		}
-
 		public int Records(IEnumerable<TRecord> records)
 		{
 			if (DB.IsBatchSupported && commandText != null && records.Count() > 1 && records.First() is not IRecordNotifyUpdate) return RecordsBatch(records);
@@ -134,7 +126,6 @@ namespace Kosson.KORM.ORM
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
-				DbParameter rowVersionParameter = meta.RowVersion == null ? null : DB.AddParameter(cmdUpdate, ROWVERSION_CURRENT, null);
 				foreach (var record in records)
 				{
 					var notify = record as IRecordNotifyUpdate;
@@ -144,11 +135,14 @@ namespace Kosson.KORM.ORM
 
 					LogRecord(LogLevel.Information, token, record);
 					DB.ClearParameters(cmdUpdate);
-					var rowVersion = record as IRecordWithRowVersion;
-					ApplyRowVersion(rowVersion, rowVersionParameter);
+					if (record is IRecordWithRowVersion rowVersionRecord)
+					{
+						DB.AddParameter(cmdUpdate, ROWVERSION_CURRENT, rowVersionRecord.RowVersion);
+						rowVersionRecord.RowVersion++;
+					}
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record);
 					int lcount = DB.ExecuteNonQuery(cmdUpdate);
-					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate.CommandText, cmdUpdate.Parameters);
+					if (lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate.CommandText, cmdUpdate.Parameters);
 
 					count += lcount;
 					if (notify != null) result = notify.OnUpdated();
@@ -171,10 +165,9 @@ namespace Kosson.KORM.ORM
 				var command = DB.CreateCommand(batch, commandText);
 				if (record is IRecordWithRowVersion rowVersionRecord)
 				{
-					var rowVersionParameter = DB.AddParameter(command, ROWVERSION_CURRENT, null);
-					ApplyRowVersion(rowVersionRecord, rowVersionParameter);
+					var rowVersionParameter = DB.AddParameter(command, ROWVERSION_CURRENT, rowVersionRecord.RowVersion);
+					rowVersionRecord.RowVersion++;
 				}
-
 				DBParameterLoader<TRecord>.Run(DB, meta, command, record);
 			}
 
@@ -219,11 +212,14 @@ namespace Kosson.KORM.ORM
 
 					LogRecord(LogLevel.Information, token, record);
 					DB.ClearParameters(cmdUpdate);
-					var rowVersion = record as IRecordWithRowVersion;
-					ApplyRowVersion(rowVersion, rowVersionParameter);
+					if (record is IRecordWithRowVersion rowVersionRecord)
+					{
+						DB.AddParameter(cmdUpdate, ROWVERSION_CURRENT, rowVersionRecord.RowVersion);
+						rowVersionRecord.RowVersion++;
+					}
 					DBParameterLoader<TRecord>.Run(DB, meta, cmdUpdate, record);
 					int lcount = await DB.ExecuteNonQueryAsync(cmdUpdate);
-					if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate.CommandText, cmdUpdate.Parameters);
+					if (lcount == 0) throw new KORMConcurrentModificationException(cmdUpdate.CommandText, cmdUpdate.Parameters);
 
 					count += lcount;
 					if (notify != null) result = notify.OnUpdated();
@@ -246,10 +242,9 @@ namespace Kosson.KORM.ORM
 				var command = DB.CreateCommand(batch, commandText);
 				if (record is IRecordWithRowVersion rowVersionRecord)
 				{
-					var rowVersionParameter = DB.AddParameter(command, ROWVERSION_CURRENT, null);
-					ApplyRowVersion(rowVersionRecord, rowVersionParameter);
+					var rowVersionParameter = DB.AddParameter(command, ROWVERSION_CURRENT, rowVersionRecord.RowVersion);
+					rowVersionRecord.RowVersion++;
 				}
-
 				DBParameterLoader<TRecord>.Run(DB, meta, command, record);
 			}
 
