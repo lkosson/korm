@@ -52,6 +52,19 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void LargeBatchDeleteDeletes()
+		{
+			var count = DB.CommandBuilder.MaxParameterCount + 1;
+			var records = Enumerable.Range(1, count).Select(e => new MainTestTable { Value = e }).ToList();
+			ORM.StoreAll(records);
+			var retrieved1 = ORM.Select<MainTestTable>().Execute();
+			Assert.AreEqual(records.Count, retrieved1.Count());
+			ORM.DeleteAll(records);
+			var retrieved2 = ORM.Select<MainTestTable>().Execute();
+			Assert.AreEqual(0, retrieved2.Count());
+		}
+
+		[TestMethod]
 		public void DeleteByIDDeletes()
 		{
 			var record = new MainTestTable();

@@ -9,30 +9,15 @@ namespace Kosson.KORM.ORM
 {
 	class DBParameterLoader
 	{
-		protected static MethodInfo miLoadParameter;
+		protected static MethodInfo miInvokeDelegate;
 		protected static MethodInfo miVerifyStringParameter;
 		protected static Dictionary<Type, object> delegates;
 
 		static DBParameterLoader()
 		{
-			miLoadParameter = typeof(DBParameterLoader).GetMethod(nameof(LoadParameter), BindingFlags.NonPublic | BindingFlags.Static);
+			miInvokeDelegate = typeof(ParameterAdder).GetMethod(nameof(ParameterAdder.Invoke));
 			miVerifyStringParameter = typeof(DBParameterLoader).GetMethod(nameof(VerifyStringParameter), BindingFlags.NonPublic | BindingFlags.Static);
 			delegates = new Dictionary<Type, object>();
-		}
-
-		private static void LoadParameter(IDB db, DbCommand cmd, string name, object value, int index, ref DbParameter[] parameters, DbType dbType)
-		{
-			var parameter = parameters[index];
-			if (parameter == null)
-			{
-				parameter = db.AddParameter(cmd, name, value);
-				parameter.DbType = dbType;
-				parameters[index] = parameter;
-			}
-			else
-			{
-				db.SetParameter(parameter, value);
-			}
 		}
 
 		private static string VerifyStringParameter(string value, string name, int maxlen, bool trim)
@@ -62,7 +47,7 @@ namespace Kosson.KORM.ORM
 			var delegateArg = untyped ? typeof(object) : meta.Type;
 			var delegateType = typeof(ParameterLoader<>).MakeGenericType(delegateArg);
 
-			var dm = new DynamicMethod("Load", null, new[] { typeof(IDB), typeof(DbCommand), delegateArg, typeof(DbParameter[]).MakeByRefType() }, true);
+			var dm = new DynamicMethod("Load", null, [typeof(ParameterAdder), delegateArg], true);
 			var il = dm.GetILGenerator();
 
 			BuildLoader(il, meta, untyped);
@@ -73,30 +58,21 @@ namespace Kosson.KORM.ORM
 
 		private static void BuildLoader(ILGenerator il, IMetaRecord meta, bool untyped)
 		{
-			int count = CountNeededParameters(meta);
-
-			var lblParametersNotNull = il.DefineLabel();
-			il.Emit(OpCodes.Ldarg_3);
-			il.Emit(OpCodes.Ldind_Ref);
-			il.Emit(OpCodes.Brtrue, lblParametersNotNull); // if (parameters != null) goto parametersNotNull;
-
-			il.Emit(OpCodes.Ldarg_3);
-			il.Emit(OpCodes.Ldc_I4, count);
-			il.Emit(OpCodes.Newarr, typeof(DbParameter));
-			il.Emit(OpCodes.Stind_Ref); // parameters = new IDbDataParameter[count];
-
-			il.MarkLabel(lblParametersNotNull); // parametersNotNull:
-
+			// ParameterAdder arg_0;
+			// TRecord arg_1;
+			// TRecord local = arg_1;
 			var local = il.DeclareLocal(meta.Type);
-			int index = 0;
-			il.Emit(OpCodes.Ldarg_2);
+			il.Emit(OpCodes.Ldarg_1);
 			if (untyped) il.Emit(OpCodes.Castclass, meta.Type);
 			il.Emit(OpCodes.Stloc, local);
-			BuildLoader(il, meta, local, ref index);
+			BuildLoader(il, meta, local);
 		}
 
-		private static void BuildLoader(ILGenerator il, IMetaRecord meta, LocalBuilder local, ref int index)
+		private static void BuildLoader(ILGenerator il, IMetaRecord meta, LocalBuilder local)
 		{
+			// ParameterAdder arg_0;
+			// TRecord arg_1;
+			// TRecordOrInline local;
 			foreach (var field in meta.Fields)
 			{
 				if (!field.IsColumn) continue;
@@ -104,11 +80,12 @@ namespace Kosson.KORM.ORM
 
 				if (field.IsInline)
 				{
-					// if (record == null) goto localIsNull;
+					// if (local == null) goto localIsNull;
 					var localIsNull = il.DefineLabel();
 					il.Emit(OpCodes.Ldloc, local);
 					il.Emit(OpCodes.Brfalse, localIsNull);
 
+					// TInline inlinelocal = local.get_field;
 					il.Emit(OpCodes.Ldloc, local);
 					var miGet = field.Property.GetGetMethod();
 					il.EmitCall(OpCodes.Callvirt, miGet, null);
@@ -118,91 +95,104 @@ namespace Kosson.KORM.ORM
 					// localIsNull:
 					il.MarkLabel(localIsNull);
 
-					BuildLoader(il, field.InlineRecord, inlinelocal, ref index);
+					BuildLoader(il, field.InlineRecord, inlinelocal);
 				}
 				else
 				{
-					il.Emit(OpCodes.Ldarg_0); // ST: idb
-					il.Emit(OpCodes.Ldarg_1); // ST: idb, cmd
+					il.Emit(OpCodes.Ldarg_0); // ST: adder
 					// TODO: Somehow replace "@" with proper IDB.CommandBuilder.ParameterPrefix
-					il.Emit(OpCodes.Ldstr, "@" + field.DBName); // ST: idb, cmd, dbname
+					il.Emit(OpCodes.Ldstr, "@" + field.DBName); // ST: adder, dbname
 
 					// if (record == null) goto localIsNull;
 					var localIsNull = il.DefineLabel();
 					var valueLoaded = il.DefineLabel();
-					il.Emit(OpCodes.Ldloc, local); // ST: idb, cmd, dbname, local
-					il.Emit(OpCodes.Brfalse, localIsNull); // ST: idb, cmd, dbname
+					il.Emit(OpCodes.Ldloc, local); // ST: adder, dbname, local
+					il.Emit(OpCodes.Brfalse, localIsNull); // ST: adder, dbname
 
 					// __value = local.Get;
-					il.Emit(OpCodes.Ldloc, local);  // ST: idb, cmd, dbname, record
+					il.Emit(OpCodes.Ldloc, local);  // ST: adder, dbname, record
 					var miGet = field.Property.GetGetMethod();
-					il.EmitCall(OpCodes.Callvirt, miGet, null); // ST: idb, cmd, dbname, value
-					if (field.Type.GetTypeInfo().IsValueType) il.Emit(OpCodes.Box, field.Type); // ST: idb, cmd, dbname, value
+					il.EmitCall(OpCodes.Callvirt, miGet, null); // ST: adder, dbname, value
+					if (field.Type.GetTypeInfo().IsValueType) il.Emit(OpCodes.Box, field.Type); // ST: adder, dbname, value
 
 					if (field.Type == typeof(string) && field.Length > 0)
 					{
-						il.Emit(OpCodes.Ldstr, field.Name); // ST: idb, cmd, dbname, value, name
-						il.Emit(OpCodes.Ldc_I4, field.Length); // ST: idb, cmd, dbname, value, name, len
-						il.Emit(OpCodes.Ldc_I4, field.Trim ? 1 : 0); // ST: idb, cmd, dbname, value, name, len, trim
-						il.EmitCall(OpCodes.Call, miVerifyStringParameter, null); // ST: idb, cmd, dbname, value
+						// __value = VerifyStringParameter(__value, __name, __length, __trim);
+						il.Emit(OpCodes.Ldstr, field.Name); // ST: adder, dbname, value, name
+						il.Emit(OpCodes.Ldc_I4, field.Length); // ST: adder, dbname, value, name, len
+						il.Emit(OpCodes.Ldc_I4, field.Trim ? 1 : 0); // ST: adder, dbname, value, name, len, trim
+						il.EmitCall(OpCodes.Call, miVerifyStringParameter, null); // ST: adder, dbname, value
 					}
 
 					// goto valueLoaded
-					il.Emit(OpCodes.Br_S, valueLoaded); // ST: idb, cmd, dbname, value
+					il.Emit(OpCodes.Br_S, valueLoaded); // ST: adder, dbname, value
 
 					// localIsNull:
 					il.MarkLabel(localIsNull);
-					il.Emit(OpCodes.Ldnull); // ST: idb, cmd, dbname, null
+					il.Emit(OpCodes.Ldnull); // ST: adder, dbname, null
 
 					// valueLoaded:
 					il.MarkLabel(valueLoaded);
 
-					il.Emit(OpCodes.Ldc_I4, index); // ST: idb, cmd, dbname, value-or-null, index
-					il.Emit(OpCodes.Ldarg_3); // ST: idb, cmd, dbname, value-or-null, index, parameters
-					il.Emit(OpCodes.Ldc_I4, (int)field.DBType); // ST: idb, cmd, dbname, value-or-null, index, parameters, dbtype
+					il.Emit(OpCodes.Ldc_I4, (int)field.DBType); // ST: adder, dbname, value-or-null, dbtype
 
-					il.EmitCall(OpCodes.Call, miLoadParameter, null); // ST: 0
-
-					index++;
+					il.EmitCall(OpCodes.Call, miInvokeDelegate, null); // ST: 0
 				}
 			}
 		}
-
-		private static int CountNeededParameters(IMetaRecord meta)
+		/*
+		public static void Run(IDB db, IMetaRecord meta, DbCommand command, object record)
 		{
-			int count = 0;
-			foreach (var field in meta.Fields)
+			void AddParameter(string name, object value, DbType dbType)
 			{
-				if (!field.IsColumn) continue;
-				if (field.IsReadOnly && !field.IsPrimaryKey) continue;
-
-				if (field.IsInline)
-				{
-					count += CountNeededParameters(field.InlineRecord);
-				}
-				else
-				{
-					count++;
-				}
+				var parameter = db.AddParameter(command, name, value);
+				parameter.DbType = dbType;
 			}
-			return count;
-		}
 
-		public static void Run(IDB db, IMetaRecord meta, DbCommand command, object record, ref DbParameter[] parameters)
-		{
 			var loader = GetOrBuildLoader<ParameterLoader<object>>(meta, true);
-			loader(db, command, record, ref parameters);
+			loader(AddParameter, record);
 		}
 
-		internal delegate void ParameterLoader<TRecord>(IDB db, DbCommand cmd, TRecord record, ref DbParameter[] parameters);
+		public static void Run(IDB db, IMetaRecord meta, DbBatchCommand command, object record)
+		{
+			void AddParameter(string name, object value, DbType dbType)
+			{
+				var parameter = db.AddParameter(command, name, value);
+				parameter.DbType = dbType;
+			}
+
+			var loader = GetOrBuildLoader<ParameterLoader<object>>(meta, true);
+			loader(AddParameter, record);
+		}
+		*/
+		internal delegate void ParameterLoader<TRecord>(ParameterAdder adder, TRecord record);
+		internal delegate void ParameterAdder(string name, object value, DbType dbType);
 	}
 
 	class DBParameterLoader<TRecord> : DBParameterLoader where TRecord : IRecord
 	{
-		public static void Run(IDB db, IMetaRecord meta, DbCommand command, TRecord record, ref DbParameter[] parameters)
+		public static void Run(IDB db, IMetaRecord meta, DbCommand command, TRecord record)
 		{
+			void AddParameter(string name, object value, DbType dbType)
+			{
+				var parameter = db.AddParameter(command, name, value);
+				parameter.DbType = dbType;
+			}
+
 			var loader = GetOrBuildLoader<ParameterLoader<TRecord>>(meta, false);
-			loader(db, command, record, ref parameters);
+			loader(AddParameter, record);
+		}
+
+		public static void Run(IDB db, IMetaRecord meta, DbBatchCommand command, TRecord record)
+		{
+			void AddParameter(string name, object value, DbType dbType)
+			{
+				var parameter = db.AddParameter(command, name, value);
+				parameter.DbType = dbType;
+			}
+
+			var loader = GetOrBuildLoader<ParameterLoader<TRecord>>(meta, false);
+			loader(AddParameter, record);
 		}
 	}
 }

@@ -327,7 +327,7 @@ namespace Kosson.KORM.Tests
 		[ExpectedException(typeof(KORMException))]
 		public void BatchThrowsWhenConsumingResult()
 		{
-			if (!DB.IsBatchSupported) return;
+			if (!DB.IsBatchSupported) throw new KORMException("Not supported");
 			using var batch = DB.CreateBatch();
 			DB.CreateCommand(batch, "INVALIDCOMMAND");
 			using var reader = DB.ExecuteReader(batch);

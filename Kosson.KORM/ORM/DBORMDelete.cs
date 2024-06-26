@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Kosson.KORM.ORM
@@ -91,6 +92,7 @@ namespace Kosson.KORM.ORM
 
 		public int Records(IEnumerable<TRecord> records)
 		{
+			if (DB.IsBatchSupported && commandText != null && records.Count() > 1 && records.First() is not IRecordNotifyDelete) return RecordsBatch(records);
 			var token = LogStart();
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
@@ -124,6 +126,33 @@ namespace Kosson.KORM.ORM
 			}
 		}
 
+		private int RecordsBatch(IEnumerable<TRecord> records)
+		{
+			var token = LogStart();
+			var idfield = meta.PrimaryKey.DBName;
+			var rowVersionField = meta.RowVersion?.DBName;
+
+			using var batch = DB.CreateBatch();
+
+			foreach (var record in records)
+			{
+				LogRecord(LogLevel.Information, token, record);
+				var command = DB.CreateCommand(batch, commandText);
+				DB.AddParameter(command, idfield, record.ID);
+				if (rowVersionField != null) DB.AddParameter(command, rowVersionField, ((IRecordWithRowVersion)record).RowVersion);
+			}
+
+			var count = DB.ExecuteNonQuery(batch);
+
+			foreach (var command in batch.BatchCommands)
+			{
+				if (command.RecordsAffected == 0) throw new KORMConcurrentModificationException(command.CommandText, command.Parameters);
+			}
+
+			LogEnd(token, count);
+			return count;
+		}
+
 		public async Task<int> ExecuteAsync()
 		{
 			var token = LogStart();
@@ -136,6 +165,8 @@ namespace Kosson.KORM.ORM
 
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
+			if (DB.IsBatchSupported && commandText != null && records.Count() > 1 && records.First() is not IRecordNotifyDelete) return await RecordsBatchAsync(records);
+
 			var token = LogStart();
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion;
@@ -167,6 +198,33 @@ namespace Kosson.KORM.ORM
 				LogEnd(token, count);
 				return count;
 			}
+		}
+
+		private async Task<int> RecordsBatchAsync(IEnumerable<TRecord> records)
+		{
+			var token = LogStart();
+			var idfield = meta.PrimaryKey.DBName;
+			var rowVersionField = meta.RowVersion?.DBName;
+
+			using var batch = DB.CreateBatch();
+
+			foreach (var record in records)
+			{
+				LogRecord(LogLevel.Information, token, record);
+				var command = DB.CreateCommand(batch, commandText);
+				DB.AddParameter(command, idfield, record.ID);
+				if (rowVersionField != null) DB.AddParameter(command, rowVersionField, ((IRecordWithRowVersion)record).RowVersion);
+			}
+
+			var count = await DB.ExecuteNonQueryAsync(batch);
+
+			foreach (var command in batch.BatchCommands)
+			{
+				if (command.RecordsAffected == 0) throw new KORMConcurrentModificationException(command.CommandText, command.Parameters);
+			}
+
+			LogEnd(token, count);
+			return count;
 		}
 
 		public override string ToString()

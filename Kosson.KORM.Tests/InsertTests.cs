@@ -61,6 +61,17 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void LargeBatchInsertsCreateNewRecords()
+		{
+			var count = DB.CommandBuilder.MaxParameterCount + 1;
+			var records = Enumerable.Range(1, count).Select(e => new MainTestTable { Value = INTMARKER }).ToList();
+			ORM.StoreAll(records);
+			var retrieved = ORM.Select<MainTestTable>().WhereFieldEquals("Value", INTMARKER).Execute();
+			Assert.AreEqual(records.Count, retrieved.Count());
+			Assert.AreEqual(records.Count, retrieved.Select(r => r.ID).Distinct().Count());
+		}
+
+		[TestMethod]
 		public void DefaultValueIsAssigned()
 		{
 			var template = new MainTestTable();

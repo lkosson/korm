@@ -69,6 +69,18 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void LargeBatchUpdateStoresValue()
+		{
+			var count = DB.CommandBuilder.MaxParameterCount + 1;
+			var records = Enumerable.Range(1, count).Select(e => new MainTestTable { Value = e }).ToList();
+			ORM.StoreAll(records);
+			foreach (var record in records) record.Value = INTMARKER;
+			ORM.StoreAll(records);
+			var retrieved = ORM.Select<MainTestTable>().WhereFieldEquals("Value", INTMARKER).Execute();
+			Assert.AreEqual(records.Count, retrieved.Count());
+		}
+
+		[TestMethod]
 		public void UpdateByIDStoresValue()
 		{
 			var record = new MainTestTable();

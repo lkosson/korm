@@ -85,6 +85,8 @@ namespace Kosson.KORM.ORM
 
 		public int Records(IEnumerable<TRecord> records)
 		{
+			if (DB.IsBatchSupported && commandText != null && records.Count() > 1 && records.First() is not IRecordNotifyInsert) return RecordsBatch(records);
+
 			var token = LogStart();
 			var getlastid = template.GetLastID;
 			var manualid = meta.IsManualID;
@@ -93,7 +95,6 @@ namespace Kosson.KORM.ORM
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
-				DbParameter[] parameters = null;
 				foreach (var record in records)
 				{
 					var notify = record as IRecordNotifyInsert;
@@ -102,7 +103,8 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Skip) continue;
 
 					LogRecord(LogLevel.Information, token, record);
-					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record, ref parameters);
+					DB.ClearParameters(cmdInsert);
+					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record);
 
 					if (cmdGetLastID != null) DB.ExecuteNonQuery(cmdInsert);
 					var rows = DB.ExecuteQuery(cmdGetLastID ?? cmdInsert);
@@ -119,8 +121,45 @@ namespace Kosson.KORM.ORM
 			}
 		}
 
+		private int RecordsBatch(IEnumerable<TRecord> records)
+		{
+			var token = LogStart();
+			var getlastid = template.GetLastID;
+			var manualid = meta.IsManualID;
+
+			using var batch = DB.CreateBatch();
+
+			foreach (var record in records)
+			{
+				LogRecord(LogLevel.Information, token, record);
+				var command = DB.CreateCommand(batch, commandText);
+				DBParameterLoader<TRecord>.Run(DB, meta, command, record);
+
+				if (getlastid != null) DB.CreateCommand(batch, getlastid);
+			}
+
+			using var reader = DB.ExecuteReader(batch);
+
+			int count = 0;
+			foreach (var record in records)
+			{
+				if (!reader.Read()) break;
+				var id = reader.GetInt64(0);
+				if (!manualid) record.ID = id;
+				LogID(token, record);
+
+				reader.NextResult();
+				count++;
+			}
+
+			LogEnd(token, count);
+			return count;
+		}
+
 		public async Task<int> RecordsAsync(IEnumerable<TRecord> records)
 		{
+			if (DB.IsBatchSupported && commandText != null && records.Count() > 1 && records.First() is not IRecordNotifyInsert) return await RecordsBatchAsync(records);
+
 			var token = LogStart();
 			var getlastid = template.GetLastID;
 			var manualid = meta.IsManualID;
@@ -129,7 +168,6 @@ namespace Kosson.KORM.ORM
 			{
 				int count = 0;
 				RecordNotifyResult result = RecordNotifyResult.Continue;
-				DbParameter[] parameters = null;
 				foreach (var record in records)
 				{
 					var notify = record as IRecordNotifyInsert;
@@ -138,7 +176,8 @@ namespace Kosson.KORM.ORM
 					if (result == RecordNotifyResult.Skip) continue;
 
 					LogRecord(LogLevel.Information, token, record);
-					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record, ref parameters);
+					DB.ClearParameters(cmdInsert);
+					DBParameterLoader<TRecord>.Run(DB, meta, cmdInsert, record);
 
 					if (cmdGetLastID != null) await DB.ExecuteNonQueryAsync(cmdInsert);
 					var rows = await DB.ExecuteQueryAsync(cmdGetLastID ?? cmdInsert);
@@ -152,6 +191,41 @@ namespace Kosson.KORM.ORM
 				LogEnd(token, count);
 				return count;
 			}
+		}
+
+		private async Task<int> RecordsBatchAsync(IEnumerable<TRecord> records)
+		{
+			var token = LogStart();
+			var getlastid = template.GetLastID;
+			var manualid = meta.IsManualID;
+
+			using var batch = DB.CreateBatch();
+
+			foreach (var record in records)
+			{
+				LogRecord(LogLevel.Information, token, record);
+				var command = DB.CreateCommand(batch, commandText);
+				DBParameterLoader<TRecord>.Run(DB, meta, command, record);
+
+				if (getlastid != null) DB.CreateCommand(batch, getlastid);
+			}
+
+			using var reader = await DB.ExecuteReaderAsync(batch);
+
+			int count = 0;
+			foreach (var record in records)
+			{
+				if (!await reader.ReadAsync()) break;
+				var id = reader.GetInt64(0);
+				if (!manualid) record.ID = id;
+				LogID(token, record);
+
+				await reader.NextResultAsync();
+				count++;
+			}
+
+			LogEnd(token, count);
+			return count;
 		}
 
 		public override string ToString()

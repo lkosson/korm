@@ -40,7 +40,7 @@ namespace Kosson.KORM.MSSQL
 				table.Append(sb);
 				sb.Append(" OFF");
 			}
-			if (primaryKeyReturn) sb.Append("; SELECT SCOPE_IDENTITY()");
+			if (primaryKeyReturn) sb.Append("; SELECT CAST(SCOPE_IDENTITY() AS BIGINT)");
 		}
 	}
 }
