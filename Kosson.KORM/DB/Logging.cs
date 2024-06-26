@@ -2,6 +2,7 @@
 using System;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Text;
 using System.Threading;
 
 namespace Kosson.KORM.DB
@@ -55,14 +56,51 @@ namespace Kosson.KORM.DB
 			if (!TraceWarningEnabled) return default(TraceToken);
 			var sql = command.CommandText;
 			var token = Start(sql);
-			TraceQueryParameters(LogLevel.Debug, token, command);
+			TraceQueryParameters(LogLevel.Debug, token, command.Parameters);
 			return token;
 		}
 
-		private void TraceQueryParameters(LogLevel level, TraceToken token, DbCommand command)
+		public TraceToken Start(DbBatch batch)
+		{
+			if (!TraceWarningEnabled) return default(TraceToken);
+
+			if (TraceDebugEnabled)
+			{
+				var token = Start("<BATCH>");
+				foreach (var command in batch.BatchCommands)
+				{
+					Trace(LogLevel.Information, token.id, command.CommandText);
+					TraceQueryParameters(LogLevel.Debug, token, command.Parameters);
+				}
+				return token;
+			}
+			else if (TraceInformationEnabled)
+			{
+				var token = Start("<BATCH>");
+				foreach (var command in batch.BatchCommands)
+				{
+					Trace(LogLevel.Information, token.id, command.CommandText);
+				}
+				return token;
+			}
+			else
+			{
+				var batchsql = new StringBuilder();
+				foreach (var command in batch.BatchCommands)
+				{
+					if (batchsql.Length > 0) batchsql.AppendLine();
+					var sql = command.CommandText;
+					batchsql.Append(sql);
+				}
+				var token = Start(batchsql.ToString());
+				return token;
+			}
+		}
+
+		private void TraceQueryParameters(LogLevel level, TraceToken token, DbParameterCollection parameters)
 		{
 			if (!logger.IsEnabled(level)) return;
-			foreach (DbParameter parameter in command.Parameters)
+			foreach (DbParameter parameter in parameters)
 			{
 				string val;
 				if (parameter.Value is string) val = "\"" + parameter.Value.ToString().Replace('\r', ' ').Replace('\n', ' ') + "\"";
@@ -107,13 +145,13 @@ namespace Kosson.KORM.DB
 
 			Trace(exceptionLevel, token.id, exc.GetType().Name + ": " + exc.OriginalMessage);
 
-			if (exc.Command != null)
+			if (exc.CommandText != null)
 			{
 				// On Information LogLevel queries are logged at start
-				if (!TraceInformationEnabled) Trace(exceptionLevel, token.id, exc.Command.CommandText);
+				if (!TraceInformationEnabled) Trace(exceptionLevel, token.id, exc.CommandText);
 
 				// On Debug LogLevel parameters are logged at start
-				if (!TraceDebugEnabled) TraceQueryParameters(exceptionLevel, token, exc.Command);
+				if (exc.CommandParameters != null && !TraceDebugEnabled) TraceQueryParameters(exceptionLevel, token, exc.CommandParameters);
 			}
 		}
 	}

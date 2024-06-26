@@ -389,6 +389,135 @@ namespace Kosson.KORM.DB
 			}
 		}
 		#endregion
+		#region Batch support
+		DbBatch IDB.CreateBatch()
+		{
+			try
+			{
+				Open(true);
+				var batch = dbconn.CreateBatch();
+				if (CommandTimeout.HasValue) batch.Timeout = CommandTimeout.Value / 1000;
+				return batch;
+			}
+			catch (Exception exc)
+			{
+				HandleException(exc);
+				throw;
+			}
+		}
+
+		DbBatchCommand IDB.CreateCommand(DbBatch batch, string command)
+		{
+			DbBatchCommand cmd = null;
+			try
+			{
+				Open(true);
+				cmd = batch.CreateBatchCommand();
+				if (ReplaceNewLines) command = command.Replace('\r', ' ').Replace('\n', ' ');
+				cmd.CommandText = command;
+				return cmd;
+			}
+			catch (Exception exc)
+			{
+				HandleException(exc);
+				throw;
+			}
+		}
+
+		DbParameter IDB.AddParameter(DbBatchCommand command, string name, object value)
+		{
+			if (!name.StartsWith(CommandBuilder.ParameterPrefix, StringComparison.Ordinal)) name = CommandBuilder.ParameterPrefix + name;
+			DbParameter param = command.CreateParameter();
+			param.ParameterName = name;
+			((IDB)this).SetParameter(param, value);
+			command.Parameters.Add(param);
+			return param;
+		}
+
+		int IDB.ExecuteNonQuery(DbBatch batch)
+		{
+			if (IsImplicitTransaction) throw new KORMInvalidOperationException("ExecuteNonQuery not allowed in implcit transaction.");
+			var token = log.Start(batch);
+			try
+			{
+				int result;
+				using (AcquireLock())
+				{
+					result = batch.ExecuteNonQuery();
+				}
+				log.Stop(token, result);
+				return result;
+			}
+			catch (Exception exc)
+			{
+				log.Stop(token);
+				HandleException(exc, token);
+				throw;
+			}
+		}
+
+		async Task<int> IDB.ExecuteNonQueryAsync(DbBatch batch)
+		{
+			if (IsImplicitTransaction) throw new KORMInvalidOperationException("ExecuteNonQueryAsync not allowed in implcit transaction.");
+			var token = log.Start(batch);
+			try
+			{
+				int result;
+				using (await AcquireLockAsync())
+				{
+					result = await batch.ExecuteNonQueryAsync();
+				}
+				log.Stop(token, result);
+				return result;
+			}
+			catch (Exception exc)
+			{
+				log.Stop(token);
+				HandleException(exc, token);
+				throw;
+			}
+		}
+
+		DbDataReader IDB.ExecuteReader(DbBatch batch)
+		{
+			var token = log.Start(batch);
+			try
+			{
+				using (AcquireLock())
+				{
+					var reader = batch.ExecuteReader();
+					log.Stop(token);
+					return reader;
+				}
+			}
+			catch (Exception exc)
+			{
+				log.Stop(token);
+				HandleException(exc, token);
+				throw;
+			}
+		}
+
+		async Task<DbDataReader> IDB.ExecuteReaderAsync(DbBatch batch)
+		{
+			var token = log.Start(batch);
+			try
+			{
+				using (AcquireLock())
+				{
+					var reader = await batch.ExecuteReaderAsync();
+					log.Stop(token);
+					return reader;
+				}
+			}
+			catch (Exception exc)
+			{
+				log.Stop(token);
+				HandleException(exc, token);
+				throw;
+			}
+		}
+		#endregion
 		#region Command execution
 		int IDB.ExecuteNonQuery(DbCommand command)
 		{
@@ -594,9 +723,10 @@ namespace Kosson.KORM.DB
 			throw translated;
 		}
 
-		internal void HandleException(Exception exc)
+		internal void HandleException(Exception exc, TraceToken token = default(TraceToken))
 		{
-			HandleException(exc, null, null, default);
+			if (exc is DbException dbException && dbException.BatchCommand != null) HandleException(exc, dbException.BatchCommand, token);
+			HandleException(exc, null, null, token);
 		}
 
 		internal void HandleException(Exception exc, DbCommand command, TraceToken token = default(TraceToken))

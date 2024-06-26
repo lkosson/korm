@@ -42,6 +42,11 @@ namespace Kosson.KORM
 		bool IsImplicitTransaction { get; }
 
 		/// <summary>
+		/// Determines whether the database supports command batching via DbBatch.
+		/// </summary>
+		bool IsBatchSupported { get; }
+
+		/// <summary>
 		/// Checks whether database specified in provider configuration exists and creates it if it does not.
 		/// </summary>
 		void CreateDatabase();
@@ -90,6 +95,59 @@ namespace Kosson.KORM
 		/// <param name="command">Database command text.</param>
 		/// <returns>New database command for a given text.</returns>
 		DbCommand CreateCommand(string command);
+
+		/// <summary>
+		/// Creates a new database command batch. Available only when IsBatchSupported = true.
+		/// </summary>
+		/// <returns>New database command batch.</returns>
+		DbBatch CreateBatch();
+
+		/// <summary>
+		/// Creates new database command with a given text associated with provided command batch.
+		/// </summary>
+		/// <param name="batch">Batch do add a command to.</param>
+		/// <param name="command">Database command text.</param>
+		/// <returns>New database command for a given text.</returns>
+		DbBatchCommand CreateCommand(DbBatch batch, string command);
+
+		/// <summary>
+		/// Adds new database parameter to a given database command. Provided value is converted to a type recognized by database engine.
+		/// </summary>
+		/// <param name="command">Database command to add parameter to.</param>
+		/// <param name="name">Name of the parameter to add.</param>
+		/// <param name="value">Value of the parameter to add.</param>
+		/// <returns>Object representing command parameter.</returns>
+		DbParameter AddParameter(DbBatchCommand command, string name, object value);
+
+		/// <summary>
+		/// Executes given database non-query command batch, handling and wrapping potential database engine-specific exceptions.
+		/// </summary>
+		/// <param name="batch">Database command batch to execute.</param>
+		/// <returns>Database command result code or a number of affected rows.</returns>
+		int ExecuteNonQuery(DbBatch batch);
+
+		/// <summary>
+		/// Asynchronous version of ExecuteNonQuery.
+		/// Executes given database non-query command batch, handling and wrapping potential database engine-specific exceptions.
+		/// </summary>
+		/// <param name="batch">Database command batch to execute.</param>
+		/// <returns>A task representing asynchronous operation returning database command result code or a number of affected rows.</returns>
+		Task<int> ExecuteNonQueryAsync(DbBatch batch);
+
+		/// <summary>
+		/// Executes given database command batch, returning a reader providing one-time, on-the-fly enumerator of rows based on the command result and handling and wrapping potential database engine-specific exceptions.
+		/// </summary>
+		/// <param name="batch">Database command batch to execute.</param>
+		/// <returns>One-time reader of rows representing result of the command batch.</returns>
+		DbDataReader ExecuteReader(DbBatch batch);
+
+		/// <summary>
+		/// Asynchronous version of ExecuteReader.
+		/// Executes given database command batch, returning a reader providing one-time, on-the-fly enumerator of rows based on the command result and handling and wrapping potential database engine-specific exceptions.
+		/// </summary>
+		/// <param name="batch">Database command batch to execute.</param>
+		/// <returns>A task representing the asynchronous operation returning one-time reader of rows representing result of the command batch.</returns>
+		Task<DbDataReader> ExecuteReaderAsync(DbBatch batch);
 
 		/// <summary>
 		/// Executes given database non-query command, handling and wrapping potential database engine-specific exceptions.
