@@ -54,7 +54,7 @@ namespace Kosson.KORM.DB
 		public virtual bool IsImplicitTransaction => isImplicit;
 
 		/// <inheritdoc/>
-		public virtual bool IsBatchSupported => dbconn.CanCreateBatch;
+		public virtual bool IsBatchSupported => false;
 
 		/// <summary>
 		/// Determines whether ADO.NET provider expects command preparation before execution.
@@ -397,6 +397,7 @@ namespace Kosson.KORM.DB
 				Open(true);
 				var batch = dbconn.CreateBatch();
 				if (CommandTimeout.HasValue) batch.Timeout = CommandTimeout.Value / 1000;
+				batch.Transaction = dbtran;
 				return batch;
 			}
 			catch (Exception exc)
@@ -415,6 +416,7 @@ namespace Kosson.KORM.DB
 				cmd = batch.CreateBatchCommand();
 				if (ReplaceNewLines) command = command.Replace('\r', ' ').Replace('\n', ' ');
 				cmd.CommandText = command;
+				batch.BatchCommands.Add(cmd);
 				return cmd;
 			}
 			catch (Exception exc)

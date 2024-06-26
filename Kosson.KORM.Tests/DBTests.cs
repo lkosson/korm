@@ -258,5 +258,119 @@ namespace Kosson.KORM.Tests
 		{
 			DB.ExecuteNonQuery($"SELECT 1");
 		}
+
+		[TestMethod]
+		public void BatchExecutes()
+		{
+			if (!DB.IsBatchSupported) return;
+			using var batch = DB.CreateBatch();
+			var cmd1 = DB.CreateCommand(batch, "SELECT 1");
+			var cmd2 = DB.CreateCommand(batch, "SELECT 2");
+			using var reader = DB.ExecuteReader(batch);
+			Assert.IsTrue(reader.Read());
+			Assert.IsFalse(reader.Read());
+			Assert.IsTrue(reader.NextResult());
+			Assert.IsTrue(reader.Read());
+			Assert.IsFalse(reader.Read());
+			Assert.IsFalse(reader.NextResult());
+		}
+
+		[TestMethod]
+		public void BatchParametersAreSupported()
+		{
+			if (!DB.IsBatchSupported) return;
+			using var batch = DB.CreateBatch();
+			var count = DB.CommandBuilder.MaxParameterCount * 2;
+			for (int i = 0; i < count; i++)
+			{
+				var parName = DB.CommandBuilder.ParameterPrefix + "P" + i;
+				var cmd = DB.CreateCommand(batch, "SELECT " + parName);
+				DB.AddParameter(cmd, parName, i);
+			}
+			using var reader = DB.ExecuteReader(batch);
+			for (int i = 0; i < count; i++)
+			{
+				Assert.IsTrue(reader.Read());
+				var val = reader.GetInt32(0);
+				Assert.AreEqual(i, val);
+				Assert.IsFalse(reader.Read());
+				if (i == count - 1) Assert.IsFalse(reader.NextResult());
+				else Assert.IsTrue(reader.NextResult());
+			}
+		}
+
+		[TestMethod]
+		public void BatchDuplicatedParametersAreIndependent()
+		{
+			if (!DB.IsBatchSupported) return;
+			using var batch = DB.CreateBatch();
+			var count = 100;
+			for (int i = 0; i < count; i++)
+			{
+				var parName = DB.CommandBuilder.ParameterPrefix + "P0";
+				var cmd = DB.CreateCommand(batch, "SELECT " + parName);
+				DB.AddParameter(cmd, parName, i);
+			}
+			using var reader = DB.ExecuteReader(batch);
+			for (int i = 0; i < count; i++)
+			{
+				Assert.IsTrue(reader.Read());
+				var val = reader.GetInt32(0);
+				Assert.AreEqual(i, val);
+				Assert.IsFalse(reader.Read());
+				if (i == count - 1) Assert.IsFalse(reader.NextResult());
+				else Assert.IsTrue(reader.NextResult());
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(KORMException))]
+		public void BatchThrowsWhenConsumingResult()
+		{
+			if (!DB.IsBatchSupported) return;
+			using var batch = DB.CreateBatch();
+			DB.CreateCommand(batch, "INVALIDCOMMAND");
+			using var reader = DB.ExecuteReader(batch);
+		}
+
+		[TestMethod]
+		public void BatchDontThrowWhenNotConsumingResult()
+		{
+			if (!DB.IsBatchSupported) return;
+			using var batch = DB.CreateBatch();
+			DB.CreateCommand(batch, "SELECT 1");
+			DB.CreateCommand(batch, "INVALIDCOMMAND");
+			var reader = DB.ExecuteReader(batch);
+			Assert.IsTrue(reader.Read());
+			try
+			{
+				reader.Dispose();
+			}
+			catch
+			{
+				// ignored - might throw subsequent error
+			}
+		}
+
+		[TestMethod]
+		public void BatchThrownExceptionContainsCommandAndParameters()
+		{
+			if (!DB.IsBatchSupported) return;
+			using var batch = DB.CreateBatch();
+			var command = DB.CreateCommand(batch, "INVALIDCOMMAND");
+			DB.AddParameter(command, "@P0", 123);
+			try
+			{
+				using var reader = DB.ExecuteReader(batch);
+				Assert.Fail();
+			}
+			catch (KORMException exc)
+			{
+				Assert.IsNotNull(exc.CommandText);
+				Assert.IsNotNull(exc.CommandParameters);
+				Assert.AreEqual(1, exc.CommandParameters.Count);
+				Assert.AreEqual(123, exc.CommandParameters[0].Value);
+			}
+		}
 	}
 }

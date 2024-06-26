@@ -34,6 +34,9 @@ namespace Kosson.KORM.PGSQL
 		protected override bool ReplaceNewLines { get { return true; } }
 
 		/// <inheritdoc/>
+		public override bool IsBatchSupported => true;
+
+		/// <inheritdoc/>
 		protected override IDBCommandBuilder CreateCommandBuilder()
 		{
 			return new CommandBuilder();

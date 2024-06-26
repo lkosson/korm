@@ -22,6 +22,9 @@ namespace Kosson.KORM.MSSQL
 		}
 
 		/// <inheritdoc/>
+		public override bool IsBatchSupported => true;
+
+		/// <inheritdoc/>
 		protected override IDBCommandBuilder CreateCommandBuilder()
 		{
 			return new CommandBuilder();
