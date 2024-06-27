@@ -53,8 +53,8 @@ namespace Kosson.KORM
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
-		public static IEnumerable<(TRecordLocal, TRecordForeign)> Join<TRecordLocal, TRecordForeign>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector) 
-			where TRecordForeign : IRecord 
+		public static IEnumerable<(TRecordLocal, TRecordForeign)> Join<TRecordLocal, TRecordForeign>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector)
+			where TRecordForeign : IRecord
 			=> Join(records, foreignRecordSelect, foreignKeySelector, (record1, record2) => (record1, record2));
 
 		/// <summary>
@@ -64,7 +64,7 @@ namespace Kosson.KORM
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
-		public static IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordForeign)> Join<TRecordLocal1, TRecordLocal2, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2), RecordRef<TRecordForeign>> foreignKeySelector) 
+		public static IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordForeign)> Join<TRecordLocal1, TRecordLocal2, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2), RecordRef<TRecordForeign>> foreignKeySelector)
 			where TRecordForeign : IRecord
 			=> Join(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, record));
 

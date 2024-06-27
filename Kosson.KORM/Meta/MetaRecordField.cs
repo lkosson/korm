@@ -128,7 +128,7 @@ namespace Kosson.KORM.Meta
 			{
 				if (typeof(Record32).IsAssignableFrom(ForeignType)) return DbType.Int32;
 				if (typeof(Record16).IsAssignableFrom(ForeignType)) return DbType.Int16;
-				if (typeof(Record8).IsAssignableFrom(ForeignType)) return DbType.Byte; 
+				if (typeof(Record8).IsAssignableFrom(ForeignType)) return DbType.Byte;
 				return DbType.Int64;
 			}
 			if (type.GetTypeInfo().IsEnum) return DbType.Int32;

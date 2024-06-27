@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace Kosson.KORM
+﻿namespace Kosson.KORM
 {
 	/// <summary>
 	/// Database connection parameters.

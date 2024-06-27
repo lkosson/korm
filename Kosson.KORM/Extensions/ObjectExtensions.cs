@@ -1,7 +1,4 @@
-﻿using Kosson.KORM;
-using System.Linq;
-
-namespace System
+﻿namespace System
 {
 	/// <summary>
 	/// Extension methods for System.Object.

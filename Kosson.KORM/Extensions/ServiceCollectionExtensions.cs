@@ -1,5 +1,4 @@
 ﻿using Kosson.KORM;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -31,8 +30,8 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddScoped<IORM, Kosson.KORM.ORM.DBORM>();
 			services.AddScoped<IDB, TDB>();
 			services.AddTransient<Kosson.KORM.XMLBackup>();
-			services.Configure<KORMOptions>(options => 
-			{ 
+			services.Configure<KORMOptions>(options =>
+			{
 				if (connectionString != null) options.ConnectionString = connectionString;
 			});
 		}
