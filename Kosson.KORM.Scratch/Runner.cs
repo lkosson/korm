@@ -54,7 +54,8 @@ namespace Kosson.KORM.Scratch
 			var selectedid = orm.Select<Membership>().Select(m => m.ID).ExecuteFirst();
 
 			var y = new[] { 1, 2 };
-			var linqd = orm.Select<Membership>().Where(m => m.User.UserDetails.PasswordHash == "123").Execute();
+			var linqd = orm.Select<Membership>().Where(m => m.User.Name.StartsWith("user1")).Execute();
+			//var linqd = orm.Select<Membership>().Where(m => m.User.UserDetails.PasswordHash.StartsWith("123")).Execute();
 			//var linqd = orm.Select<Membership>().Where(m => 4m != y[1] + 3L || m.User.ID == DateTime.Now.AddDays(1).Ticks || m.CreationTime == null || (m.ID > 10 && m.User.UserDetails.Group.ID == x));
 
 			var joined = orm.Select<User>().Execute().Join(orm.Select<User>(), user => user.UserDetails.Group);

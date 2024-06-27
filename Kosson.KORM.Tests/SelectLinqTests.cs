@@ -372,7 +372,18 @@ namespace Kosson.KORM.Tests
 			var inserted = PrepareTestTables();
 			var retrieved = ORM.Select<LinqTestTable>().Where(t => !(t.Value == INTMARKER)).Execute();
 			Assert.IsNotNull(retrieved);
+			Assert.AreNotEqual(0, retrieved.Count);
 			Assert.IsTrue(retrieved.All(t => t.Value != INTMARKER));
+		}
+
+		[TestMethod]
+		public void SelectLinqByStringMatching()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.InlinedDirectly.DoubleInline.Value.StartsWith("AA")).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreNotEqual(0, retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => t.InlinedDirectly.DoubleInline.Value.StartsWith("AA")));
 		}
 
 		[Table]

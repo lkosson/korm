@@ -113,7 +113,7 @@ namespace Kosson.KORM
 			where TRecord : IRecord
 		{
 			var target = methodCallExpression.Object == null ? null : ProcessExpression(query, methodCallExpression.Object);
-			if (target is IDBExpression) throw new NotSupportedException("Unsupported method call on database value: " + methodCallExpression);
+			if (target is IDBExpression targetDBExpression) return ProcessDatabaseCallExpression(targetDBExpression, query, methodCallExpression);
 			var arguments = new object[methodCallExpression.Arguments.Count];
 			var parameters = methodCallExpression.Method.GetParameters();
 			for (int i = 0; i < arguments.Length; i++)
@@ -124,6 +124,34 @@ namespace Kosson.KORM
 				arguments[i] = argument;
 			}
 			return methodCallExpression.Method.Invoke(target, arguments);
+		}
+
+		private static object ProcessDatabaseCallExpression<TCommand, TRecord>(IDBExpression targetDBExpression, IORMNarrowableCommand<TCommand, TRecord> query, MethodCallExpression methodCallExpression)
+			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
+			where TRecord : IRecord
+		{
+			if (methodCallExpression.Method.DeclaringType == typeof(string))
+			{
+				if (methodCallExpression.Method.Name == nameof(String.StartsWith) && methodCallExpression.Arguments.Count == 1)
+				{
+					var argument = ProcessExpression(query, methodCallExpression.Arguments[0]);
+					if (argument is string stringArgument) return query.DB.CommandBuilder.Comparison(targetDBExpression, DBExpressionComparison.Like, query.Parameter(stringArgument + "%"));
+					else throw new NotSupportedException("Unsupported argument type: " + argument);
+				}
+				else if (methodCallExpression.Method.Name == nameof(String.EndsWith) && methodCallExpression.Arguments.Count == 1)
+				{
+					var argument = ProcessExpression(query, methodCallExpression.Arguments[0]);
+					if (argument is string stringArgument) return query.DB.CommandBuilder.Comparison(targetDBExpression, DBExpressionComparison.Like, query.Parameter("%" + stringArgument));
+					else throw new NotSupportedException("Unsupported argument type: " + argument);
+				}
+				else if (methodCallExpression.Method.Name == nameof(String.Contains) && methodCallExpression.Arguments.Count == 1)
+				{
+					var argument = ProcessExpression(query, methodCallExpression.Arguments[0]);
+					if (argument is string stringArgument) return query.DB.CommandBuilder.Comparison(targetDBExpression, DBExpressionComparison.Like, query.Parameter("%" + stringArgument + "%"));
+					else throw new NotSupportedException("Unsupported argument type: " + argument);
+				}
+			}
+			throw new NotSupportedException("Unsupported method call on database value: " + methodCallExpression);
 		}
 
 		private static object ProcessConstantExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, ConstantExpression constantExpression)
