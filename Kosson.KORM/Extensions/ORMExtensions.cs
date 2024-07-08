@@ -1,6 +1,8 @@
 ﻿using Kosson.KORM;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Kosson.KORM
@@ -226,5 +228,89 @@ namespace Kosson.KORM
 		/// <returns>Task representing asynchronous operation returning record for a given record reference.</returns>
 		public static Task<T> GetAsync<T>(this IORM orm, RecordRef<T> recordref) where T : class, IRecord, new()
 			=> orm.Select<T>().ByIDAsync(recordref.ID);
+
+		/// <summary>
+		/// Retrieves all records matching all provided conditions.
+		/// </summary>
+		/// <typeparam name="T">Type of records to retrieve.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="predicates">Set of predicates determining which records to retrieve.</param>
+		/// <returns>Records matching all provided conditions.</returns>
+		public static IReadOnlyCollection<T> Get<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
+			=> orm.Select<T>().WhereAll(predicates).Execute();
+
+		/// <summary>
+		/// Asynchronous version of Get.
+		/// Retrieves all records matching all provided conditions.
+		/// </summary>
+		/// <typeparam name="T">Type of records to retrieve.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="predicates">Set of predicates determining which records to retrieve.</param>
+		/// <returns>Records matching all provided conditions.</returns>
+		public static Task<IReadOnlyCollection<T>> GetAsync<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
+			=> orm.Select<T>().WhereAll(predicates).ExecuteAsync();
+
+		/// <summary>
+		/// Retrieves all records matching provided SQL condition.
+		/// </summary>
+		/// <typeparam name="T">Type of records to retrieve.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="where">Expression to use as WHERE clause in SQL SELECT command.</param>
+		/// <returns>Records matching provided condition.</returns>
+		public static IReadOnlyCollection<T> Get<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
+			=> orm.Select<T>().Where(where).Execute();
+
+		/// <summary>
+		/// Asynchronous version of Get.
+		/// Retrieves all records matching provided SQL condition.
+		/// </summary>
+		/// <typeparam name="T">Type of records to retrieve.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="where">Expression to use as WHERE clause in SQL SELECT command.</param>
+		/// <returns>Records matching provided condition.</returns>
+		public static Task<IReadOnlyCollection<T>> GetAsync<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
+			=> orm.Select<T>().Where(where).ExecuteAsync();
+
+		/// <summary>
+		/// Retrieves first record matching all provided conditions.
+		/// </summary>
+		/// <typeparam name="T">Type of record to retrieve.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="predicates">Set of predicates determining which record to retrieve.</param>
+		/// <returns>First record matching provided conditions.</returns>
+		public static T GetFirst<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
+			=> orm.Select<T>().WhereAll(predicates).ExecuteFirst();
+
+		/// <summary>
+		/// Asynchronous version of GetFirst.
+		/// Retrieves first record matching all provided conditions.
+		/// </summary>
+		/// <typeparam name="T">Type of record to retrieve.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="predicates">Set of predicates determining which record to retrieve.</param>
+		/// <returns>First record matching provided conditions.</returns>
+		public static Task<T> GetFirstAsync<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
+			=> orm.Select<T>().WhereAll(predicates).ExecuteFirstAsync();
+
+		/// <summary>
+		/// Retrieves first record matching provided SQL condition.
+		/// </summary>
+		/// <typeparam name="T">Type of record to retrieve.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="where">Expression to use as WHERE clause in SQL SELECT command.</param>
+		/// <returns>First record matching provided condition.</returns>
+		public static T GetFirst<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
+			=> orm.Select<T>().Where(where).ExecuteFirst();
+
+		/// <summary>
+		/// Asynchronous version of GetFirst.
+		/// Retrieves first record matching provided SQL condition.
+		/// </summary>
+		/// <typeparam name="T">Type of record to retrieve.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="where">Expression to use as WHERE clause in SQL SELECT command.</param>
+		/// <returns>First record matching provided condition.</returns>
+		public static Task<T> GetFirstAsync<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
+			=> orm.Select<T>().Where(where).ExecuteFirstAsync();
 	}
 }

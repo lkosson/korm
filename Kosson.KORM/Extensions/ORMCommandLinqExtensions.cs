@@ -28,6 +28,23 @@ namespace Kosson.KORM
 				var other => throw new NotSupportedException("Unsupported expression result \"" + other + "\".")
 			};
 
+		/// <summary>
+		/// Adds WHERE conditions to the query based on provided set of predicates.
+		/// </summary>
+		/// <typeparam name="TCommand">Type of command to add conditions to.</typeparam>
+		/// <typeparam name="TRecord">Type of record processed by the command.</typeparam>
+		/// <param name="query">Command to add conditions to.</param>
+		/// <param name="predicates">Set of conditions to add to the command.</param>
+		/// <returns>Original command with conditions added to.</returns>
+		public static TCommand WhereAll<TCommand, TRecord>(this TCommand query, params Expression<Func<TRecord, bool>>[] predicates)
+			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
+			where TRecord : IRecord
+		{
+			foreach (var predicate in predicates)
+				query = query.Where(predicate);
+			return query;
+		}
+
 		private static object ProcessExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, Expression expression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord
