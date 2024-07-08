@@ -74,14 +74,14 @@ namespace Kosson.KORM
 		/// <param name="name">Name of the parameter to add.</param>
 		/// <param name="value">Value of the parameter to add.</param>
 		/// <returns>Object representing command parameter.</returns>
-		DbParameter AddParameter(DbCommand command, string name, object value);
+		DbParameter AddParameter(DbCommand command, string name, object? value);
 
 		/// <summary>
 		/// Changes value of a given database parameter to a new one. Provided value is converted to a type recognized by database engine.
 		/// </summary>
 		/// <param name="parameter">Parameter to change.</param>
 		/// <param name="value">New value of the parameter.</param>
-		void SetParameter(DbParameter parameter, object value);
+		void SetParameter(DbParameter parameter, object? value);
 
 		/// <summary>
 		/// Removes all parameters from the database command.

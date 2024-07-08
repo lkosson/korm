@@ -53,7 +53,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Gets or sets database engine-specific data type for backing column of a property.
 		/// </summary>
-		public string ColumnDefinition { get; set; }
+		public string? ColumnDefinition { get; set; }
 
 		/// <summary>
 		/// Marks a property as backed by database column. It will be stored and retrieved from database using ORM operations.

@@ -162,7 +162,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="value">Constant value to create expression for.</param>
 		/// <returns>New constant expression.</returns>
-		IDBExpression Const(string value);
+		IDBExpression Const(string? value);
 
 		/// <summary>
 		/// Creates a new expression for a given constant value.
@@ -211,7 +211,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="names">Identifier names to create expression for.</param>
 		/// <returns>New multipart identifier expression.</returns>
-		IDBIdentifier Identifier(params string[] names);
+		IDBIdentifier Identifier(params string?[] names);
 
 		/// <summary>
 		/// Creates a new expression from a given text.
@@ -227,7 +227,7 @@ namespace Kosson.KORM
 		/// <param name="comparison">Type of comparison between values.</param>
 		/// <param name="rexpr">Right value of a comparison.</param>
 		/// <returns>New expression representing comparison between given expressions.</returns>
-		IDBExpression Comparison(IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr);
+		IDBExpression Comparison(IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression? rexpr);
 
 		/// <summary>
 		/// Creates a new unary operator from two a expression.
@@ -383,6 +383,11 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="sb">StringBuilder to append the expression to.</param>
 		void Append(StringBuilder sb);
+
+		/// <summary>
+		/// Returns a database representation of the expression.
+		/// </summary>
+		string ToString();
 	}
 
 	/// <summary>
@@ -425,6 +430,11 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="tag">Comment to append to database command.</param>
 		void Tag(IDBComment tag);
+
+		/// <summary>
+		/// Returns a database representation of the command.
+		/// </summary>
+		string ToString();
 	}
 
 	/// <summary>
@@ -484,28 +494,28 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="expression">Expression to use as a column value.</param>
 		/// <param name="alias">Optional column name.</param>
-		void Column(IDBExpression expression, IDBIdentifier alias = null);
+		void Column(IDBExpression expression, IDBIdentifier? alias = null);
 
 		/// <summary>
 		/// Adds a subquery to SELECT clause of the command.
 		/// </summary>
 		/// <param name="expression">Subquery to use as a column value.</param>
 		/// <param name="alias">Optional column name.</param>
-		void Subquery(IDBExpression expression, IDBIdentifier alias = null);
+		void Subquery(IDBExpression expression, IDBIdentifier? alias = null);
 
 		/// <summary>
 		/// Sets FROM clause of the command to given table.
 		/// </summary>
 		/// <param name="table">Main table name.</param>
 		/// <param name="alias">Optional main table alias.</param>
-		void From(IDBIdentifier table, IDBIdentifier alias = null);
+		void From(IDBIdentifier table, IDBIdentifier? alias = null);
 
 		/// <summary>
 		/// Sets FROM clause of the command to a given subquery expression.
 		/// </summary>
 		/// <param name="expression">Subquery to use as a main table.</param>
 		/// <param name="alias">Optional main table alias.</param>
-		void FromSubquery(IDBExpression expression, IDBIdentifier alias = null);
+		void FromSubquery(IDBExpression expression, IDBIdentifier? alias = null);
 
 		/// <summary>
 		/// Adds a JOIN clause to the command.
@@ -514,7 +524,7 @@ namespace Kosson.KORM
 		/// <param name="expression">Expression on which the join is made.</param>
 		/// <param name="alias">Remote table alias.</param>
 		/// <param name="outer">Specifies whether OUTER or INNER JOIN should be produced.</param>
-		void Join(IDBIdentifier table, IDBExpression expression, IDBIdentifier alias = null, bool outer = true);
+		void Join(IDBIdentifier table, IDBExpression expression, IDBIdentifier? alias = null, bool outer = true);
 
 		/// <summary>
 		/// Adds GROUP BY clause to the command. Clause is added after existing (if any) GROUP BY clauses.
@@ -588,7 +598,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Returns database query to retrieve value of primary key (ID) assigned by last INSERT command. Returns null if value can be obtained directly as a result of INSERT command execution.
 		/// </summary>
-		string GetLastID { get; }
+		string? GetLastID { get; }
 
 		/// <summary>
 		/// Sets table to insert to.

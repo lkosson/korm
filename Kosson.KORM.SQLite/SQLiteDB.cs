@@ -44,7 +44,7 @@ namespace Kosson.KORM.SQLite
 		}
 
 		/// <inheritdoc/>
-		protected override object NativeToSQL(object val)
+		protected override object NativeToSQL(object? val)
 		{
 			if (val is bool) return val;
 			if (val is DateTime date) return date.ToString("yyyy-MM-dd HH:mm:ss.ffff", System.Globalization.CultureInfo.InvariantCulture);
@@ -52,7 +52,7 @@ namespace Kosson.KORM.SQLite
 		}
 
 		/// <inheritdoc/>
-		protected override KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
+		protected override KORMException? TranslateException(Exception exc, string ?commandText, DbParameterCollection? commandParameters)
 		{
 			if (exc is SqliteException se)
 			{

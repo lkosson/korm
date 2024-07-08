@@ -11,6 +11,6 @@ namespace Kosson.KORM
 		/// Reads next record from the backups.
 		/// </summary>
 		/// <returns>Record from the backup or null if there are no more records.</returns>
-		IRecord ReadRecord();
+		IRecord? ReadRecord();
 	}
 }

@@ -8,19 +8,19 @@ namespace Kosson.KORM.Meta
 	{
 		private readonly IFactory factory;
 		public IMetaRecord Record { get; private set; }
-		public PropertyInfo Property { get; private set; }
+		public PropertyInfo Property { get; private set; } = default!;
 
-		public string Name { get; private set; }
-		public Type Type { get; private set; }
+		public string Name { get; private set; } = default!;
+		public Type Type { get; private set; } = default!;
 		public bool IsEagerLookup { get; private set; }
 		public bool IsRecordRef { get; private set; }
 		public bool IsPrimaryKey { get; private set; }
 
 		public bool IsColumn { get; private set; }
 		public bool IsFromDB { get; private set; }
-		public string DBName { get; private set; }
+		public string DBName { get; private set; } = default!;
 		public DbType DBType { get; private set; }
-		public string ColumnDefinition { get; private set; }
+		public string? ColumnDefinition { get; private set; }
 		public bool IsReadOnly { get; private set; }
 
 		public int Length { get; private set; }
@@ -31,17 +31,17 @@ namespace Kosson.KORM.Meta
 		public bool IsForeignKey { get; private set; }
 		public bool IsCascade { get; private set; }
 		public bool IsSetNull { get; private set; }
-		public Type ForeignType { get; private set; }
-		public IMetaRecord ForeignMeta => ForeignType == null ? null : new MetaRecord(factory, ForeignType);
+		public Type? ForeignType { get; private set; }
+		public IMetaRecord? ForeignMeta => ForeignType == null ? null : new MetaRecord(factory, ForeignType);
 
-		public SubqueryBuilder SubqueryBuilder { get; private set; }
+		public SubqueryBuilder? SubqueryBuilder { get; private set; }
 
-		public object DefaultValue { get; private set; }
+		public object? DefaultValue { get; private set; }
 		public bool IsNotNull { get; private set; }
 
 		public bool IsInline { get; private set; }
-		public string InlinePrefix { get; private set; }
-		public IMetaRecord InlineRecord { get; private set; }
+		public string? InlinePrefix { get; private set; }
+		public IMetaRecord? InlineRecord { get; private set; }
 
 		public MetaRecordField(PropertyInfo property, IMetaRecord record, IFactory factory)
 		{
@@ -79,14 +79,14 @@ namespace Kosson.KORM.Meta
 
 		private void ProcessDBNameAttribute(PropertyInfo property)
 		{
-			var dbname = (DBNameAttribute)property.GetCustomAttribute(typeof(DBNameAttribute), false);
+			var dbname = (DBNameAttribute?)property.GetCustomAttribute(typeof(DBNameAttribute), false);
 			if (dbname != null) DBName = dbname.Name;
 			else if (DBName == null) DBName = String.IsNullOrEmpty(Record.DBPrefix) ? Name : Record.DBPrefix + "_" + Name;
 		}
 
 		private void ProcessColumnAttribute(PropertyInfo property, IFactory factory)
 		{
-			var column = (ColumnAttribute)property.GetCustomAttribute(typeof(ColumnAttribute), false);
+			var column = (ColumnAttribute?)property.GetCustomAttribute(typeof(ColumnAttribute), false);
 			if (column == null) return;
 
 			IsColumn = true;
@@ -137,7 +137,7 @@ namespace Kosson.KORM.Meta
 
 		private void ProcessDBAliasAttribute(PropertyInfo property)
 		{
-			var dbalias = (DBAliasAttribute)property.GetCustomAttribute(typeof(DBAliasAttribute), false);
+			var dbalias = (DBAliasAttribute?)property.GetCustomAttribute(typeof(DBAliasAttribute), false);
 			if (dbalias == null) return;
 			var aliasedField = Record.GetField(dbalias.Name);
 			if (aliasedField == null) DBName = String.IsNullOrEmpty(Record.DBPrefix) ? dbalias.Name : Record.DBPrefix + "_" + dbalias.Name;
@@ -149,7 +149,7 @@ namespace Kosson.KORM.Meta
 
 		private void ProcessForeignKeyAttribute(PropertyInfo property)
 		{
-			var fk = (ForeignKeyAttribute)property.GetCustomAttribute(typeof(ForeignKeyAttribute), false);
+			var fk = (ForeignKeyAttribute?)property.GetCustomAttribute(typeof(ForeignKeyAttribute), false);
 			if (fk == null) return;
 
 			IsForeignKey = true;
@@ -159,7 +159,7 @@ namespace Kosson.KORM.Meta
 
 		private void ProcessSubqueryAttribute(PropertyInfo property)
 		{
-			var subquery = (SubqueryBuilderAttribute)property.GetCustomAttribute(typeof(SubqueryBuilderAttribute), false);
+			var subquery = (SubqueryBuilderAttribute?)property.GetCustomAttribute(typeof(SubqueryBuilderAttribute), false);
 			if (subquery == null) return;
 
 			IsForeignKey = false;
@@ -170,7 +170,7 @@ namespace Kosson.KORM.Meta
 
 		private void ProcessInlineAttribute(PropertyInfo property, IFactory factory)
 		{
-			var inline = (InlineAttribute)property.GetCustomAttribute(typeof(InlineAttribute), false);
+			var inline = (InlineAttribute?)property.GetCustomAttribute(typeof(InlineAttribute), false);
 			if (inline == null) return;
 
 			IsColumn = true;

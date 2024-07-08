@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,12 +29,12 @@ namespace Kosson.KORM.DB
 		/// <summary>
 		/// Current ADO.NET connection.
 		/// </summary>
-		protected DbConnection dbconn;
+		protected DbConnection? dbconn;
 
 		/// <summary>
 		/// Current ADO.NET transaction.
 		/// </summary>
-		protected DbTransaction dbtran;
+		protected DbTransaction? dbtran;
 
 		/// <inheritdoc/>
 		public virtual int? CommandTimeout { get; set; }
@@ -84,19 +85,20 @@ namespace Kosson.KORM.DB
 		/// <returns>New ADO.NET DbConnection.</returns>
 		protected abstract DbConnection CreateConnection();
 
-		private StackTrace connectionStartStackTrace;
-		private StackTrace connectionEndStackTrace;
-		private StackTrace transactionStartStackTrace;
-		private StackTrace transactionEndStackTrace;
+		private StackTrace? connectionStartStackTrace;
+		private StackTrace? connectionEndStackTrace;
+		private StackTrace? transactionStartStackTrace;
+		private StackTrace? transactionEndStackTrace;
 
 		/// <summary>
 		/// Creates new instance of ADONETDB.
 		/// </summary>
 		public ADONETDB(IOptionsMonitor<KORMOptions> optionsMonitor, ILogger logger)
 		{
+			ConnectionString = "";
 			IsolationLevel = IsolationLevel.Unspecified;
 			commandBuilder = CreateCommandBuilder();
-			optionsMonitorDisposer = optionsMonitor.OnChange(ApplyOptions);
+			optionsMonitorDisposer = optionsMonitor.OnChange(ApplyOptions)!;
 			ApplyOptions(optionsMonitor.CurrentValue);
 			if (logger.IsEnabled(LogLevel.Critical)) log = new Logging(logger);
 			else log = new Logging(null);
@@ -192,7 +194,7 @@ namespace Kosson.KORM.DB
 			{
 				if (!IsTransactionOpen) throw new KORMInvalidOperationException("Transaction not started.");
 				if (IsImplicitTransaction) throw new KORMInvalidOperationException("Implicit transaction cannot be committed.");
-				dbtran.Commit();
+				dbtran!.Commit();
 				dbtran.Dispose();
 				dbtran = null;
 				transactionEndStackTrace = CaptureStackTrace();
@@ -205,7 +207,7 @@ namespace Kosson.KORM.DB
 			{
 				if (!IsTransactionOpen) throw new KORMInvalidOperationException("Transaction not started.");
 				if (IsImplicitTransaction) throw new KORMInvalidOperationException("Implicit transaction cannot be rolled back.");
-				dbtran.Rollback();
+				dbtran!.Rollback();
 				dbtran.Dispose();
 				dbtran = null;
 				transactionEndStackTrace = CaptureStackTrace();
@@ -231,7 +233,7 @@ namespace Kosson.KORM.DB
 				{
 					if (dontThrow)
 					{
-						var translated = TranslateException(exc, null, null);
+						var translated = TranslateException(exc, null, null) ?? (KORMException)exc;
 						log.Log(translated, default);
 					}
 					else
@@ -253,7 +255,7 @@ namespace Kosson.KORM.DB
 				{
 					if (dontThrow)
 					{
-						var translated = TranslateException(exc, null, null);
+						var translated = TranslateException(exc, null, null) ?? (KORMException)exc;
 						log.Log(translated, default);
 					}
 					else
@@ -276,14 +278,14 @@ namespace Kosson.KORM.DB
 			GC.SuppressFinalize(this);
 		}
 
-		private static StackTrace CaptureStackTrace()
+		private static StackTrace? CaptureStackTrace()
 		{
 			if (!Debugger.IsAttached) return null;
 			return new StackTrace();
 		}
 		#endregion
 		#region Parameters handling
-		private static bool IsNull(object val)
+		private static bool IsNull([NotNullWhen(false)] object? val)
 		{
 			if (val == null) return true;
 			if (val is DateTime date && date.Ticks == 0) return true;
@@ -301,7 +303,7 @@ namespace Kosson.KORM.DB
 		/// </summary>
 		/// <param name="val">Value to convert.</param>
 		/// <returns>Converted value understood by ADO.NET provider.</returns>
-		protected virtual object NativeToSQL(object val)
+		protected virtual object NativeToSQL(object? val)
 		{
 			if (IsNull(val)) return DBNull.Value;
 			else if (val is Enum) return (int)val;
@@ -310,7 +312,7 @@ namespace Kosson.KORM.DB
 			else return val;
 		}
 
-		DbParameter IDB.AddParameter(DbCommand command, string name, object value)
+		DbParameter IDB.AddParameter(DbCommand command, string name, object? value)
 		{
 			if (!name.StartsWith(CommandBuilder.ParameterPrefix, StringComparison.Ordinal)) name = CommandBuilder.ParameterPrefix + name;
 			DbParameter param = command.CreateParameter();
@@ -328,7 +330,7 @@ namespace Kosson.KORM.DB
 		{
 		}
 
-		void IDB.SetParameter(DbParameter parameter, object value)
+		void IDB.SetParameter(DbParameter parameter, object? value)
 		{
 			parameter.Value = NativeToSQL(value);
 			FixParameter(parameter);
@@ -348,11 +350,11 @@ namespace Kosson.KORM.DB
 
 		DbCommand IDB.CreateCommand(string command)
 		{
-			DbCommand cmd = null;
+			DbCommand? cmd = null;
 			try
 			{
 				Open(true);
-				cmd = dbconn.CreateCommand();
+				cmd = dbconn!.CreateCommand();
 				if (CommandTimeout.HasValue)
 				{
 					if (CommandTimeoutSeconds)
@@ -369,7 +371,7 @@ namespace Kosson.KORM.DB
 			}
 			catch (Exception exc)
 			{
-				HandleException(exc, cmd);
+				if (cmd != null) HandleException(exc, cmd);
 				throw;
 			}
 		}
@@ -380,7 +382,7 @@ namespace Kosson.KORM.DB
 			try
 			{
 				Open(true);
-				var batch = dbconn.CreateBatch();
+				var batch = dbconn!.CreateBatch();
 				if (CommandTimeout.HasValue) batch.Timeout = CommandTimeout.Value / 1000;
 				batch.Transaction = dbtran;
 				return batch;
@@ -663,8 +665,8 @@ namespace Kosson.KORM.DB
 
 		private static ArrayBasedRow CreateRowFromReader(DbDataReader reader, Dictionary<string, int> meta)
 		{
-			var items = new object[reader.FieldCount];
-			reader.GetValues(items);
+			var items = new object?[reader.FieldCount];
+			reader.GetValues(items!);
 			for (int i = 0; i < items.Length; i++)
 			{
 				if (items[i] is DBNull) items[i] = null;
@@ -692,7 +694,7 @@ namespace Kosson.KORM.DB
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
 		/// <returns>Provider-independent exception.</returns>
-		protected virtual KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
+		protected virtual KORMException? TranslateException(Exception exc, string? commandText, DbParameterCollection? commandParameters)
 		{
 			if (exc is System.Data.Common.DbException) return new KORMException(exc.Message, exc, commandText, commandParameters);
 			else if (exc is InvalidOperationException) return new KORMException(exc.Message, exc, commandText, commandParameters);
@@ -700,7 +702,7 @@ namespace Kosson.KORM.DB
 			return new KORMException(exc.Message, exc, commandText, commandParameters);
 		}
 
-		private void HandleException(Exception exc, string commandText, DbParameterCollection commandParameters, TraceToken token = default)
+		private void HandleException(Exception exc, string? commandText, DbParameterCollection? commandParameters, TraceToken token = default)
 		{
 			var translated = TranslateException(exc, commandText, commandParameters);
 			if (translated == null) return; // untranslated exceptions will be rethrown by caller

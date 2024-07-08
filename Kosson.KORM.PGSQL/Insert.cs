@@ -1,5 +1,7 @@
 ﻿using Kosson.KORM.DB.CommandBuilder;
+using System;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Kosson.KORM.PGSQL
 {
@@ -25,11 +27,14 @@ namespace Kosson.KORM.PGSQL
 			base.AppendCommandText(sb);
 			if (primaryKeyReturn)
 			{
+				ArgumentNullException.ThrowIfNull(primaryKey);
 				sb.Append(" RETURNING ");
 				AppendColumn(sb, primaryKey);
 			}
 			if (primaryKeyInsert)
 			{
+				ArgumentNullException.ThrowIfNull(primaryKey);
+				ArgumentNullException.ThrowIfNull(table);
 				var sequence = CreateTable.SequenceForTable(Builder, table);
 				sb.Append("; SELECT setval('");
 				sequence.Append(sb);

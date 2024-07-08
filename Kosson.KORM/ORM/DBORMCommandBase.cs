@@ -16,10 +16,10 @@ namespace Kosson.KORM.ORM
 	class DBORMCommandBase<TRecord> : DBORMCommandBase
 		where TRecord : IRecord
 	{
-		protected static IMetaRecord meta;
-		private List<object> parameters;
+		protected static IMetaRecord meta = default!;
+		private List<object?>? parameters;
 		protected virtual bool UseFullFieldNames { get { return true; } }
-		protected IEnumerable<object> Parameters { get { return parameters ?? Enumerable.Empty<object>(); } }
+		protected IEnumerable<object?> Parameters { get { return parameters ?? Enumerable.Empty<object?>(); } }
 		private readonly ILogger operationLogger;
 		private readonly ILogger recordLogger;
 
@@ -41,12 +41,12 @@ namespace Kosson.KORM.ORM
 			DB = template.DB;
 			operationLogger = template.operationLogger;
 			recordLogger = template.recordLogger;
-			if (template.parameters != null) parameters = new List<object>(template.parameters);
+			if (template.parameters != null) parameters = new List<object?>(template.parameters);
 		}
 
-		public IDBExpression Parameter(object value)
+		public IDBExpression Parameter(object? value)
 		{
-			parameters ??= new List<object>(8);
+			parameters ??= new List<object?>(8);
 			var pnum = parameters.Count;
 			var pname = pnum < parametersNameCache.Length ? parametersNameCache[pnum] : "P" + pnum;
 			parameters.Add(value);
@@ -65,7 +65,7 @@ namespace Kosson.KORM.ORM
 
 		public IDBIdentifier Field(string name)
 		{
-			IMetaRecordField metafield = meta.GetField(name);
+			var metafield = meta.GetField(name);
 			if (metafield == null) return DB.CommandBuilder.Identifier(name);
 
 			if (UseFullFieldNames)
@@ -87,7 +87,7 @@ namespace Kosson.KORM.ORM
 			return desc;
 		}
 
-		protected TraceToken LogStart(IDBSelect dbcommand = null)
+		protected TraceToken LogStart(IDBSelect? dbcommand = null)
 		{
 			if (operationLogger == null) return default;
 			if (!operationLogger.IsEnabled(LogLevel.Warning)) return default;
@@ -115,7 +115,7 @@ namespace Kosson.KORM.ORM
 			}
 		}
 
-		protected void LogRaw(TraceToken token, string sql, IEnumerable<object> parameters)
+		protected void LogRaw(TraceToken token, string sql, IEnumerable<object?> parameters)
 		{
 			if (operationLogger == null) return;
 			if (token.id == 0) return;
@@ -150,7 +150,7 @@ namespace Kosson.KORM.ORM
 		{
 			public EventId id;
 			public long start;
-			public IDBSelect command;
+			public IDBSelect? command;
 		}
 	}
 
@@ -158,9 +158,9 @@ namespace Kosson.KORM.ORM
 		where TRecord : IRecord
 		where TCommand : IDBCommand<TCommand>
 	{
-		protected static TCommand template;
+		protected static TCommand? template;
 
-		private TCommand command;
+		private TCommand? command;
 		protected TCommand Command
 		{
 			get

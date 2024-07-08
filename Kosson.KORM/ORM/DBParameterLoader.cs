@@ -15,12 +15,12 @@ namespace Kosson.KORM.ORM
 
 		static DBParameterLoader()
 		{
-			miInvokeDelegate = typeof(ParameterAdder).GetMethod(nameof(ParameterAdder.Invoke));
-			miVerifyStringParameter = typeof(DBParameterLoader).GetMethod(nameof(VerifyStringParameter), BindingFlags.NonPublic | BindingFlags.Static);
+			miInvokeDelegate = typeof(ParameterAdder).GetMethod(nameof(ParameterAdder.Invoke))!;
+			miVerifyStringParameter = typeof(DBParameterLoader).GetMethod(nameof(VerifyStringParameter), BindingFlags.NonPublic | BindingFlags.Static)!;
 			delegates = [];
 		}
 
-		private static string VerifyStringParameter(string value, string name, int maxlen, bool trim)
+		private static string? VerifyStringParameter(string? value, string name, int maxlen, bool trim)
 		{
 			if (value == null) return null;
 			if (value.Length > maxlen)
@@ -86,15 +86,14 @@ namespace Kosson.KORM.ORM
 
 					// TInline inlinelocal = local.get_field;
 					il.Emit(OpCodes.Ldloc, local);
-					var miGet = field.Property.GetGetMethod();
-					il.EmitCall(OpCodes.Callvirt, miGet, null);
+					il.EmitCall(OpCodes.Callvirt, field.Property.GetMethod!, null);
 					var inlinelocal = il.DeclareLocal(field.Type);
 					il.Emit(OpCodes.Stloc, inlinelocal);
 
 					// localIsNull:
 					il.MarkLabel(localIsNull);
 
-					BuildLoader(il, field.InlineRecord, inlinelocal);
+					BuildLoader(il, field.InlineRecord!, inlinelocal);
 				}
 				else
 				{
@@ -110,8 +109,7 @@ namespace Kosson.KORM.ORM
 
 					// __value = local.Get;
 					il.Emit(OpCodes.Ldloc, local);  // ST: adder, dbname, record
-					var miGet = field.Property.GetGetMethod();
-					il.EmitCall(OpCodes.Callvirt, miGet, null); // ST: adder, dbname, value
+					il.EmitCall(OpCodes.Callvirt, field.Property.GetMethod!, null); // ST: adder, dbname, value
 					if (field.Type.GetTypeInfo().IsValueType) il.Emit(OpCodes.Box, field.Type); // ST: adder, dbname, value
 
 					if (field.Type == typeof(string) && field.Length > 0)

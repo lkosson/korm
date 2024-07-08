@@ -15,7 +15,7 @@ namespace Kosson.KORM.ORM
 		private readonly IFactory factory;
 		private readonly ILogger operationLogger;
 		private readonly ILogger recordLogger;
-		private static ReaderRecordLoaderCache cache;
+		private static ReaderRecordLoaderCache cache = default!;
 
 		/// <summary>
 		/// Creates a new Object-relational mapper using provided IDB for database communication.

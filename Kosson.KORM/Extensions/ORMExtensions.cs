@@ -215,7 +215,7 @@ namespace Kosson.KORM
 		/// <param name="orm">ORM instance.</param>
 		/// <param name="recordref">Primary key (ID) reference to a record to retrieve.</param>
 		/// <returns>Record for a given record reference.</returns>
-		public static T Get<T>(this IORM orm, RecordRef<T> recordref) where T : class, IRecord, new()
+		public static T? Get<T>(this IORM orm, RecordRef<T> recordref) where T : class, IRecord, new()
 			=> orm.Select<T>().ByID(recordref.ID);
 
 		/// <summary>
@@ -226,7 +226,7 @@ namespace Kosson.KORM
 		/// <param name="orm">ORM instance.</param>
 		/// <param name="recordref">Primary key (ID) reference to a record to retrieve.</param>
 		/// <returns>Task representing asynchronous operation returning record for a given record reference.</returns>
-		public static Task<T> GetAsync<T>(this IORM orm, RecordRef<T> recordref) where T : class, IRecord, new()
+		public static Task<T?> GetAsync<T>(this IORM orm, RecordRef<T> recordref) where T : class, IRecord, new()
 			=> orm.Select<T>().ByIDAsync(recordref.ID);
 
 		/// <summary>
@@ -278,7 +278,7 @@ namespace Kosson.KORM
 		/// <param name="orm">ORM instance.</param>
 		/// <param name="predicates">Set of predicates determining which record to retrieve.</param>
 		/// <returns>First record matching provided conditions.</returns>
-		public static T GetFirst<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
+		public static T? GetFirst<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
 			=> orm.Select<T>().WhereAll(predicates).ExecuteFirst();
 
 		/// <summary>
@@ -289,7 +289,7 @@ namespace Kosson.KORM
 		/// <param name="orm">ORM instance.</param>
 		/// <param name="predicates">Set of predicates determining which record to retrieve.</param>
 		/// <returns>First record matching provided conditions.</returns>
-		public static Task<T> GetFirstAsync<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
+		public static Task<T?> GetFirstAsync<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
 			=> orm.Select<T>().WhereAll(predicates).ExecuteFirstAsync();
 
 		/// <summary>
@@ -299,7 +299,7 @@ namespace Kosson.KORM
 		/// <param name="orm">ORM instance.</param>
 		/// <param name="where">Expression to use as WHERE clause in SQL SELECT command.</param>
 		/// <returns>First record matching provided condition.</returns>
-		public static T GetFirst<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
+		public static T? GetFirst<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
 			=> orm.Select<T>().Where(where).ExecuteFirst();
 
 		/// <summary>
@@ -310,7 +310,7 @@ namespace Kosson.KORM
 		/// <param name="orm">ORM instance.</param>
 		/// <param name="where">Expression to use as WHERE clause in SQL SELECT command.</param>
 		/// <returns>First record matching provided condition.</returns>
-		public static Task<T> GetFirstAsync<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
+		public static Task<T?> GetFirstAsync<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
 			=> orm.Select<T>().Where(where).ExecuteFirstAsync();
 	}
 }

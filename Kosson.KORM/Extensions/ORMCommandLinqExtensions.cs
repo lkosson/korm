@@ -45,7 +45,7 @@ namespace Kosson.KORM
 			return query;
 		}
 
-		private static object ProcessExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, Expression expression)
+		private static object? ProcessExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, Expression expression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord
 			=> expression switch
@@ -60,7 +60,7 @@ namespace Kosson.KORM
 				_ => throw new ArgumentOutOfRangeException(nameof(expression), expression, "Unsupported expression: " + expression)
 			};
 
-		private static object ProcessBinaryExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, BinaryExpression binaryExpression)
+		private static object? ProcessBinaryExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, BinaryExpression binaryExpression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord
 		{
@@ -95,43 +95,43 @@ namespace Kosson.KORM
 				else if (binaryExpression.NodeType == ExpressionType.ArrayIndex && left is Array leftArray && right is int rightInt) return leftArray.GetValue(rightInt);
 			}
 
-			left = ConvertConstToParameter(query, left);
-			right = ConvertConstToParameter(query, right);
+			var leftDbExpr = ConvertConstToParameter(query, left);
+			var rightDbExpr = ConvertConstToParameter(query, right);
 
 			if (leftFinal)
 			{
-				if (binaryExpression.NodeType == ExpressionType.OrElse && left is bool leftBoolOr) return leftBoolOr ? true : right;
-				if (binaryExpression.NodeType == ExpressionType.AndAlso && left is bool leftBoolAnd) return leftBoolAnd ? right : false;
+				if (binaryExpression.NodeType == ExpressionType.OrElse && left is bool leftBoolOr) return leftBoolOr ? true : rightDbExpr;
+				if (binaryExpression.NodeType == ExpressionType.AndAlso && left is bool leftBoolAnd) return leftBoolAnd ? rightDbExpr : false;
 			}
 
 			if (rightFinal)
 			{
-				if (binaryExpression.NodeType == ExpressionType.OrElse && right is bool rightBoolOr) return rightBoolOr ? true : left;
-				if (binaryExpression.NodeType == ExpressionType.AndAlso && right is bool rightBoolAnd) return rightBoolAnd ? left : false;
+				if (binaryExpression.NodeType == ExpressionType.OrElse && right is bool rightBoolOr) return rightBoolOr ? true : leftDbExpr;
+				if (binaryExpression.NodeType == ExpressionType.AndAlso && right is bool rightBoolAnd) return rightBoolAnd ? leftDbExpr : false;
 			}
 
-			if (binaryExpression.NodeType == ExpressionType.Equal) return query.DB.CommandBuilder.Comparison((IDBExpression)left, DBExpressionComparison.Equal, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.NotEqual) return query.DB.CommandBuilder.Comparison((IDBExpression)left, DBExpressionComparison.NotEqual, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.GreaterThan) return query.DB.CommandBuilder.Comparison((IDBExpression)left, DBExpressionComparison.Greater, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.GreaterThanOrEqual) return query.DB.CommandBuilder.Comparison((IDBExpression)left, DBExpressionComparison.GreaterOrEqual, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.LessThan) return query.DB.CommandBuilder.Comparison((IDBExpression)left, DBExpressionComparison.Less, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.LessThanOrEqual) return query.DB.CommandBuilder.Comparison((IDBExpression)left, DBExpressionComparison.LessOrEqual, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.AndAlso) return query.DB.CommandBuilder.And((IDBExpression)left, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.OrElse) return query.DB.CommandBuilder.Or((IDBExpression)left, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.Add) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.Add, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.Subtract) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.Subtract, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.Multiply) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.Multiply, (IDBExpression)right);
-			else if (binaryExpression.NodeType == ExpressionType.Divide) return query.DB.CommandBuilder.BinaryExpression((IDBExpression)left, DBBinaryOperator.Divide, (IDBExpression)right);
+			if (binaryExpression.NodeType == ExpressionType.Equal) return query.DB.CommandBuilder.Comparison(leftDbExpr, DBExpressionComparison.Equal, right == null ? null : rightDbExpr);
+			else if (binaryExpression.NodeType == ExpressionType.NotEqual) return query.DB.CommandBuilder.Comparison(leftDbExpr, DBExpressionComparison.NotEqual, right == null ? null : rightDbExpr);
+			else if (binaryExpression.NodeType == ExpressionType.GreaterThan) return query.DB.CommandBuilder.Comparison(leftDbExpr, DBExpressionComparison.Greater, rightDbExpr);
+			else if (binaryExpression.NodeType == ExpressionType.GreaterThanOrEqual) return query.DB.CommandBuilder.Comparison(leftDbExpr, DBExpressionComparison.GreaterOrEqual, rightDbExpr);
+			else if (binaryExpression.NodeType == ExpressionType.LessThan) return query.DB.CommandBuilder.Comparison(leftDbExpr, DBExpressionComparison.Less, rightDbExpr);
+			else if (binaryExpression.NodeType == ExpressionType.LessThanOrEqual) return query.DB.CommandBuilder.Comparison(leftDbExpr, DBExpressionComparison.LessOrEqual, rightDbExpr);
+			else if (binaryExpression.NodeType == ExpressionType.AndAlso) return query.DB.CommandBuilder.And(leftDbExpr, rightDbExpr);
+			else if (binaryExpression.NodeType == ExpressionType.OrElse) return query.DB.CommandBuilder.Or(leftDbExpr, rightDbExpr);
+			else if (binaryExpression.NodeType == ExpressionType.Add) return query.DB.CommandBuilder.BinaryExpression(leftDbExpr, DBBinaryOperator.Add, rightDbExpr);
+			else if (binaryExpression.NodeType == ExpressionType.Subtract) return query.DB.CommandBuilder.BinaryExpression(leftDbExpr, DBBinaryOperator.Subtract, rightDbExpr);
+			else if (binaryExpression.NodeType == ExpressionType.Multiply) return query.DB.CommandBuilder.BinaryExpression(leftDbExpr, DBBinaryOperator.Multiply, rightDbExpr);
+			else if (binaryExpression.NodeType == ExpressionType.Divide) return query.DB.CommandBuilder.BinaryExpression(leftDbExpr, DBBinaryOperator.Divide, rightDbExpr);
 			else throw new NotSupportedException("Unsupported binary expression: " + binaryExpression.NodeType);
 		}
 
-		private static object ProcessMethodCallExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, MethodCallExpression methodCallExpression)
+		private static object? ProcessMethodCallExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, MethodCallExpression methodCallExpression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord
 		{
 			var target = methodCallExpression.Object == null ? null : ProcessExpression(query, methodCallExpression.Object);
 			if (target is IDBExpression targetDBExpression) return ProcessDatabaseCallExpression(targetDBExpression, query, methodCallExpression);
-			var arguments = new object[methodCallExpression.Arguments.Count];
+			var arguments = new object?[methodCallExpression.Arguments.Count];
 			var parameters = methodCallExpression.Method.GetParameters();
 			for (int i = 0; i < arguments.Length; i++)
 			{
@@ -171,7 +171,7 @@ namespace Kosson.KORM
 			throw new NotSupportedException("Unsupported method call on database value: " + methodCallExpression);
 		}
 
-		private static object ProcessConstantExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, ConstantExpression constantExpression)
+		private static object? ProcessConstantExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, ConstantExpression constantExpression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord => constantExpression.Value;
 
@@ -179,7 +179,7 @@ namespace Kosson.KORM
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord => throw new NotImplementedException();
 
-		private static object ProcessUnaryExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, UnaryExpression unaryExpression)
+		private static object? ProcessUnaryExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, UnaryExpression unaryExpression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord
 		{
@@ -189,8 +189,8 @@ namespace Kosson.KORM
 				if (value is IDBExpression) return value;
 				if (value is not IConvertible convertibleValue) return value;
 				var type = unaryExpression.Type;
-				if (Nullable.GetUnderlyingType(type) != null) type = Nullable.GetUnderlyingType(type);
-				return convertibleValue.ToType(type, null);
+				var nullableType = Nullable.GetUnderlyingType(type);
+				return convertibleValue.ToType(nullableType ?? type, null);
 			}
 
 			if (unaryExpression.NodeType == ExpressionType.Negate && value is int intValue) return -intValue;
@@ -205,7 +205,7 @@ namespace Kosson.KORM
 			else throw new NotSupportedException("Unsupported unary expression: " + unaryExpression);
 		}
 
-		private static object ProcessMemberExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, MemberExpression memberExpression, bool recursive = false)
+		private static object? ProcessMemberExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, MemberExpression memberExpression, bool recursive = false)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord
 		{
@@ -221,8 +221,9 @@ namespace Kosson.KORM
 				partialIdentifier.Append(memberExpression.Member.Name);
 				//if (partialIdentifier.Meta != query.Meta) throw new NotSupportedException("Not supported foreign value reference \"" + partialIdentifier + "\".");
 				var field = partialIdentifier.Meta.GetField(partialIdentifier.CurrentPath);
+				if (field == null) throw new ArgumentOutOfRangeException(partialIdentifier.ToString(), "Invalid field.");
 				if (field.IsInline) return partialIdentifier;
-				if (field.IsEagerLookup && recursive) return new PartialIdentifier(field.ForeignMeta, partialIdentifier);
+				if (field.IsEagerLookup && recursive) return new PartialIdentifier(field.ForeignMeta!, partialIdentifier);
 				if (!field.IsFromDB) throw new ArgumentOutOfRangeException(partialIdentifier.ToString(), "Record property is not accessible from database.");
 				var fieldExpression = query.Field(partialIdentifier.FullPath);
 				if (field.Type == typeof(bool)) return query.DB.CommandBuilder.Comparison(fieldExpression, DBExpressionComparison.Equal, query.Parameter(true));
@@ -233,12 +234,11 @@ namespace Kosson.KORM
 			else throw new NotSupportedException("Unsupported member expression: " + memberExpression);
 		}
 
-		private static IDBExpression ConvertConstToParameter<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, object value)
+		private static IDBExpression ConvertConstToParameter<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, object? value)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord => value switch
 			{
 				IDBExpression expression => expression,
-				null => null, // required for "x == null" to "x IS NULL" conversion
 				_ => query.Parameter(value)
 			};
 
@@ -246,14 +246,14 @@ namespace Kosson.KORM
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord => new PartialIdentifier(query.Meta);
 
-		class PartialIdentifier(IMetaRecord meta, ORMCommandLinqExtensions.PartialIdentifier parent = null)
+		class PartialIdentifier(IMetaRecord meta, PartialIdentifier? parent = null)
 		{
 			private readonly List<string> path = [];
 
 			public IMetaRecord Meta => meta;
 			public string CurrentPath => String.Join(".", path);
 			public string FullPath => parent == null ? CurrentPath : path.Count == 0 ? parent.FullPath /* direct reference to eager field */ : parent.FullPath + "." + CurrentPath;
-			public string TableAlias => parent == null ? null : parent.TableAlias == null ? parent.Meta.DBName : parent.TableAlias + "." + parent.Meta.DBName;
+			public string? TableAlias => parent == null ? null : parent.TableAlias == null ? parent.Meta.DBName : parent.TableAlias + "." + parent.Meta.DBName;
 			public void Append(string part) => path.Add(part);
 			public override string ToString() => FullPath;
 		}

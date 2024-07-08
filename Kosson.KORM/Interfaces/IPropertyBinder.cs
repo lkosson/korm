@@ -13,7 +13,7 @@ namespace Kosson.KORM
 		/// <param name="target">Object to retrieve property value from.</param>
 		/// <param name="expression">Expression determining property to retrieve.</param>
 		/// <returns>Value of the property of the object.</returns>
-		object Get(object target, string expression);
+		object? Get(object target, string expression);
 
 		/// <summary>
 		/// Sets value of an object property determined by given text expression.
@@ -21,7 +21,7 @@ namespace Kosson.KORM
 		/// <param name="target">Object to set property value on.</param>
 		/// <param name="expression">Expression determining property to change.</param>
 		/// <param name="value">New value of a property.</param>
-		void Set(object target, string expression, object value);
+		void Set(object target, string expression, object? value);
 
 		/// <summary>
 		/// Creates a delegate for accessing property determined by given text expression.

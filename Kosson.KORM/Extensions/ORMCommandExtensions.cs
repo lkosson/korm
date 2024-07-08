@@ -267,7 +267,7 @@ namespace Kosson.KORM
 		/// <param name="field">Column or property name to set value of.</param>
 		/// <param name="value">Value to set.</param>
 		/// <returns>Original command with SET clause added to it.</returns>
-		public static IORMUpdate<TRecord> Set<TRecord>(this IORMUpdate<TRecord> query, string field, object value) where TRecord : IRecord
+		public static IORMUpdate<TRecord> Set<TRecord>(this IORMUpdate<TRecord> query, string field, object? value) where TRecord : IRecord
 		{
 			var fieldExpr = query.Field(field);
 			var valExpr = query.Parameter(value);
@@ -332,7 +332,7 @@ namespace Kosson.KORM
 		/// <param name="query">SELECT command to execute.</param>
 		/// <param name="id">Primary KEY (ID) of a record to select.</param>
 		/// <returns>Record returned by the query or null if no record matches the query condition.</returns>
-		public static TRecord ByID<TRecord>(this IORMSelect<TRecord> query, long id) where TRecord : IRecord
+		public static TRecord? ByID<TRecord>(this IORMSelect<TRecord> query, long id) where TRecord : IRecord
 			=> query.WhereID(id).ExecuteFirst();
 
 		/// <summary>
@@ -385,7 +385,7 @@ namespace Kosson.KORM
 		/// <param name="query">SELECT command to execute.</param>
 		/// <param name="recordRef">Reference to a record to select.</param>
 		/// <returns>Record returned by the query or null if no record matches the query condition.</returns>
-		public static TRecord ByRef<TRecord>(this IORMSelect<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
+		public static TRecord? ByRef<TRecord>(this IORMSelect<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
 			=> ByID(query, recordRef.ID);
 
 		/// <summary>
@@ -408,7 +408,7 @@ namespace Kosson.KORM
 		/// <param name="query">SELECT command to execute.</param>
 		/// <param name="id">Primary KEY (ID) of a record to select.</param>
 		/// <returns>Task representing asynchronous operation returning record returned by the query or null if no record matches the query condition.</returns>
-		public static Task<TRecord> ByIDAsync<TRecord>(this IORMSelect<TRecord> query, long id) where TRecord : IRecord
+		public static Task<TRecord?> ByIDAsync<TRecord>(this IORMSelect<TRecord> query, long id) where TRecord : IRecord
 			=> query.WhereID(id).ExecuteFirstAsync();
 
 		/// <summary>
@@ -463,7 +463,7 @@ namespace Kosson.KORM
 		/// <param name="query">SELECT command to execute.</param>
 		/// <param name="recordRef">Reference to a record to select.</param>
 		/// <returns>Task representing asynchronous operation returning record returned by the query or null if no record matches the query condition.</returns>
-		public static Task<TRecord> ByRefAsync<TRecord>(this IORMSelect<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
+		public static Task<TRecord?> ByRefAsync<TRecord>(this IORMSelect<TRecord> query, RecordRef<TRecord> recordRef) where TRecord : IRecord
 			=> ByIDAsync(query, recordRef.ID);
 
 		/// <summary>
@@ -484,7 +484,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TRecord">Type of record to return.</typeparam>
 		/// <param name="query">SELECT command to execute.</param>
 		/// <returns>Record returned by the query or null if empty resultset is returned.</returns>
-		public static TRecord ExecuteFirst<TRecord>(this IORMSelect<TRecord> query) where TRecord : IRecord
+		public static TRecord? ExecuteFirst<TRecord>(this IORMSelect<TRecord> query) where TRecord : IRecord
 		{
 			using var reader = query.Limit(1).ExecuteReader();
 			if (!reader.MoveNext()) return default;
@@ -498,7 +498,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TRecord">Type of record to return.</typeparam>
 		/// <param name="query">SELECT command to execute.</param>
 		/// <returns>Record returned by the query or null if empty resultset is returned.</returns>
-		public async static Task<TRecord> ExecuteFirstAsync<TRecord>(this IORMSelect<TRecord> query) where TRecord : IRecord
+		public async static Task<TRecord?> ExecuteFirstAsync<TRecord>(this IORMSelect<TRecord> query) where TRecord : IRecord
 		{
 			using var reader = await query.Limit(1).ExecuteReaderAsync();
 			if (!await reader.MoveNextAsync()) return default;
@@ -512,7 +512,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TResult">Type of result row.</typeparam>
 		/// <param name="query">SELECT command to execute.</param>
 		/// <returns>Record returned by the query or null if empty resultset is returned.</returns>
-		public static TResult ExecuteFirst<TRecord, TResult>(this IORMSelectAnonymous<TRecord, TResult> query) where TRecord : IRecord
+		public static TResult? ExecuteFirst<TRecord, TResult>(this IORMSelectAnonymous<TRecord, TResult> query) where TRecord : IRecord
 		{
 			//return query.Limit(1).Execute().FirstOrDefault();
 			query.OriginalSelect.Limit(1);
@@ -529,7 +529,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TResult">Type of result row.</typeparam>
 		/// <param name="query">SELECT command to execute.</param>
 		/// <returns>Record returned by the query or null if empty resultset is returned.</returns>
-		public async static Task<TResult> ExecuteFirstAsync<TRecord, TResult>(this IORMSelectAnonymous<TRecord, TResult> query) where TRecord : IRecord
+		public async static Task<TResult?> ExecuteFirstAsync<TRecord, TResult>(this IORMSelectAnonymous<TRecord, TResult> query) where TRecord : IRecord
 		{
 			query.OriginalSelect.Limit(1);
 			using var reader = await query.ExecuteReaderAsync();

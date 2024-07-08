@@ -37,6 +37,7 @@ namespace Kosson.KORM
 		{
 			Name = indexName;
 			Fields = indexFields;
+			IncludedFields = Array.Empty<string>();
 		}
 	}
 

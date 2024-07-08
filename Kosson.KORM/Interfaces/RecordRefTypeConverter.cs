@@ -13,16 +13,16 @@ namespace Kosson.KORM
 		public RecordRefTypeConverter(Type recordRefType)
 		{
 			var entityType = recordRefType.GetGenericArguments()[0];
-			constructor = (Func<long, object>)GetType().GetMethod(nameof(CreateEntityRef), BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(entityType).CreateDelegate(typeof(Func<long, object>));
+			constructor = (Func<long, object>)GetType().GetMethod(nameof(CreateEntityRef), BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(entityType).CreateDelegate(typeof(Func<long, object>));
 			recordTypeName = entityType.Name;
 		}
 
-		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+		public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
 		{
 			return sourceType == typeof(string) || sourceType == typeof(long) || base.CanConvertFrom(context, sourceType);
 		}
 
-		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+		public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
 		{
 			if (value is string str)
 			{

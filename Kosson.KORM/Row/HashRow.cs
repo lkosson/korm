@@ -11,8 +11,8 @@ namespace Kosson.KORM
 		private readonly Dictionary<string, int> names;
 
 		int IIndexBasedRow.Length => values.Count;
-		object IIndexBasedRow.this[int index] => index >= 0 && index < values.Count ? values[index] : null;
-		object IRow.this[string name] { get { var row = (IRow)this; return row[row.GetIndex(name)]; } }
+		object? IIndexBasedRow.this[int index] => index >= 0 && index < values.Count ? values[index] : null;
+		object? IRow.this[string name] { get { var row = (IRow)this; return row[row.GetIndex(name)]; } }
 
 		/// <summary>
 		/// Creates new, empty row.
@@ -47,7 +47,7 @@ namespace Kosson.KORM
 			return -1;
 		}
 
-		string IRow.GetName(int index)
+		string? IRow.GetName(int index)
 		{
 			foreach (var pair in names)
 			{

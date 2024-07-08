@@ -10,7 +10,7 @@
 		/// </summary>
 		/// <param name="index">Index of value to retrieve.</param>
 		/// <returns>Row value for a given column index.</returns>
-		object this[int index] { get; }
+		object? this[int index] { get; }
 
 		/// <summary>
 		/// Number of columns of the row.
@@ -28,7 +28,7 @@
 		/// </summary>
 		/// <param name="name">Name of column to retrieve.</param>
 		/// <returns>Row value for a given column.</returns>
-		object this[string name] { get; }
+		object? this[string name] { get; }
 
 		/// <summary>
 		/// Retrieves index for a given column name.
@@ -42,6 +42,6 @@
 		/// </summary>
 		/// <param name="index">Column index to retrieve name for.</param>
 		/// <returns>Column name for a given index.</returns>
-		string GetName(int index);
+		string? GetName(int index);
 	}
 }

@@ -26,37 +26,37 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// List of column expression to select.
 		/// </summary>
-		protected List<DBCommandColumn> columns;
+		protected List<DBCommandColumn>? columns;
 
 		/// <summary>
 		/// List of column subqueries to select.
 		/// </summary>
-		protected List<DBCommandSubquery> subqueries;
+		protected List<DBCommandSubquery>? subqueries;
 
 		/// <summary>
 		/// List of joined tables.
 		/// </summary>
-		protected List<DBCommandJoin> joins;
+		protected List<DBCommandJoin>? joins;
 
 		/// <summary>
 		/// List of grouping expression.
 		/// </summary>
-		protected List<IDBExpression> groups;
+		protected List<IDBExpression>? groups;
 
 		/// <summary>
 		/// List of ordering expressions.
 		/// </summary>
-		protected List<DBCommandOrder> orders;
+		protected List<DBCommandOrder>? orders;
 
 		/// <summary>
 		/// Subquery expression used as main table.
 		/// </summary>
-		protected IDBExpression tableSubquery;
+		protected IDBExpression? tableSubquery;
 
 		/// <summary>
 		/// Main table alias.
 		/// </summary>
-		protected IDBIdentifier alias;
+		protected IDBIdentifier? alias;
 
 		/// <summary>
 		/// Indicates whether the command is a subquery part of outer SELECT command.
@@ -107,21 +107,21 @@ namespace Kosson.KORM.DB.CommandBuilder
 			this.limit = limit;
 		}
 
-		void IDBSelect.Column(IDBExpression expression, IDBIdentifier alias)
+		void IDBSelect.Column(IDBExpression expression, IDBIdentifier? alias)
 		{
 			ArgumentNullException.ThrowIfNull(expression);
 			columns ??= [];
 			columns.Add(new DBCommandColumn(expression, alias));
 		}
 
-		void IDBSelect.Subquery(IDBExpression expression, IDBIdentifier alias)
+		void IDBSelect.Subquery(IDBExpression expression, IDBIdentifier? alias)
 		{
 			ArgumentNullException.ThrowIfNull(expression);
 			subqueries ??= [];
 			subqueries.Add(new DBCommandSubquery(expression, alias));
 		}
 
-		void IDBSelect.From(IDBIdentifier table, IDBIdentifier alias)
+		void IDBSelect.From(IDBIdentifier table, IDBIdentifier? alias)
 		{
 			ArgumentNullException.ThrowIfNull(table);
 			this.table = table;
@@ -129,7 +129,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 			this.alias = alias;
 		}
 
-		void IDBSelect.FromSubquery(IDBExpression expression, IDBIdentifier alias)
+		void IDBSelect.FromSubquery(IDBExpression expression, IDBIdentifier? alias)
 		{
 			ArgumentNullException.ThrowIfNull(expression);
 			this.table = null;
@@ -137,7 +137,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 			this.alias = alias ?? Builder.Identifier("Q");
 		}
 
-		void IDBSelect.Join(IDBIdentifier table, IDBExpression expression, IDBIdentifier alias, bool outer)
+		void IDBSelect.Join(IDBIdentifier table, IDBExpression expression, IDBIdentifier? alias, bool outer)
 		{
 			ArgumentNullException.ThrowIfNull(table);
 			ArgumentNullException.ThrowIfNull(expression);
@@ -171,7 +171,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 			{
 				var newColumns = new List<DBCommandColumn>();
 				foreach (var column in columns)
-					newColumns.Add(new DBCommandColumn(predicate(column.Alias.RawValue) ? Builder.Const((string)null) : column.Expression, column.Alias));
+					newColumns.Add(new DBCommandColumn(column.Alias != null && predicate(column.Alias.RawValue) ? Builder.Const((string?)null) : column.Expression, column.Alias));
 				columns = newColumns;
 			}
 
@@ -179,7 +179,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 			{
 				var newSubqueries = new List<DBCommandSubquery>();
 				foreach (var subquery in subqueries)
-					newSubqueries.Add(new DBCommandSubquery(predicate(subquery.Alias.RawValue) ? Builder.Const((string)null) : subquery.Expression, subquery.Alias));
+					newSubqueries.Add(new DBCommandSubquery(subquery.Alias != null && predicate(subquery.Alias.RawValue) ? Builder.Const((string?)null) : subquery.Expression, subquery.Alias));
 				subqueries = newSubqueries;
 			}
 		}
@@ -193,6 +193,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 				{
 					foreach (var column in columns)
 					{
+						if (column.Alias == null) continue;
 						if (column.Expression is DBStringConst && column.Expression.RawValue == null) continue;
 						if (sb.Length > 0) sb.Append(',');
 						sb.Append(column.Alias.RawValue);
@@ -203,6 +204,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 				{
 					foreach (var subquery in subqueries)
 					{
+						if (subquery.Alias == null) continue;
 						if (subquery.Expression is DBStringConst && subquery.Expression.RawValue == null) continue;
 						if (sb.Length > 0) sb.Append(',');
 						sb.Append(subquery.Alias.RawValue);
@@ -262,7 +264,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 			}
 
 			bool first = true;
-			string previousTable = null;
+			string? previousTable = null;
 			if (columns != null)
 			{
 				foreach (var column in columns)
@@ -390,7 +392,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		/// <param name="table">Table name to add.</param>
 		/// <param name="alias">Table alias to add.</param>
-		protected virtual void AppendTable(StringBuilder sb, IDBIdentifier table, IDBIdentifier alias)
+		protected virtual void AppendTable(StringBuilder sb, IDBIdentifier table, IDBIdentifier? alias)
 		{
 			table.Append(sb);
 			if (alias != null)
@@ -406,7 +408,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		/// <param name="expression">Subquery expression to add.</param>
 		/// <param name="alias">Main table alias to add.</param>
-		protected virtual void AppendTableSubquery(StringBuilder sb, IDBExpression expression, IDBIdentifier alias)
+		protected virtual void AppendTableSubquery(StringBuilder sb, IDBExpression expression, IDBIdentifier? alias)
 		{
 			sb.Append('(');
 			expression.Append(sb);
@@ -604,14 +606,14 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// Column alias.
 		/// </summary>
-		public IDBIdentifier Alias { get; private set; }
+		public IDBIdentifier? Alias { get; private set; }
 
 		/// <summary>
 		/// Creates new SELECT column definition.
 		/// </summary>
 		/// <param name="expression">Column value expression.</param>
 		/// <param name="alias">Column alias.</param>
-		public DBCommandColumn(IDBExpression expression, IDBIdentifier alias)
+		public DBCommandColumn(IDBExpression expression, IDBIdentifier? alias)
 			: this()
 		{
 			Expression = expression;
@@ -632,14 +634,14 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// Column alias.
 		/// </summary>
-		public IDBIdentifier Alias { get; private set; }
+		public IDBIdentifier? Alias { get; private set; }
 
 		/// <summary>
 		/// Creates new SELECT subquery column definition.
 		/// </summary>
 		/// <param name="expression">Column subquery expression.</param>
 		/// <param name="alias">Column alias.</param>
-		public DBCommandSubquery(IDBExpression expression, IDBIdentifier alias)
+		public DBCommandSubquery(IDBExpression expression, IDBIdentifier? alias)
 			: this()
 		{
 			Expression = expression;
@@ -665,7 +667,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// Joined table alias.
 		/// </summary>
-		public IDBIdentifier Alias { get; private set; }
+		public IDBIdentifier? Alias { get; private set; }
 
 		/// <summary>
 		/// OUTER/INNER join specifier.
@@ -679,7 +681,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="expression">Join condition expression.</param>
 		/// <param name="alias">Joined table alias.</param>
 		/// <param name="outer">OUTER/INNER join specifier.</param>
-		public DBCommandJoin(IDBIdentifier table, IDBExpression expression, IDBIdentifier alias, bool outer)
+		public DBCommandJoin(IDBIdentifier table, IDBExpression expression, IDBIdentifier? alias, bool outer)
 			: this()
 		{
 			Table = table;

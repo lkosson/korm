@@ -25,27 +25,26 @@ namespace Kosson.KORM.ORM
 		private readonly MethodInfo miConvert;
 		private readonly MethodInfo miCreate;
 		private readonly MethodInfo miGetType;
-		private ILGenerator il;
 
 		public ReaderRecordLoaderBuilder(IMetaBuilder metaBuilder)
 		{
 			this.metaBuilder = metaBuilder;
-			miIsDBNull = typeof(DbDataReader).GetMethod(nameof(DbDataReader.IsDBNull));
-			miGetBoolean = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetBoolean));
-			miGetByte = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetByte));
-			miGetInt16 = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetInt16));
-			miGetInt32 = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetInt32));
-			miGetInt64 = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetInt64));
-			miGetFloat = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetFloat));
-			miGetDouble = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetDouble));
-			miGetDecimal = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetDecimal));
-			miGetDateTime = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetDateTime));
-			miGetGuid = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetGuid));
-			miGetString = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetString));
-			miGetValue = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetValue));
-			miConvert = typeof(IConverter).GetMethod(nameof(IConverter.Convert), [typeof(object), typeof(Type)]);
-			miCreate = typeof(FactoryExtensions).GetMethod(nameof(FactoryExtensions.Create), [typeof(IFactory), typeof(Type)]);
-			miGetType = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
+			miIsDBNull = typeof(DbDataReader).GetMethod(nameof(DbDataReader.IsDBNull))!;
+			miGetBoolean = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetBoolean))!;
+			miGetByte = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetByte))!;
+			miGetInt16 = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetInt16))!;
+			miGetInt32 = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetInt32))!;
+			miGetInt64 = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetInt64))!;
+			miGetFloat = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetFloat))!;
+			miGetDouble = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetDouble))!;
+			miGetDecimal = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetDecimal))!;
+			miGetDateTime = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetDateTime))!;
+			miGetGuid = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetGuid))!;
+			miGetString = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetString))!;
+			miGetValue = typeof(DbDataReader).GetMethod(nameof(DbDataReader.GetValue))!;
+			miConvert = typeof(IConverter).GetMethod(nameof(IConverter.Convert), [typeof(object), typeof(Type)])!;
+			miCreate = typeof(FactoryExtensions).GetMethod(nameof(FactoryExtensions.Create), [typeof(IFactory), typeof(Type)])!;
+			miGetType = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!;
 		}
 
 		public LoaderFromReaderByIndexDelegate<TRecord> Build<TRecord>()
@@ -57,13 +56,13 @@ namespace Kosson.KORM.ORM
 			PrepareIndices(meta, "this", ref fieldIndex, indices, new Stack<long>());
 
 			var dm = new DynamicMethod("Load", null, [typeof(TRecord), typeof(DbDataReader), typeof(IConverter), typeof(IFactory)], true);
-			il = dm.GetILGenerator();
+			var il = dm.GetILGenerator();
 
 			var localRecord = il.DeclareLocal(typeof(TRecord));
 			il.Emit(OpCodes.Ldarg_0);
 			il.Emit(OpCodes.Stloc, localRecord);
 
-			Build(meta, "this", indices, localRecord);
+			Build(il, meta, "this", indices, localRecord);
 
 			il.Emit(OpCodes.Ret);
 			return (LoaderFromReaderByIndexDelegate<TRecord>)dm.CreateDelegate(typeof(LoaderFromReaderByIndexDelegate<TRecord>));
@@ -134,7 +133,7 @@ namespace Kosson.KORM.ORM
 			}
 		}
 
-		private void Build(IMetaRecord meta, string prefix, Dictionary<string, int> indices, LocalBuilder localRecord)
+		private void Build(ILGenerator il, IMetaRecord meta, string prefix, Dictionary<string, int> indices, LocalBuilder localRecord)
 		{
 			// keep order in sync with DBORMSelect.PrepareTemplate
 			foreach (var field in meta.Fields)
@@ -144,16 +143,16 @@ namespace Kosson.KORM.ORM
 
 				if (field.IsInline || field.IsEagerLookup)
 				{
-					BuildForeign(field, fieldName, indices, localRecord);
+					BuildForeign(il, field, fieldName, indices, localRecord);
 				}
 				else
 				{
-					ReadField(field, indices[fieldName], localRecord);
+					ReadField(il, field, indices[fieldName], localRecord);
 				}
 			}
 		}
 
-		private void BuildForeign(IMetaRecordField field, string fieldName, Dictionary<string, int> indices, LocalBuilder localRecord)
+		private void BuildForeign(ILGenerator il, IMetaRecordField field, string fieldName, Dictionary<string, int> indices, LocalBuilder localRecord)
 		{
 			var type = field.Type;
 			var labForeignEnd = il.DefineLabel();
@@ -170,7 +169,7 @@ namespace Kosson.KORM.ORM
 
 			// _tmp = local.(field.Name);
 			il.Emit(OpCodes.Ldloc, localRecord); // ST: record
-			il.EmitCall(OpCodes.Callvirt, field.Property.GetMethod, null); // ST: foreign-or-null
+			il.EmitCall(OpCodes.Callvirt, field.Property.GetMethod!, null); // ST: foreign-or-null
 			il.Emit(OpCodes.Stloc, foreignRecord); // ST: <0>
 
 			// if (_tmp != null) goto end;
@@ -191,39 +190,39 @@ namespace Kosson.KORM.ORM
 			// local.(field.Name) = _tmp
 			il.Emit(OpCodes.Ldloc, localRecord); // ST: record
 			il.Emit(OpCodes.Ldloc, foreignRecord); // ST: record, foreign
-			il.EmitCall(OpCodes.Callvirt, field.Property.SetMethod, null); // ST: <0>
+			il.EmitCall(OpCodes.Callvirt, field.Property.SetMethod!, null); // ST: <0>
 
 			// end:
 			il.MarkLabel(labForeignEnd); // ST: <0>
 
 			var foreignMeta = metaBuilder.Get(field.Type);
-			Build(foreignMeta, fieldName, indices, foreignRecord);
+			Build(il, foreignMeta, fieldName, indices, foreignRecord);
 
 			// null:
 			il.MarkLabel(labForeignNull); // ST: <0>
 		}
 
-		private void ReadField(IMetaRecordField field, int fieldIndex, LocalBuilder localRecord)
+		private void ReadField(ILGenerator il, IMetaRecordField field, int fieldIndex, LocalBuilder localRecord)
 		{
 			if (field.IsEagerLookup) return; // loaded in 2nd pass by BuildForeign
-			else if (field.IsConverted) ReadFieldConvert(field, fieldIndex, localRecord);
-			else if (field.Type == typeof(bool)) ReadFieldPrimitive(field, fieldIndex, miGetBoolean, localRecord);
-			else if (field.Type == typeof(byte)) ReadFieldPrimitive(field, fieldIndex, miGetByte, localRecord);
-			else if (field.Type == typeof(short)) ReadFieldPrimitive(field, fieldIndex, miGetInt16, localRecord);
-			else if (field.Type == typeof(int)) ReadFieldPrimitive(field, fieldIndex, miGetInt32, localRecord);
-			else if (field.Type == typeof(long)) ReadFieldPrimitive(field, fieldIndex, miGetInt64, localRecord);
-			else if (field.Type == typeof(float)) ReadFieldPrimitive(field, fieldIndex, miGetFloat, localRecord);
-			else if (field.Type == typeof(double)) ReadFieldPrimitive(field, fieldIndex, miGetDouble, localRecord);
-			else if (field.Type == typeof(decimal)) ReadFieldPrimitive(field, fieldIndex, miGetDecimal, localRecord);
-			else if (field.Type == typeof(DateTime)) ReadFieldPrimitive(field, fieldIndex, miGetDateTime, localRecord);
-			else if (field.Type == typeof(Guid)) ReadFieldPrimitive(field, fieldIndex, miGetGuid, localRecord);
-			else if (field.Type == typeof(string)) ReadFieldPrimitive(field, fieldIndex, miGetString, localRecord);
-			else if (field.IsRecordRef) ReadFieldRecordRef(field, fieldIndex, localRecord);
-			else if (field.Type.IsEnum) ReadFieldPrimitive(field, fieldIndex, miGetInt32, localRecord);
-			else ReadFieldConvert(field, fieldIndex, localRecord);
+			else if (field.IsConverted) ReadFieldConvert(il, field, fieldIndex, localRecord);
+			else if (field.Type == typeof(bool)) ReadFieldPrimitive(il, field, fieldIndex, miGetBoolean, localRecord);
+			else if (field.Type == typeof(byte)) ReadFieldPrimitive(il, field, fieldIndex, miGetByte, localRecord);
+			else if (field.Type == typeof(short)) ReadFieldPrimitive(il, field, fieldIndex, miGetInt16, localRecord);
+			else if (field.Type == typeof(int)) ReadFieldPrimitive(il, field, fieldIndex, miGetInt32, localRecord);
+			else if (field.Type == typeof(long)) ReadFieldPrimitive(il, field, fieldIndex, miGetInt64, localRecord);
+			else if (field.Type == typeof(float)) ReadFieldPrimitive(il, field, fieldIndex, miGetFloat, localRecord);
+			else if (field.Type == typeof(double)) ReadFieldPrimitive(il, field, fieldIndex, miGetDouble, localRecord);
+			else if (field.Type == typeof(decimal)) ReadFieldPrimitive(il, field, fieldIndex, miGetDecimal, localRecord);
+			else if (field.Type == typeof(DateTime)) ReadFieldPrimitive(il, field, fieldIndex, miGetDateTime, localRecord);
+			else if (field.Type == typeof(Guid)) ReadFieldPrimitive(il, field, fieldIndex, miGetGuid, localRecord);
+			else if (field.Type == typeof(string)) ReadFieldPrimitive(il, field, fieldIndex, miGetString, localRecord);
+			else if (field.IsRecordRef) ReadFieldRecordRef(il, field, fieldIndex, localRecord);
+			else if (field.Type.IsEnum) ReadFieldPrimitive(il, field, fieldIndex, miGetInt32, localRecord);
+			else ReadFieldConvert(il, field, fieldIndex, localRecord);
 		}
 
-		private void ReadFieldPrimitive(IMetaRecordField field, int fieldIndex, MethodInfo getter, LocalBuilder localRecord)
+		private void ReadFieldPrimitive(ILGenerator il, IMetaRecordField field, int fieldIndex, MethodInfo getter, LocalBuilder localRecord)
 		{
 			var labIsNull = il.DefineLabel();
 			var labSet = il.DefineLabel();
@@ -254,10 +253,10 @@ namespace Kosson.KORM.ORM
 			}
 
 			il.MarkLabel(labSet);
-			il.EmitCall(OpCodes.Callvirt, field.Property.SetMethod, null); // ST: 0
+			il.EmitCall(OpCodes.Callvirt, field.Property.SetMethod!, null); // ST: 0
 		}
 
-		private void ReadFieldRecordRef(IMetaRecordField field, int fieldIndex, LocalBuilder localRecord)
+		private void ReadFieldRecordRef(ILGenerator il, IMetaRecordField field, int fieldIndex, LocalBuilder localRecord)
 		{
 			var labIsNull = il.DefineLabel();
 			var labSet = il.DefineLabel();
@@ -296,11 +295,11 @@ namespace Kosson.KORM.ORM
 			il.Emit(OpCodes.Ldc_I8, 0L); // ST: record, 0L
 
 			il.MarkLabel(labSet); // ST: record, long
-			il.Emit(OpCodes.Newobj, field.Type.GetConstructor([typeof(long)])); // ST: record, RecordRef
-			il.EmitCall(OpCodes.Callvirt, field.Property.SetMethod, null); // ST: 0
+			il.Emit(OpCodes.Newobj, field.Type.GetConstructor([typeof(long)])!); // ST: record, RecordRef
+			il.EmitCall(OpCodes.Callvirt, field.Property.SetMethod!, null); // ST: 0
 		}
 
-		private void ReadFieldConvert(IMetaRecordField field, int fieldIndex, LocalBuilder localRecord)
+		private void ReadFieldConvert(ILGenerator il, IMetaRecordField field, int fieldIndex, LocalBuilder localRecord)
 		{
 			// localRecord.(field.name) = converter.Convert<field.type>(reader.GetValue(fieldIndex))
 			var type = field.Type;
@@ -316,7 +315,7 @@ namespace Kosson.KORM.ORM
 				il.Emit(OpCodes.Unbox_Any, type); // ST: record, value-converted-unboxed
 			else
 				il.Emit(OpCodes.Castclass, type); // ST: record, value-converted-casted
-			il.EmitCall(OpCodes.Callvirt, field.Property.SetMethod, null); // ST: 0
+			il.EmitCall(OpCodes.Callvirt, field.Property.SetMethod!, null); // ST: 0
 		}
 	}
 

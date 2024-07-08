@@ -1,4 +1,5 @@
 ﻿using Kosson.KORM.DB.CommandBuilder;
+using System;
 using System.Text;
 
 namespace Kosson.KORM.PGSQL
@@ -7,6 +8,9 @@ namespace Kosson.KORM.PGSQL
 	{
 		protected override void AppendHeader(StringBuilder sb)
 		{
+			ArgumentNullException.ThrowIfNull(name);
+			ArgumentNullException.ThrowIfNull(table);
+
 			sb.Append("DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM information_schema.table_constraints WHERE table_name = '");
 
 			if (table is IDBDottedIdentifier dottedTable)

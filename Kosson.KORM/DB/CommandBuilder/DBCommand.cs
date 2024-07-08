@@ -13,12 +13,12 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// Table name.
 		/// </summary>
-		protected IDBIdentifier table;
+		protected IDBIdentifier? table;
 
 		/// <summary>
 		/// Command tag.
 		/// </summary>
-		protected IDBComment tag;
+		protected IDBComment? tag;
 
 		/// <inheritdoc/>
 		public IDBCommandBuilder Builder => builder;

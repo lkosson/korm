@@ -31,7 +31,7 @@ namespace Kosson.KORM.Backup
 			recordsCompleted = new Dictionary<Type, HashSet<long>>();
 		}
 
-		public void AddRecords<T>(IEnumerable<T> records)
+		public void AddRecords<T>(IEnumerable<T>? records)
 			where T : class, IRecord, new()
 		{
 			AddRecordsInternal(typeof(T), records ?? GetRecords<T>());
@@ -84,7 +84,7 @@ namespace Kosson.KORM.Backup
 				if (field.IsRecordRef) fieldType = fieldType.GetGenericArguments()[0];
 				if (field.IsInline)
 				{
-					AddForeignRecords(field.InlineRecord, leftoverForeigns);
+					AddForeignRecords(field.InlineRecord!, leftoverForeigns);
 					continue;
 				}
 				if (!field.IsForeignKey) continue;
@@ -111,7 +111,7 @@ namespace Kosson.KORM.Backup
 
 		private void AddRecordsAndForeign(Type type, IEnumerable records, IEnumerable<IMetaRecordField> foreigns)
 		{
-			HashSet<long> recordsCompletedForType;
+			HashSet<long>? recordsCompletedForType;
 			if (!recordsCompleted.TryGetValue(type, out recordsCompletedForType))
 			{
 				recordsCompletedForType = new HashSet<long>();
@@ -130,15 +130,15 @@ namespace Kosson.KORM.Backup
 			}
 		}
 
-		private IRecord GetRecordFromRef<T>(IRecordRef recordRef)
+		private IRecord? GetRecordFromRef<T>(IRecordRef recordRef)
 			where T : class, IRecord, new()
 		{
 			return orm.Get<T>((RecordRef<T>)recordRef);
 		}
 
-		private IRecord GetRecordFromRef(Type type, IRecordRef recordRef)
+		private IRecord? GetRecordFromRef(Type type, IRecordRef recordRef)
 		{
-			var typed = new Func<IRecordRef, IRecord>(GetRecordFromRef<Record>).ChangeDelegateGenericArgument(type);
+			var typed = new Func<IRecordRef, IRecord?>(GetRecordFromRef<Record>).ChangeDelegateGenericArgument(type);
 			return typed(recordRef);
 		}
 
@@ -147,8 +147,8 @@ namespace Kosson.KORM.Backup
 			foreach (var field in foreigns)
 			{
 				string inlinePrefix = "";
-				IMetaRecordField inline = field.Record.InliningField;
-				IRecord foreignRecord = null;
+				IMetaRecordField? inline = field.Record.InliningField;
+				IRecord? foreignRecord = null;
 				while (inline != null)
 				{
 					inlinePrefix = inline.Name + ".";
@@ -173,7 +173,7 @@ namespace Kosson.KORM.Backup
 
 				if (foreignRecord == null) continue;
 
-				HashSet<long> recordsCompletedForForeign = null;
+				HashSet<long>? recordsCompletedForForeign = null;
 				if (recordsInProgress.Contains(foreignRecord))
 				{
 					var id = foreignRecord.ID;

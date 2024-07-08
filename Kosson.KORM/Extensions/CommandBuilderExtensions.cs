@@ -14,7 +14,7 @@ namespace Kosson.KORM
 		/// <param name="lexpr">First value to compare.</param>
 		/// <param name="rexpr">Second value to compare.</param>
 		/// <returns>Comparison expression testing for equality between lexpr and rexpr.</returns>
-		public static IDBExpression Equal(this IDBCommandBuilder builder, IDBIdentifier lexpr, IDBExpression rexpr)
+		public static IDBExpression Equal(this IDBCommandBuilder builder, IDBIdentifier lexpr, IDBExpression? rexpr)
 			=> builder.Comparison(lexpr, DBExpressionComparison.Equal, rexpr);
 
 		/// <summary>
@@ -24,7 +24,7 @@ namespace Kosson.KORM
 		/// <param name="lexpr">First value to compare.</param>
 		/// <param name="rexpr">Second value to compare.</param>
 		/// <returns>Comparison expression testing for inequality between lexpr and rexpr.</returns>
-		public static IDBExpression NotEqual(this IDBCommandBuilder builder, IDBIdentifier lexpr, IDBExpression rexpr)
+		public static IDBExpression NotEqual(this IDBCommandBuilder builder, IDBIdentifier lexpr, IDBExpression? rexpr)
 			=> builder.Comparison(lexpr, DBExpressionComparison.NotEqual, rexpr);
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace Kosson.KORM
 		/// <param name="builder">Builder to use for expression construction.</param>
 		/// <param name="value">Constant value to build expression for.</param>
 		/// <returns>Constant expression representing a given value.</returns>
-		public static IDBExpression Const(this IDBCommandBuilder builder, object value)
+		public static IDBExpression Const(this IDBCommandBuilder builder, object? value)
 		{
 			if (value == null) return builder.Null();
 			if (value is byte byteValue) return builder.Const(byteValue);

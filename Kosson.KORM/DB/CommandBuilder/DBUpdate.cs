@@ -10,7 +10,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// List of SET expression of the command.
 		/// </summary>
-		protected List<SetInfo> sets;
+		protected List<SetInfo>? sets;
 
 		/// <inheritdoc/>
 		public DBUpdate(IDBCommandBuilder builder)

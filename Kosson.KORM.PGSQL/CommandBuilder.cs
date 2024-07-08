@@ -74,7 +74,7 @@ namespace Kosson.KORM.PGSQL
 			throw new ArgumentException("Unsupported type " + type);
 		}
 
-		private static string TrimIdentifier(string name)
+		private static string? TrimIdentifier(string? name)
 		{
 			if (String.IsNullOrEmpty(name)) return name;
 			if (name.Length <= 63) return name;
@@ -83,11 +83,11 @@ namespace Kosson.KORM.PGSQL
 
 		public override IDBIdentifier Identifier(string name)
 		{
-			name = TrimIdentifier(name);
+			name = TrimIdentifier(name)!;
 			return base.Identifier(name);
 		}
 
-		public override IDBIdentifier Identifier(params string[] names)
+		public override IDBIdentifier Identifier(params string?[] names)
 		{
 			for (int i = 0; i < names.Length; i++) names[i] = TrimIdentifier(names[i]);
 			return base.Identifier(names);

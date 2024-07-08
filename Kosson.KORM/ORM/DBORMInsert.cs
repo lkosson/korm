@@ -9,9 +9,9 @@ namespace Kosson.KORM.ORM
 	class DBORMInsert<TRecord> : DBORMCommandBase<TRecord, IDBInsert>, IORMInsert<TRecord> where TRecord : IRecord
 	{
 		private IConverter converter;
-		private string commandText;
-		private static string cachedCommandText;
-		private static Type cachedCommandTextDBType;
+		private string? commandText;
+		private static string? cachedCommandText;
+		private static Type? cachedCommandTextDBType;
 
 		public DBORMInsert(IDB db, IMetaBuilder metaBuilder, IConverter converter, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
@@ -56,7 +56,7 @@ namespace Kosson.KORM.ORM
 				if (field.IsReadOnly) continue;
 				if (field.IsInline)
 				{
-					PrepareTemplate(cb, template, field.InlineRecord);
+					PrepareTemplate(cb, template, field.InlineRecord!);
 				}
 				else
 				{
@@ -86,7 +86,7 @@ namespace Kosson.KORM.ORM
 			if (DB.IsBatchSupported && commandText != null && records.Count() > 1 && records.First() is not IRecordNotifyInsert) return RecordsBatch(records);
 
 			var token = LogStart();
-			var getlastid = template.GetLastID;
+			var getlastid = template!.GetLastID;
 			var manualid = meta.IsManualID;
 			using var cmdInsert = DB.CreateCommand(commandText ?? Command.ToString());
 			using var cmdGetLastID = getlastid == null ? null : DB.CreateCommand(getlastid);
@@ -120,7 +120,7 @@ namespace Kosson.KORM.ORM
 		private int RecordsBatch(IEnumerable<TRecord> records)
 		{
 			var token = LogStart();
-			var getlastid = template.GetLastID;
+			var getlastid = template!.GetLastID;
 			var manualid = meta.IsManualID;
 
 			using var batch = DB.CreateBatch();
@@ -128,7 +128,7 @@ namespace Kosson.KORM.ORM
 			foreach (var record in records)
 			{
 				LogRecord(LogLevel.Information, token, record);
-				var command = DB.CreateCommand(batch, commandText);
+				var command = DB.CreateCommand(batch, commandText!);
 				DBParameterLoader<TRecord>.Run(DB, meta, command, record);
 
 				if (getlastid != null) DB.CreateCommand(batch, getlastid);
@@ -157,7 +157,7 @@ namespace Kosson.KORM.ORM
 			if (DB.IsBatchSupported && commandText != null && records.Count() > 1 && records.First() is not IRecordNotifyInsert) return await RecordsBatchAsync(records);
 
 			var token = LogStart();
-			var getlastid = template.GetLastID;
+			var getlastid = template!.GetLastID;
 			var manualid = meta.IsManualID;
 			using var cmdInsert = DB.CreateCommand(commandText ?? Command.ToString());
 			using var cmdGetLastID = getlastid == null ? null : DB.CreateCommand(getlastid);
@@ -190,7 +190,7 @@ namespace Kosson.KORM.ORM
 		private async Task<int> RecordsBatchAsync(IEnumerable<TRecord> records)
 		{
 			var token = LogStart();
-			var getlastid = template.GetLastID;
+			var getlastid = template!.GetLastID;
 			var manualid = meta.IsManualID;
 
 			using var batch = DB.CreateBatch();
@@ -198,7 +198,7 @@ namespace Kosson.KORM.ORM
 			foreach (var record in records)
 			{
 				LogRecord(LogLevel.Information, token, record);
-				var command = DB.CreateCommand(batch, commandText);
+				var command = DB.CreateCommand(batch, commandText!);
 				DBParameterLoader<TRecord>.Run(DB, meta, command, record);
 
 				if (getlastid != null) DB.CreateCommand(batch, getlastid);

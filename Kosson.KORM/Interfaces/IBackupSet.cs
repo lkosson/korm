@@ -19,8 +19,8 @@ namespace Kosson.KORM
 		/// Adds provided records to the backup. Records referenced by foreign keys are also included.
 		/// </summary>
 		/// <typeparam name="T">Type of records to add to the backup.</typeparam>
-		/// <param name="records">Records to add to the backup.</param>
-		void AddRecords<T>(IEnumerable<T> records = null)
+		/// <param name="records">Records to add to the backup -or- null to add all records from the table.</param>
+		void AddRecords<T>(IEnumerable<T>? records = null)
 			where T : class, IRecord, new();
 	}
 }

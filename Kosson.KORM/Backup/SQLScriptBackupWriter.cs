@@ -33,14 +33,15 @@ namespace Kosson.KORM.Backup
 		void IBackupWriter.WriteRecord(IRecord record)
 		{
 			var type = record.GetType();
-			TableState tableState;
+			TableState? tableState;
 			if (!tableStates.TryGetValue(type, out tableState))
 			{
 				var meta = metaBuilder.Get(type);
 				var tableType = meta.TableType;
+				if (tableType == null) return;
 				if (!tableStates.TryGetValue(tableType, out tableState))
 				{
-					tableState = new TableState { meta = meta, recordsWritten = new HashSet<long>() };
+					tableState = new TableState(meta);
 					if (CreateStructure) WriteCreateTable(meta);
 				}
 				tableStates[type] = tableState;
@@ -64,8 +65,8 @@ namespace Kosson.KORM.Backup
 			foreach (var field in meta.Fields)
 			{
 				if (!field.IsForeignKey) continue;
-				if (tableStates.ContainsKey(field.ForeignType)) continue;
-				tc.CreateTable(metaBuilder.Get(field.ForeignType));
+				if (tableStates.ContainsKey(field.ForeignType!)) continue;
+				tc.CreateTable(metaBuilder.Get(field.ForeignType!));
 			}
 			tc.Create(meta);
 		}
@@ -92,7 +93,7 @@ namespace Kosson.KORM.Backup
 				var value = field.Property.GetValue(record);
 				if (field.IsInline)
 				{
-					if (value != null) BuildInsert(insert, field.InlineRecord, false, value);
+					if (value != null) BuildInsert(insert, field.InlineRecord!, false, value);
 				}
 				else
 				{
@@ -131,7 +132,7 @@ namespace Kosson.KORM.Backup
 				}
 				else if (field.IsInline)
 				{
-					if (value != null) BuildUpdate(update, field.InlineRecord, value);
+					if (value != null) BuildUpdate(update, field.InlineRecord!, value);
 				}
 				else
 				{
@@ -152,6 +153,12 @@ namespace Kosson.KORM.Backup
 			public HashSet<long> recordsWritten;
 			public IMetaRecord meta;
 			public long maxWrittenId;
+
+			public TableState(IMetaRecord meta)
+			{
+				this.meta = meta;
+				recordsWritten = new HashSet<long>();
+			}
 		}
 	}
 }

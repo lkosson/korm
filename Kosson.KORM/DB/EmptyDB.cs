@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Kosson.KORM.DB
 {
@@ -31,6 +32,7 @@ namespace Kosson.KORM.DB
 
 		class Connection : DbConnection
 		{
+			[AllowNull]
 			public override string ConnectionString { get; set; }
 			public override int ConnectionTimeout => 0;
 			public override string Database => "";
@@ -63,12 +65,12 @@ namespace Kosson.KORM.DB
 
 		class Command : DbCommand
 		{
-			public override string CommandText { get; set; }
+			[AllowNull] public override string CommandText { get; set; }
 			public override int CommandTimeout { get; set; }
 			public override CommandType CommandType { get; set; }
-			protected override DbConnection DbConnection { get; set; }
+			[AllowNull] protected override DbConnection DbConnection { get; set; }
 			protected override DbParameterCollection DbParameterCollection => new Parameters();
-			protected override DbTransaction DbTransaction { get; set; }
+			[AllowNull] protected override DbTransaction DbTransaction { get; set; }
 			public override UpdateRowSource UpdatedRowSource { get; set; }
 			public override bool DesignTimeVisible { get; set; }
 
@@ -81,7 +83,7 @@ namespace Kosson.KORM.DB
 
 			public override int ExecuteNonQuery() => 0;
 			public DbDataReader ExecuteDbReader(CommandBehavior behavior) => new DataReader();
-			public override object ExecuteScalar() => null;
+			public override object ExecuteScalar() => null!;
 			public override void Prepare() { }
 			protected override DbParameter CreateDbParameter() => new Parameter();
 			protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior) => new DataReader();
@@ -92,11 +94,11 @@ namespace Kosson.KORM.DB
 			public override DbType DbType { get; set; }
 			public override ParameterDirection Direction { get; set; }
 			public override bool IsNullable { get; set; }
-			public override string ParameterName { get; set; }
+			[AllowNull] public override string ParameterName { get; set; }
 			public override int Size { get; set; }
-			public override string SourceColumn { get; set; }
+			[AllowNull] public override string SourceColumn { get; set; }
 			public override bool SourceColumnNullMapping { get; set; }
-			public override object Value { get; set; }
+			[AllowNull] public override object Value { get; set; }
 			public override DataRowVersion SourceVersion { get; set; }
 
 			public override void ResetDbType()
@@ -125,16 +127,16 @@ namespace Kosson.KORM.DB
 			public override void Remove(object value) { }
 			public override void RemoveAt(string parameterName) { }
 			public override void RemoveAt(int index) { }
-			protected override DbParameter GetParameter(string parameterName) => null;
-			protected override DbParameter GetParameter(int index) => null;
+			protected override DbParameter GetParameter(string parameterName) => null!;
+			protected override DbParameter GetParameter(int index) => null!;
 			protected override void SetParameter(string parameterName, DbParameter value) { }
 			protected override void SetParameter(int index, DbParameter value) { }
 		}
 
 		class DataReader : DbDataReader
 		{
-			public override object this[string name] => null;
-			public override object this[int ordinal] => null;
+			public override object this[string name] => null!;
+			public override object this[int ordinal] => null!;
 			public override int Depth => 0;
 			public override int FieldCount => 0;
 			public override bool HasRows => false;
@@ -143,9 +145,9 @@ namespace Kosson.KORM.DB
 			public override void Close() { }
 			public override bool GetBoolean(int ordinal) => false;
 			public override byte GetByte(int ordinal) => 0;
-			public override long GetBytes(int ordinal, long dataOffset, byte[] buffer, int bufferOffset, int length) => 0;
+			public override long GetBytes(int ordinal, long dataOffset, byte[]? buffer, int bufferOffset, int length) => 0;
 			public override char GetChar(int ordinal) => '\0';
-			public override long GetChars(int ordinal, long dataOffset, char[] buffer, int bufferOffset, int length) => 0;
+			public override long GetChars(int ordinal, long dataOffset, char[]? buffer, int bufferOffset, int length) => 0;
 			public override string GetDataTypeName(int ordinal) => "";
 			public override DateTime GetDateTime(int ordinal) => DateTime.MinValue;
 			public override decimal GetDecimal(int ordinal) => 0;
@@ -159,8 +161,8 @@ namespace Kosson.KORM.DB
 			public override long GetInt64(int ordinal) => 0;
 			public override string GetName(int ordinal) => "";
 			public override int GetOrdinal(string name) => -1;
-			public override string GetString(int ordinal) => null;
-			public override object GetValue(int ordinal) => null;
+			public override string GetString(int ordinal) => null!;
+			public override object GetValue(int ordinal) => null!;
 			public override int GetValues(object[] values) => 0;
 			public override bool IsDBNull(int ordinal) => true;
 			public override bool NextResult() => false;
@@ -170,7 +172,7 @@ namespace Kosson.KORM.DB
 
 		class EmptyEnumerator : IEnumerator
 		{
-			public object Current => null;
+			public object Current => null!;
 			public bool MoveNext() => false;
 			public void Reset() { }
 		}

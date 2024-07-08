@@ -14,6 +14,7 @@
 		/// <returns>Delegate with a generic type argument changed.</returns>
 		public static TDelegate ChangeDelegateGenericArgument<TDelegate>(this TDelegate target, Type argumentType)
 		{
+			if (target == null) return target;
 			var originalDelegate = (Delegate)(object)target;
 			var method = originalDelegate.Method;
 			var genericMethod = method.GetGenericMethodDefinition();

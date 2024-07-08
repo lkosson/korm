@@ -11,18 +11,21 @@
 			this.metaBuilder = metaBuilder;
 		}
 
-		T IRecordCloner.Clone<T>(T source)
+		T? IRecordCloner.Clone<T>(T? source)
+			where T : class
 		{
-			return (T)CloneImpl(source);
+			return (T?)CloneImpl(source);
 		}
 
-		private object CloneImpl(object source)
+		private object? CloneImpl(object? source)
 		{
 			if (source == null) return null;
 			var clone = factory.Create(source.GetType());
 			var fields = metaBuilder.Get(source.GetType()).Fields;
 			foreach (var field in fields)
 			{
+				if (field.Property.GetMethod == null) continue;
+				if (field.Property.SetMethod == null) continue;
 				var value = field.Property.GetMethod.Invoke(source, null);
 				if (field.IsInline)
 				{

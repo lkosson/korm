@@ -1,5 +1,6 @@
 ﻿using Kosson.KORM;
 using Kosson.KORM.DB.CommandBuilder;
+using System;
 using System.Text;
 
 namespace Kosson.KORM.MSSQL
@@ -8,6 +9,8 @@ namespace Kosson.KORM.MSSQL
 	{
 		protected override void AppendHeader(StringBuilder sb)
 		{
+			ArgumentNullException.ThrowIfNull(name);
+			ArgumentNullException.ThrowIfNull(table);
 			sb.Append("IF NOT EXISTS(SELECT name FROM sys.columns WHERE name='");
 			sb.Append(name.RawValue);
 			sb.Append("' AND object_id = (SELECT object_id FROM sys.tables WHERE name='");

@@ -12,12 +12,12 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Command that caused the exception.
 		/// </summary>
-		public string CommandText { get; }
+		public string? CommandText { get; }
 
 		/// <summary>
 		/// Parameters of the command that caused the exception.
 		/// </summary>
-		public DbParameterCollection CommandParameters { get; }
+		public DbParameterCollection? CommandParameters { get; }
 
 		/// <summary>
 		/// Exception message without appended command text.
@@ -39,7 +39,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="msg">Exception message.</param>
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
-		public KORMException(string msg, Exception inner)
+		public KORMException(string msg, Exception? inner)
 			: base(msg, inner)
 		{
 			OriginalMessage = msg;
@@ -52,7 +52,7 @@ namespace Kosson.KORM
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
-		public KORMException(string msg, Exception inner, string commandText, DbParameterCollection commandParameters)
+		public KORMException(string msg, Exception? inner, string? commandText, DbParameterCollection? commandParameters)
 			: base(msg + (commandText == null ? "" : "\n\n" + commandText), inner)
 		{
 			CommandText = commandText;
@@ -105,7 +105,7 @@ namespace Kosson.KORM
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
-		public KORMDuplicateValueException(Exception inner, string commandText, DbParameterCollection commandParameters)
+		public KORMDuplicateValueException(Exception inner, string? commandText, DbParameterCollection? commandParameters)
 			: base("Duplicate value in unique field.", inner, commandText, commandParameters)
 		{
 		}
@@ -123,7 +123,7 @@ namespace Kosson.KORM
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
-		public KORMLockException(Exception inner, string commandText, DbParameterCollection commandParameters)
+		public KORMLockException(Exception inner, string? commandText, DbParameterCollection? commandParameters)
 			: base("Row is locked in another transaction.", inner, commandText, commandParameters)
 		{
 		}
@@ -140,7 +140,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
-		public KORMConcurrentModificationException(string commandText, DbParameterCollection commandParameters)
+		public KORMConcurrentModificationException(string? commandText, DbParameterCollection? commandParameters)
 			: base("Row has been modified in another transaction.", null, commandText, commandParameters)
 		{
 		}
@@ -158,7 +158,7 @@ namespace Kosson.KORM
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
-		public KORMInvalidStructureException(Exception inner, string commandText, DbParameterCollection commandParameters)
+		public KORMInvalidStructureException(Exception inner, string? commandText, DbParameterCollection? commandParameters)
 			: base("Database structure creation error.", inner, commandText, commandParameters)
 		{
 		}
@@ -170,7 +170,7 @@ namespace Kosson.KORM
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
-		public KORMInvalidStructureException(string msg, Exception inner, string commandText, DbParameterCollection commandParameters)
+		public KORMInvalidStructureException(string msg, Exception inner, string? commandText, DbParameterCollection? commandParameters)
 			: base(msg, inner, commandText, commandParameters)
 		{
 		}
@@ -188,7 +188,7 @@ namespace Kosson.KORM
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
-		public KORMObjectExistsException(Exception inner, string commandText, DbParameterCollection commandParameters)
+		public KORMObjectExistsException(Exception inner, string? commandText, DbParameterCollection? commandParameters)
 			: base("Database object already exists.", inner, commandText, commandParameters)
 		{
 		}
@@ -203,7 +203,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Table referenced by a violated foreign key constraint.
 		/// </summary>
-		public string Remote { get; set; }
+		public string? Remote { get; set; }
 
 		/// <summary>
 		/// Creates a new exception from underlying database engine-specific exception and command causing the exception.
@@ -212,7 +212,7 @@ namespace Kosson.KORM
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
 		/// <param name="remote">Table referenced by violated foreign key.</param>
-		public KORMForeignKeyException(Exception inner, string commandText, DbParameterCollection commandParameters, string remote)
+		public KORMForeignKeyException(Exception inner, string? commandText, DbParameterCollection? commandParameters, string? remote)
 			: base("Operation failed due to foreign key violation in table \"" + remote + "\".", inner, commandText, commandParameters)
 		{
 			Remote = remote;
@@ -231,7 +231,7 @@ namespace Kosson.KORM
 		/// <param name="inner">Underlying, database engine-specific exception.</param>
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
-		public KORMDataLengthException(Exception inner, string commandText, DbParameterCollection commandParameters)
+		public KORMDataLengthException(Exception inner, string? commandText, DbParameterCollection? commandParameters)
 			: base("Data too long.", inner, commandText, commandParameters)
 		{
 		}

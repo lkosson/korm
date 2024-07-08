@@ -9,12 +9,12 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// Table's primary key column name.
 		/// </summary>
-		protected IDBIdentifier primaryKey;
+		protected IDBIdentifier? primaryKey;
 
 		/// <summary>
 		/// Primary key's column database type.
 		/// </summary>
-		protected IDBExpression type;
+		protected IDBExpression? type;
 
 		/// <summary>
 		/// Determines whether table's primary key values are assigned by database engine.
@@ -63,6 +63,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		protected virtual void AppendPrimaryKey(StringBuilder sb)
 		{
 			ArgumentNullException.ThrowIfNull(primaryKey);
+			ArgumentNullException.ThrowIfNull(type);
 			primaryKey.Append(sb);
 			sb.Append(' ');
 			type.Append(sb);

@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <typeparam name="TDB">Database provider</typeparam>
 		/// <param name="services">Services collection</param>
 		/// <param name="connectionString">Hard-coded connectionstring to use.</param>
-		public static void AddKORMServices<TDB>(this IServiceCollection services, string connectionString = null)
+		public static void AddKORMServices<TDB>(this IServiceCollection services, string? connectionString = null)
 			where TDB : class, IDB
 		{
 			services.AddOptions<KORMOptions>();

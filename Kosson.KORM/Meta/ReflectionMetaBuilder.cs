@@ -19,7 +19,7 @@ namespace Kosson.KORM.Meta
 
 		IMetaRecord IMetaBuilder.Get(Type type)
 		{
-			IMetaRecord meta;
+			IMetaRecord? meta;
 
 			if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(RecordRef<>))
 			{

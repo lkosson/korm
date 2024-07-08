@@ -13,6 +13,6 @@ namespace Kosson.KORM
 		/// <param name="value">Value to convert.</param>
 		/// <param name="type">Type to convert the value into.</param>
 		/// <returns>Object of given type.</returns>
-		object Convert(object value, Type type);
+		object? Convert(object? value, Type type);
 	}
 }

@@ -18,12 +18,12 @@ namespace Kosson.KORM.Converter
 		private static readonly Type typeGuid = typeof(Guid);
 		private static readonly Type typeBlob = typeof(byte[]);
 
-		private static readonly object[] defaultByTypeCode;
+		private static readonly object?[] defaultByTypeCode;
 
 		protected virtual CultureInfo Culture { get { return System.Globalization.CultureInfo.InvariantCulture; } }
 
 		private readonly IFactory factory;
-		private readonly ConcurrentDictionary<Type, object> defaultValues;
+		private readonly ConcurrentDictionary<Type, object?> defaultValues;
 
 		static DefaultConverter()
 		{
@@ -51,10 +51,10 @@ namespace Kosson.KORM.Converter
 		public DefaultConverter(IFactory factory)
 		{
 			this.factory = factory;
-			defaultValues = new ConcurrentDictionary<Type, object>();
+			defaultValues = new ConcurrentDictionary<Type, object?>();
 		}
 
-		object IConverter.Convert(object value, Type type)
+		object? IConverter.Convert(object? value, Type type)
 		{
 			if (value == DBNull.Value) value = null;
 			if (value == null) return DefaultValue(type);
@@ -92,18 +92,18 @@ namespace Kosson.KORM.Converter
 			throw new InvalidCastException("Value \"" + value + "\" of type " + value.GetType() + " cannot be converted to type " + type + ".");
 		}
 
-		private static object DefaultValueForTypeCode(TypeCode typeCode)
+		private static object? DefaultValueForTypeCode(TypeCode typeCode)
 		{
 			return defaultByTypeCode[(int)typeCode];
 		}
 
-		private object DefaultValue(Type type)
+		private object? DefaultValue(Type type)
 		{
 			var typeCode = Type.GetTypeCode(type);
 			if (typeCode != TypeCode.Object) return DefaultValueForTypeCode(typeCode);
 			if (defaultValues.TryGetValue(type, out var result)) return result;
 
-			if (type.IsArray) result = Array.CreateInstance(type.GetElementType(), 0);
+			if (type.IsArray) result = Array.CreateInstance(type.GetElementType()!, 0);
 			else if (!type.IsValueType) result = null;
 			else result = factory.Create(type);
 			defaultValues[type] = result;
@@ -119,7 +119,7 @@ namespace Kosson.KORM.Converter
 			return Convert.ToBoolean(value);
 		}
 
-		private string ToString(object value, Type from)
+		private string? ToString(object value, Type from)
 		{
 			if (from == typeDateTime)
 			{
@@ -134,7 +134,7 @@ namespace Kosson.KORM.Converter
 			return value.ToString();
 		}
 
-		private object ParseString(string value, Type type)
+		private object? ParseString(string value, Type type)
 		{
 			if (String.IsNullOrWhiteSpace(value)) return DefaultValue(type);
 

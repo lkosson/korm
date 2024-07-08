@@ -29,7 +29,7 @@ namespace Kosson.KORM.Backup
 			xmlreader.ReadStartElement("records");
 		}
 
-		IRecord IBackupReader.ReadRecord()
+		IRecord? IBackupReader.ReadRecord()
 		{
 			if (xmlreader.NodeType == XmlNodeType.EndElement && xmlreader.Name == "records")
 			{
@@ -39,7 +39,7 @@ namespace Kosson.KORM.Backup
 
 			while (!xmlreader.IsStartElement("record") && xmlreader.Read()) ;
 
-			string typeName = null;
+			string? typeName = null;
 			while (xmlreader.MoveToNextAttribute())
 			{
 				if (xmlreader.Name != "type") continue;
@@ -82,7 +82,7 @@ namespace Kosson.KORM.Backup
 				}
 				else if (xmlreader.NodeType == XmlNodeType.Text)
 				{
-					object value;
+					object? value;
 					var text = xmlreader.Value;
 					xmlreader.Read();
 					if (field.IsRecordRef)
@@ -118,7 +118,7 @@ namespace Kosson.KORM.Backup
 
 		private Type ResolveType(string typeName)
 		{
-			Type type;
+			Type? type;
 			if (!typeMapping.TryGetValue(typeName, out type))
 			{
 				foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())

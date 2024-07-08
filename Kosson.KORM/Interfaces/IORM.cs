@@ -65,7 +65,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="value">Value of the parameter to add.</param>
 		/// <returns>Expression referencing the parameter.</returns>
-		IDBExpression Parameter(object value);
+		IDBExpression Parameter(object? value);
 
 		/// <summary>
 		/// Creates new array expression from provided values.

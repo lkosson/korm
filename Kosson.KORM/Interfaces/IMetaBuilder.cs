@@ -31,7 +31,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Type of the record stored in database.
 		/// </summary>
-		Type TableType { get; }
+		Type? TableType { get; }
 
 		/// <summary>
 		/// Determines whether type is marked as a table.
@@ -51,22 +51,22 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Database name of the table backing the record.
 		/// </summary>
-		string DBName { get; }
+		string? DBName { get; }
 
 		/// <summary>
 		/// Database schema name (if any) of the table backing the record.
 		/// </summary>
-		string DBSchema { get; }
+		string? DBSchema { get; }
 
 		/// <summary>
 		/// Prefix for database identifiers used as names for columns backing properties of the record.
 		/// </summary>
-		string DBPrefix { get; }
+		string? DBPrefix { get; }
 
 		/// <summary>
 		/// Optional custom database query used to retrieve record data.
 		/// </summary>
-		string DBQuery { get; }
+		string? DBQuery { get; }
 
 		/// <summary>
 		/// Determines whether primary key (ID) is assigned automatically by database or manually by application.
@@ -76,12 +76,12 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Field of parent record that caused this object to be inlined.
 		/// </summary>
-		IMetaRecordField InliningField { get; }
+		IMetaRecordField? InliningField { get; }
 
 		/// <summary>
 		/// 64-bit integer column used for optimistic concurrency control.
 		/// </summary>
-		IMetaRecordField RowVersion { get; }
+		IMetaRecordField? RowVersion { get; }
 
 		/// <summary>
 		/// Primary key (ID) column/property of the record.
@@ -103,7 +103,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		IMetaRecordField GetField(string name);
+		IMetaRecordField? GetField(string name);
 
 		internal string GetFieldTableAlias(string name);
 	}
@@ -146,12 +146,12 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Record type of the referenced foreign key table.
 		/// </summary>
-		Type ForeignType { get; }
+		Type? ForeignType { get; }
 
 		/// <summary>
 		/// Metadata of a referenced foreign key record.
 		/// </summary>
-		IMetaRecord ForeignMeta { get; }
+		IMetaRecord? ForeignMeta { get; }
 
 		/// <summary>
 		/// Determines whether this property is primary key column of a backing database table for containing record.
@@ -181,7 +181,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Database engine-specific column definition for backing column.
 		/// </summary>
-		string ColumnDefinition { get; }
+		string? ColumnDefinition { get; }
 
 		/// <summary>
 		/// Determines whether column backing this property should not be modified by ORM.
@@ -226,12 +226,12 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Delegate used for building a subquery to retrieve value for this property.
 		/// </summary>
-		SubqueryBuilder SubqueryBuilder { get; }
+		SubqueryBuilder? SubqueryBuilder { get; }
 
 		/// <summary>
 		/// Value used as DEFAULT constraint for database column backing this property.
 		/// </summary>
-		object DefaultValue { get; }
+		object? DefaultValue { get; }
 
 		/// <summary>
 		/// Determines whether database column backing this property has NOT NULL constraint.
@@ -246,12 +246,12 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Prefix to use for properties declared in type of this property and inlined in this type by ORM.
 		/// </summary>
-		string InlinePrefix { get; }
+		string? InlinePrefix { get; }
 
 		/// <summary>
 		/// Database metadata of a type of this property used for inlining its properties in this type.
 		/// </summary>
-		IMetaRecord InlineRecord { get; }
+		IMetaRecord? InlineRecord { get; }
 	}
 
 	/// <summary>

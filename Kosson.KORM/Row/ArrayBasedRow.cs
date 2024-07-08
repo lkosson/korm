@@ -7,19 +7,19 @@ namespace Kosson.KORM
 	/// </summary>
 	class ArrayBasedRow : IRow
 	{
-		private readonly object[] values;
+		private readonly object?[] values;
 		private readonly Dictionary<string, int> names;
 
 		int IIndexBasedRow.Length { get { return values.Length; } }
-		object IIndexBasedRow.this[int index] { get { return index >= 0 && index < values.Length ? values[index] : null; } }
-		object IRow.this[string name] { get { var row = (IRow)this; return row[row.GetIndex(name)]; } }
+		object? IIndexBasedRow.this[int index] { get { return index >= 0 && index < values.Length ? values[index] : null; } }
+		object? IRow.this[string name] { get { var row = (IRow)this; return row[row.GetIndex(name)]; } }
 
 		/// <summary>
 		/// Creates new row from provided values and column names.
 		/// </summary>
 		/// <param name="items">Array of values of the row.</param>
 		/// <param name="names">Mapping from column names to column indices.</param>
-		public ArrayBasedRow(object[] items, Dictionary<string, int> names)
+		public ArrayBasedRow(object?[] items, Dictionary<string, int> names)
 		{
 			this.values = items;
 			this.names = names;
@@ -31,7 +31,7 @@ namespace Kosson.KORM
 			return -1;
 		}
 
-		string IRow.GetName(int index)
+		string? IRow.GetName(int index)
 		{
 			foreach (var pair in names)
 			{

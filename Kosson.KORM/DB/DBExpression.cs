@@ -17,12 +17,12 @@ namespace Kosson.KORM.DB
 
 	class DBRawExpression : DBExpression, IDBExpression
 	{
-		private readonly string expression;
+		private readonly string? expression;
 
 		public string RawValue { get { if (expression == null) throw new NotSupportedException(); return expression; } }
 		public override bool IsSimple => false;
 
-		public DBRawExpression(IDBCommandBuilder builder, string expression)
+		public DBRawExpression(IDBCommandBuilder builder, string? expression)
 			: base(builder)
 		{
 			this.expression = expression;
@@ -49,7 +49,8 @@ namespace Kosson.KORM.DB
 		public DBComment(IDBCommandBuilder builder, string value)
 			: base(builder)
 		{
-			if (value != null) RawValue = value.Replace(builder.CommentDelimiterRight, "");
+			if (String.IsNullOrEmpty(value)) RawValue = "";
+			else RawValue = value.Replace(builder.CommentDelimiterRight, "");
 		}
 
 		public virtual void Append(StringBuilder sb)
@@ -73,10 +74,11 @@ namespace Kosson.KORM.DB
 		public string RawValue { get; }
 		public override bool IsSimple => true;
 
-		public DBStringConst(IDBCommandBuilder builder, string value)
+		public DBStringConst(IDBCommandBuilder builder, string? value)
 			: base(builder)
 		{
-			if (value != null) this.RawValue = value.Replace(builder.StringQuoteLeft, builder.StringQuoteLeft + builder.StringQuoteLeft);
+			if (String.IsNullOrEmpty(value)) RawValue = value!;
+			else RawValue = value.Replace(builder.StringQuoteLeft, builder.StringQuoteLeft + builder.StringQuoteLeft);
 		}
 
 		public virtual void Append(StringBuilder sb)
@@ -123,6 +125,13 @@ namespace Kosson.KORM.DB
 				sb.Append(HexDigit(v / 16));
 				sb.Append(HexDigit(v % 16));
 			}
+		}
+
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+			Append(sb);
+			return sb.ToString();
 		}
 
 		private static char HexDigit(int b)
@@ -198,7 +207,7 @@ namespace Kosson.KORM.DB
 		public override bool IsSimple => true;
 		public string[] Fragments { get; }
 
-		public DBDottedIdentifier(IDBCommandBuilder builder, string[] fragments)
+		public DBDottedIdentifier(IDBCommandBuilder builder, string?[] fragments)
 			: base(builder)
 		{
 			var hasNull = false;
@@ -215,9 +224,12 @@ namespace Kosson.KORM.DB
 					if (fragment == null) continue;
 					nonNullFragments.Add(fragment);
 				}
-				fragments = nonNullFragments.ToArray();
+				Fragments = nonNullFragments.ToArray();
 			}
-			this.Fragments = fragments;
+			else
+			{
+				Fragments = fragments!;
+			}
 		}
 
 		public virtual void Append(StringBuilder sb)
@@ -242,13 +254,13 @@ namespace Kosson.KORM.DB
 	class DBComparison : DBExpression, IDBExpression
 	{
 		private readonly IDBExpression lexpr;
-		private readonly IDBExpression rexpr;
+		private readonly IDBExpression? rexpr;
 		private readonly DBExpressionComparison comparison;
 
 		public string RawValue { get { throw new NotSupportedException(); } }
 		public override bool IsSimple => false;
 
-		public DBComparison(IDBCommandBuilder builder, IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr)
+		public DBComparison(IDBCommandBuilder builder, IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression? rexpr)
 			: base(builder)
 		{
 			ArgumentNullException.ThrowIfNull(lexpr);
@@ -267,7 +279,8 @@ namespace Kosson.KORM.DB
 			if (rexpr == null)
 			{
 				if (comparison == DBExpressionComparison.Equal) sb.Append(" IS NULL");
-				if (comparison == DBExpressionComparison.NotEqual) sb.Append(" IS NOT NULL");
+				else if (comparison == DBExpressionComparison.NotEqual) sb.Append(" IS NOT NULL");
+				else throw new ArgumentOutOfRangeException("comparison", comparison, "Unsupported comparison type.");
 			}
 			else
 			{

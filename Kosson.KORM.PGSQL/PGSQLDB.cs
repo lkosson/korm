@@ -51,14 +51,14 @@ namespace Kosson.KORM.PGSQL
 		}
 
 		/// <inheritdoc/>
-		protected override object NativeToSQL(object val)
+		protected override object NativeToSQL(object? val)
 		{
 			if (val is bool) return val;
 			return base.NativeToSQL(val);
 		}
 
 		/// <inheritdoc/>
-		protected override KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
+		protected override KORMException? TranslateException(Exception exc, string? commandText, DbParameterCollection? commandParameters)
 		{
 			if (exc is PostgresException pe)
 			{

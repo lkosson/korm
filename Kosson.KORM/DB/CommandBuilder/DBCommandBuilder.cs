@@ -118,7 +118,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		public virtual IDBExpression Const(long value) => new DBRawExpression(this, value.ToString());
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Const(string value) => new DBStringConst(this, value);
+		public virtual IDBExpression Const(string? value) => new DBStringConst(this, value);
 
 		/// <inheritdoc/>
 		public virtual IDBExpression Const(double value) => new DBRawExpression(this, value.ToString(System.Globalization.CultureInfo.InvariantCulture));
@@ -139,13 +139,13 @@ namespace Kosson.KORM.DB.CommandBuilder
 		public virtual IDBIdentifier Identifier(string name) => new DBIdentifier(this, name);
 
 		/// <inheritdoc/>
-		public virtual IDBIdentifier Identifier(params string[] names) => new DBDottedIdentifier(this, names);
+		public virtual IDBIdentifier Identifier(params string?[] names) => new DBDottedIdentifier(this, names);
 
 		/// <inheritdoc/>
 		public virtual IDBExpression Expression(string expression) => new DBRawExpression(this, expression);
 
 		/// <inheritdoc/>
-		public virtual IDBExpression Comparison(IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression rexpr) => new DBComparison(this, lexpr, comparison, rexpr);
+		public virtual IDBExpression Comparison(IDBExpression lexpr, DBExpressionComparison comparison, IDBExpression? rexpr) => new DBComparison(this, lexpr, comparison, rexpr);
 
 		/// <inheritdoc/>
 		public virtual IDBExpression UnaryExpression(IDBExpression expr, DBUnaryOperator unaryOperator) => new DBUnaryExpression(this, expr, unaryOperator);

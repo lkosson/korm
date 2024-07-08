@@ -12,9 +12,9 @@ namespace Kosson.KORM.ORM
 		private readonly IDB db;
 		private readonly IDBCommandBuilder cb;
 		private readonly Action<IDBCommand> executor;
-		private readonly ILogger logger;
+		private readonly ILogger? logger;
 
-		public DBTableCreator(IDB db, IMetaBuilder metaBuilder, ILogger logger, Action<IDBCommand> customExecutor = null)
+		public DBTableCreator(IDB db, IMetaBuilder metaBuilder, ILogger? logger, Action<IDBCommand>? customExecutor = null)
 		{
 			this.db = db;
 			this.metaBuilder = metaBuilder;
@@ -86,7 +86,7 @@ namespace Kosson.KORM.ORM
 				if (field.IsPrimaryKey) continue;
 				if (field.IsInline)
 				{
-					CreateColumns(field.InlineRecord);
+					CreateColumns(field.InlineRecord!);
 					continue;
 				}
 				CreateColumn(meta, field);

@@ -9,5 +9,8 @@
 		/// Primary key of the record.
 		/// </summary>
 		new long ID { get; set; }
+
+		/// <inheritdoc />
+		string ToString();
 	}
 }

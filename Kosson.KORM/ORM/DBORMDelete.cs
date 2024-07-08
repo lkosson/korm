@@ -10,9 +10,9 @@ namespace Kosson.KORM.ORM
 	class DBORMDelete<TRecord> : DBORMCommandBase<TRecord, IDBDelete>, IORMDelete<TRecord> where TRecord : IRecord
 	{
 		protected override bool UseFullFieldNames { get { return false; } }
-		private string commandText;
-		private static string cachedCommandText;
-		private static Type cachedCommandTextDBType;
+		private string? commandText;
+		private static string? cachedCommandText;
+		private static Type? cachedCommandTextDBType;
 
 		public DBORMDelete(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
@@ -100,7 +100,7 @@ namespace Kosson.KORM.ORM
 			int count = 0;
 			RecordNotifyResult result = RecordNotifyResult.Continue;
 			DbParameter idParameter = DB.AddParameter(cmdDelete, idfield, null);
-			DbParameter rowVersionParameter = rowVersionField == null ? null : DB.AddParameter(cmdDelete, rowVersionField.DBName, null);
+			DbParameter? rowVersionParameter = rowVersionField == null ? null : DB.AddParameter(cmdDelete, rowVersionField.DBName, null);
 			foreach (var record in records)
 			{
 				var notify = record as IRecordNotifyDelete;
@@ -110,7 +110,7 @@ namespace Kosson.KORM.ORM
 
 				LogRecord(LogLevel.Information, token, record);
 				var rowVersion = record as IRecordWithRowVersion;
-				if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
+				if (rowVersionParameter != null && rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
 				DB.SetParameter(idParameter, record.ID);
 				int lcount = DB.ExecuteNonQuery(cmdDelete);
 				if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete.CommandText, cmdDelete.Parameters);
@@ -125,6 +125,7 @@ namespace Kosson.KORM.ORM
 
 		private int RecordsBatch(IEnumerable<TRecord> records)
 		{
+			if (commandText == null) throw new InvalidOperationException("Cannot use Records method with manually added conditions.");
 			var token = LogStart();
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion?.DBName;
@@ -172,7 +173,7 @@ namespace Kosson.KORM.ORM
 			int count = 0;
 			RecordNotifyResult result = RecordNotifyResult.Continue;
 			DbParameter idParameter = DB.AddParameter(cmdDelete, idfield, null);
-			DbParameter rowVersionParameter = rowVersionField == null ? null : DB.AddParameter(cmdDelete, rowVersionField.DBName, null);
+			DbParameter? rowVersionParameter = rowVersionField == null ? null : DB.AddParameter(cmdDelete, rowVersionField.DBName, null);
 			foreach (var record in records)
 			{
 				var notify = record as IRecordNotifyDelete;
@@ -182,7 +183,7 @@ namespace Kosson.KORM.ORM
 
 				LogRecord(LogLevel.Information, token, record);
 				var rowVersion = record as IRecordWithRowVersion;
-				if (rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
+				if (rowVersionParameter != null && rowVersion != null) DB.SetParameter(rowVersionParameter, rowVersion.RowVersion);
 				DB.SetParameter(idParameter, record.ID);
 				int lcount = await DB.ExecuteNonQueryAsync(cmdDelete);
 				if (rowVersion != null && lcount == 0) throw new KORMConcurrentModificationException(cmdDelete.CommandText, cmdDelete.Parameters);
@@ -197,6 +198,7 @@ namespace Kosson.KORM.ORM
 
 		private async Task<int> RecordsBatchAsync(IEnumerable<TRecord> records)
 		{
+			if (commandText == null) throw new InvalidOperationException("Cannot use Records method with manually added conditions.");
 			var token = LogStart();
 			var idfield = meta.PrimaryKey.DBName;
 			var rowVersionField = meta.RowVersion?.DBName;

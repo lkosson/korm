@@ -11,9 +11,9 @@ namespace Kosson.KORM.ORM
 	{
 		private const string ROWVERSION_CURRENT = "ROWVERSION_CURRENT";
 		protected override bool UseFullFieldNames { get { return false; } }
-		private string commandText;
-		private static string cachedCommandText;
-		private static Type cachedCommandTextDBType;
+		private string? commandText;
+		private static string? cachedCommandText;
+		private static Type? cachedCommandTextDBType;
 
 		public DBORMUpdate(IDB db, IMetaBuilder metaBuilder, ILogger operationLogger, ILogger recordLogger)
 			: base(db, metaBuilder, operationLogger, recordLogger)
@@ -58,7 +58,7 @@ namespace Kosson.KORM.ORM
 				if (field.IsReadOnly) continue;
 				if (field.IsInline)
 				{
-					PrepareTemplate(cb, template, field.InlineRecord);
+					PrepareTemplate(cb, template, field.InlineRecord!);
 				}
 				else
 				{
@@ -157,7 +157,7 @@ namespace Kosson.KORM.ORM
 			foreach (var record in records)
 			{
 				LogRecord(LogLevel.Information, token, record);
-				var command = DB.CreateCommand(batch, commandText);
+				var command = DB.CreateCommand(batch, commandText!);
 				if (record is IRecordWithRowVersion rowVersionRecord)
 				{
 					var rowVersionParameter = DB.AddParameter(command, ROWVERSION_CURRENT, rowVersionRecord.RowVersion);
@@ -194,7 +194,6 @@ namespace Kosson.KORM.ORM
 			using var cmdUpdate = DB.CreateCommand(commandText ?? BuildCommandTextForRecords());
 			int count = 0;
 			RecordNotifyResult result = RecordNotifyResult.Continue;
-			DbParameter rowVersionParameter = meta.RowVersion == null ? null : DB.AddParameter(cmdUpdate, ROWVERSION_CURRENT, null);
 			foreach (var record in records)
 			{
 				var notify = record as IRecordNotifyUpdate;
@@ -230,7 +229,7 @@ namespace Kosson.KORM.ORM
 			foreach (var record in records)
 			{
 				LogRecord(LogLevel.Information, token, record);
-				var command = DB.CreateCommand(batch, commandText);
+				var command = DB.CreateCommand(batch, commandText!);
 				if (record is IRecordWithRowVersion rowVersionRecord)
 				{
 					var rowVersionParameter = DB.AddParameter(command, ROWVERSION_CURRENT, rowVersionRecord.RowVersion);

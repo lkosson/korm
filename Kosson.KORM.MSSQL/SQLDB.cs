@@ -84,7 +84,7 @@ namespace Kosson.KORM.MSSQL
 		}
 
 		/// <inheritdoc/>
-		protected override KORMException TranslateException(Exception exc, string commandText, DbParameterCollection commandParameters)
+		protected override KORMException? TranslateException(Exception exc, string? commandText, DbParameterCollection? commandParameters)
 		{
 			if (exc is SqlException se)
 			{

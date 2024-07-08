@@ -4,8 +4,8 @@
 	{
 		public TOutput Get(TInput input)
 		{
-			var rawvalue = propertyBinder.Get(input, expression);
-			return converter.Convert<TOutput>(rawvalue);
+			var rawvalue = propertyBinder.Get(input!, expression);
+			return converter.Convert<TOutput>(rawvalue)!;
 		}
 	}
 }

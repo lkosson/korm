@@ -19,13 +19,13 @@ namespace Kosson.KORM.PropertyBinder
 			cache = new ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>>();
 		}
 
-		private void AccessTarget(ref object target, ref string expression)
+		private void AccessTarget(ref object? target, ref string expression)
 		{
 			int dot;
 			while (target != null && (dot = expression.IndexOf('.')) != -1 && dot != 0)
 			{
 				var propname = expression.Substring(0, dot);
-				var property = GetProperty(target, propname);
+				var property = GetProperty(target, propname) ?? throw new ArgumentOutOfRangeException(nameof(expression), expression, "Invalid property expression.");
 				target = property.GetValue(target);
 				expression = expression.Substring(dot + 1);
 			}
@@ -62,18 +62,19 @@ namespace Kosson.KORM.PropertyBinder
 			return property;
 		}
 
-		object IPropertyBinder.Get(object target, string expression)
+		object? IPropertyBinder.Get(object target, string expression)
 		{
 			expression += ".";
-			AccessTarget(ref target, ref expression);
-			return target;
+			var value = target;
+			AccessTarget(ref value, ref expression);
+			return value;
 		}
 
-		void IPropertyBinder.Set(object target, string expression, object value)
+		void IPropertyBinder.Set(object target, string expression, object? value)
 		{
 			string orgExpr = expression;
-			object orgTarget = target;
-			AccessTarget(ref target, ref expression);
+			var orgTarget = target;
+			AccessTarget(ref target!, ref expression);
 			if (target == null)
 			{
 				if (orgExpr == expression)

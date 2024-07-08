@@ -9,17 +9,17 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// Column name identifier.
 		/// </summary>
-		protected IDBIdentifier name;
+		protected IDBIdentifier? name;
 
 		/// <summary>
 		/// Column data type.
 		/// </summary>
-		protected IDBExpression type;
+		protected IDBExpression? type;
 
 		/// <summary>
 		/// Column default value.
 		/// </summary>
-		protected IDBExpression defaultValue;
+		protected IDBExpression? defaultValue;
 
 		/// <summary>
 		/// Determines whether column has NOT NULL clause.
@@ -29,17 +29,17 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// Name of the foreign key constraint for the column.
 		/// </summary>
-		protected IDBIdentifier foreignKeyName;
+		protected IDBIdentifier? foreignKeyName;
 
 		/// <summary>
 		/// Identifier of a table referenced by foreign key.
 		/// </summary>
-		protected IDBIdentifier targetTable;
+		protected IDBIdentifier? targetTable;
 
 		/// <summary>
 		/// Identifier of a column referenced by foreign key.
 		/// </summary>
-		protected IDBIdentifier targetColumn;
+		protected IDBIdentifier? targetColumn;
 
 		/// <summary>
 		/// Determines whether foreign key has ON DELETE SET NULL clause.
@@ -176,6 +176,8 @@ namespace Kosson.KORM.DB.CommandBuilder
 		protected virtual void AppendForeignKey(StringBuilder sb)
 		{
 			if (foreignKeyName == null) return;
+			ArgumentNullException.ThrowIfNull(targetTable);
+			ArgumentNullException.ThrowIfNull(targetColumn);
 			var fk = Builder.CreateForeignKey();
 			fk.ConstraintName(foreignKeyName);
 			fk.TargetTable(targetTable);

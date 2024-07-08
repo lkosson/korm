@@ -10,12 +10,12 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// List of column names and values.
 		/// </summary>
-		protected List<InsertInfo> columns;
+		protected List<InsertInfo>? columns;
 
 		/// <summary>
 		/// Table's primary key column name.
 		/// </summary>
-		protected IDBIdentifier primaryKey;
+		protected IDBIdentifier? primaryKey;
 
 		/// <summary>
 		/// Determines whether to insert provided primary key value.
@@ -27,7 +27,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// </summary>
 		protected bool primaryKeyReturn;
 
-		string IDBInsert.GetLastID { get { return null; } }
+		string? IDBInsert.GetLastID { get { return null; } }
 
 		/// <inheritdoc/>
 		public DBInsert(IDBCommandBuilder builder)

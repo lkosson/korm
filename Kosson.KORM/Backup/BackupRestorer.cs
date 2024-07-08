@@ -15,10 +15,10 @@ namespace Kosson.KORM.Backup
 		private readonly bool supportsPKInsert;
 		private readonly Dictionary<string, TableState> tableStates;
 
-		private Action<IRecord> storeRecordDelegate;
-		private Action<IRecord> insertRecordPKDelegate;
-		private Type storeRecordDelegateType;
-		private Type insertRecordPKDelegateType;
+		private Action<IRecord>? storeRecordDelegate;
+		private Action<IRecord>? insertRecordPKDelegate;
+		private Type? storeRecordDelegateType;
+		private Type? insertRecordPKDelegateType;
 
 		public BackupRestorer(IMetaBuilder metaBuilder, IORM orm, IDB db, IPropertyBinder propertyBinder, IFactory factory)
 		{
@@ -36,7 +36,7 @@ namespace Kosson.KORM.Backup
 			try
 			{
 				Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-				IRecord record;
+				IRecord? record;
 				while ((record = reader.ReadRecord()) != null)
 				{
 					ProcessRecord(record);
@@ -50,9 +50,8 @@ namespace Kosson.KORM.Backup
 
 		private TableState GetTableState(Type type)
 		{
-			TableState tableState;
-			var typeName = type.FullName;
-			if (!tableStates.TryGetValue(typeName, out tableState))
+			var typeName = type.FullName!;
+			if (!tableStates.TryGetValue(typeName, out var tableState))
 			{
 				var tableName = metaBuilder.Get(type).DBSchema + metaBuilder.Get(type).DBName;
 				if (!tableStates.TryGetValue(tableName, out tableState))
@@ -129,7 +128,7 @@ namespace Kosson.KORM.Backup
 				{
 					if (field.IsRecordRef)
 					{
-						var value = (IRecordRef)field.Property.GetValue(target);
+						var value = (IRecordRef?)field.Property.GetValue(target);
 						if (value == null || value.ID == 0) continue;
 						var targetType = value.GetType();
 						targetType = targetType.GetGenericArguments()[0];
@@ -139,7 +138,7 @@ namespace Kosson.KORM.Backup
 					}
 					else
 					{
-						var value = (IRecord)field.Property.GetValue(target);
+						var value = (IRecord?)field.Property.GetValue(target);
 						if (value == null || value.ID == 0) continue;
 						var targetType = value.GetType();
 						var newId = GetTableState(targetType).IDMappings[value.ID];
@@ -151,7 +150,7 @@ namespace Kosson.KORM.Backup
 
 		private void StoreRecord(Type type, IRecord record)
 		{
-			if (type != storeRecordDelegateType)
+			if (type != storeRecordDelegateType || storeRecordDelegate == null)
 			{
 				storeRecordDelegate = new Action<IRecord>(StoreRecord<IRecord>).ChangeDelegateGenericArgument(type);
 				storeRecordDelegateType = type;
@@ -167,7 +166,7 @@ namespace Kosson.KORM.Backup
 
 		private void InsertRecordPK(Type type, IRecord record)
 		{
-			if (type != insertRecordPKDelegateType)
+			if (type != insertRecordPKDelegateType || insertRecordPKDelegate == null)
 			{
 				insertRecordPKDelegate = new Action<IRecord>(InsertRecordPK<IRecord>).ChangeDelegateGenericArgument(type);
 				insertRecordPKDelegateType = type;

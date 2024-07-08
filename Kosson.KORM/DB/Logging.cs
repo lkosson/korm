@@ -10,7 +10,7 @@ namespace Kosson.KORM.DB
 	class Logging
 	{
 		private readonly Stopwatch queryTimer;
-		private readonly ILogger logger;
+		private readonly ILogger? logger;
 		private static int nextTraceId;
 		public bool TraceEnabled => logger != null && logger.IsEnabled(LogLevel.Critical);
 		public bool TraceWarningEnabled => logger != null && logger.IsEnabled(LogLevel.Warning);
@@ -22,7 +22,7 @@ namespace Kosson.KORM.DB
 			nextTraceId = -1;
 		}
 
-		public Logging(ILogger logger)
+		public Logging(ILogger? logger)
 		{
 			this.logger = logger;
 			queryTimer = Stopwatch.StartNew();
@@ -30,12 +30,12 @@ namespace Kosson.KORM.DB
 
 		private void Trace(LogLevel level, int id, string msg)
 		{
-			logger.Log(level, new EventId(id), msg);
+			logger?.Log(level, new EventId(id), msg);
 		}
 
 		public void Trace(LogLevel level, string msg)
 		{
-			logger.Log(level, msg);
+			logger?.Log(level, msg);
 		}
 
 		public TraceToken Start(string msg)
@@ -99,13 +99,13 @@ namespace Kosson.KORM.DB
 
 		private void TraceQueryParameters(LogLevel level, TraceToken token, DbParameterCollection parameters)
 		{
-			if (!logger.IsEnabled(level)) return;
+			if (logger == null || !logger.IsEnabled(level)) return;
 			foreach (DbParameter parameter in parameters)
 			{
 				string val;
-				if (parameter.Value is string) val = "\"" + parameter.Value.ToString().Replace('\r', ' ').Replace('\n', ' ') + "\"";
+				if (parameter.Value is string stringParameter) val = "\"" + stringParameter.Replace('\r', ' ').Replace('\n', ' ') + "\"";
 				else if (parameter.Value is DBNull || parameter.Value == null) val = "<NULL>";
-				else val = parameter.Value.ToString();
+				else val = parameter.Value.ToString() ?? "<NULL>";
 				Trace(level, token.id, parameter.ParameterName + "=" + val);
 			}
 		}
@@ -141,7 +141,7 @@ namespace Kosson.KORM.DB
 		{
 			if (!TraceEnabled) return;
 			var exceptionLevel = exc is KORMInvalidStructureException ? LogLevel.Warning : LogLevel.Error;
-			if (!logger.IsEnabled(exceptionLevel)) return;
+			if (logger == null || !logger.IsEnabled(exceptionLevel)) return;
 
 			Trace(exceptionLevel, token.id, exc.GetType().Name + ": " + exc.OriginalMessage);
 

@@ -28,7 +28,7 @@ namespace Kosson.KORM
 			return dictionary;
 		}
 
-		private static IEnumerable<TResult> Join<TRecordLocal, TRecordForeign, TResult>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector, Func<TRecordLocal, TRecordForeign, TResult> resultConstructor) where TRecordForeign : IRecord
+		private static IEnumerable<TResult> Join<TRecordLocal, TRecordForeign, TResult>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector, Func<TRecordLocal, TRecordForeign?, TResult> resultConstructor) where TRecordForeign : IRecord
 		{
 			var foreignRefs = records.Select(foreignKeySelector).Distinct().ToList();
 			var foreignRecords = foreignRecordSelect.ByRefs(foreignRefs);
@@ -37,7 +37,7 @@ namespace Kosson.KORM
 			return joinedRecords;
 		}
 
-		private static async Task<IEnumerable<TResult>> JoinAsync<TRecordLocal, TRecordForeign, TResult>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector, Func<TRecordLocal, TRecordForeign, TResult> resultConstructor) where TRecordForeign : IRecord
+		private static async Task<IEnumerable<TResult>> JoinAsync<TRecordLocal, TRecordForeign, TResult>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector, Func<TRecordLocal, TRecordForeign?, TResult> resultConstructor) where TRecordForeign : IRecord
 		{
 			var foreignRefs = records.Select(foreignKeySelector).Distinct().ToList();
 			var foreignRecords = await foreignRecordSelect.ByRefsAsync(foreignRefs);
@@ -53,7 +53,7 @@ namespace Kosson.KORM
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
-		public static IEnumerable<(TRecordLocal, TRecordForeign)> Join<TRecordLocal, TRecordForeign>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector)
+		public static IEnumerable<(TRecordLocal, TRecordForeign?)> Join<TRecordLocal, TRecordForeign>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector)
 			where TRecordForeign : IRecord
 			=> Join(records, foreignRecordSelect, foreignKeySelector, (record1, record2) => (record1, record2));
 
@@ -64,7 +64,7 @@ namespace Kosson.KORM
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
-		public static IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordForeign)> Join<TRecordLocal1, TRecordLocal2, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2), RecordRef<TRecordForeign>> foreignKeySelector)
+		public static IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordForeign?)> Join<TRecordLocal1, TRecordLocal2, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2), RecordRef<TRecordForeign>> foreignKeySelector)
 			where TRecordForeign : IRecord
 			=> Join(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, record));
 
@@ -75,7 +75,7 @@ namespace Kosson.KORM
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
-		public static IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign)> Join<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3), RecordRef<TRecordForeign>> foreignKeySelector)
+		public static IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign?)> Join<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3), RecordRef<TRecordForeign>> foreignKeySelector)
 			where TRecordForeign : IRecord
 			=> Join(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, tuple.Item3, record));
 
@@ -86,7 +86,7 @@ namespace Kosson.KORM
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
-		public static IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign)> Join<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4), RecordRef<TRecordForeign>> foreignKeySelector)
+		public static IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign?)> Join<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4), RecordRef<TRecordForeign>> foreignKeySelector)
 			where TRecordForeign : IRecord
 			=> Join(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, record));
 
@@ -97,7 +97,7 @@ namespace Kosson.KORM
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
-		public static Task<IEnumerable<(TRecordLocal, TRecordForeign)>> JoinAsync<TRecordLocal, TRecordForeign>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector)
+		public static Task<IEnumerable<(TRecordLocal, TRecordForeign?)>> JoinAsync<TRecordLocal, TRecordForeign>(this IEnumerable<TRecordLocal> records, IORMSelect<TRecordForeign> foreignRecordSelect, Func<TRecordLocal, RecordRef<TRecordForeign>> foreignKeySelector)
 			where TRecordForeign : IRecord
 			=> JoinAsync(records, foreignRecordSelect, foreignKeySelector, (record1, record2) => (record1, record2));
 
@@ -108,7 +108,7 @@ namespace Kosson.KORM
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
-		public static Task<IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordForeign)>> JoinAsync<TRecordLocal1, TRecordLocal2, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2), RecordRef<TRecordForeign>> foreignKeySelector)
+		public static Task<IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordForeign?)>> JoinAsync<TRecordLocal1, TRecordLocal2, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2), RecordRef<TRecordForeign>> foreignKeySelector)
 			where TRecordForeign : IRecord
 			=> JoinAsync(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, record));
 
@@ -119,7 +119,7 @@ namespace Kosson.KORM
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
-		public static Task<IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign)>> JoinAsync<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3), RecordRef<TRecordForeign>> foreignKeySelector)
+		public static Task<IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign?)>> JoinAsync<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3), RecordRef<TRecordForeign>> foreignKeySelector)
 			where TRecordForeign : IRecord
 			=> JoinAsync(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, tuple.Item3, record));
 
@@ -130,7 +130,7 @@ namespace Kosson.KORM
 		/// <param name="foreignRecordSelect">Base SELECT query to use for fetching foreign records.</param>
 		/// <param name="foreignKeySelector">Foreign key reference</param>
 		/// <returns>Tuples of joined local and remote records</returns>
-		public static Task<IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign)>> JoinAsync<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4), RecordRef<TRecordForeign>> foreignKeySelector)
+		public static Task<IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign?)>> JoinAsync<TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4, TRecordForeign>(this IEnumerable<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4)> tuples, IORMSelect<TRecordForeign> foreignRecordSelect, Func<(TRecordLocal1, TRecordLocal2, TRecordLocal3, TRecordLocal4), RecordRef<TRecordForeign>> foreignKeySelector)
 			where TRecordForeign : IRecord
 			=> JoinAsync(tuples, foreignRecordSelect, foreignKeySelector, (tuple, record) => (tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, record));
 
@@ -140,7 +140,7 @@ namespace Kosson.KORM
 		/// <typeparam name="TRecord">Type of the record.</typeparam>
 		/// <param name="record">Record to create reference to.</param>
 		/// <returns>Reference to a record.</returns>
-		public static RecordRef<TRecord> Ref<TRecord>(this TRecord record) where TRecord : IRecord
+		public static RecordRef<TRecord> Ref<TRecord>(this TRecord? record) where TRecord : IRecord
 		{
 			if (record == null) return default;
 			return new RecordRef<TRecord>(record.ID);
@@ -153,7 +153,7 @@ namespace Kosson.KORM
 		/// <param name="records">Records to search.</param>
 		/// <param name="id">Record ID value to search for.</param>
 		/// <returns>Found record or null if no record matches given ID.</returns>
-		public static TRecord ByID<TRecord>(this IEnumerable<TRecord> records, long id) where TRecord : IHasID
+		public static TRecord? ByID<TRecord>(this IEnumerable<TRecord> records, long id) where TRecord : IHasID
 		{
 			foreach (var record in records)
 			{
@@ -169,7 +169,7 @@ namespace Kosson.KORM
 		/// <param name="records">Records to search.</param>
 		/// <param name="recordRef">Record reference to match.</param>
 		/// <returns>Found record or null if no record matches given reference.</returns>
-		public static TRecord ByRef<TRecord>(this IEnumerable<TRecord> records, RecordRef<TRecord> recordRef) where TRecord : IRecord
+		public static TRecord? ByRef<TRecord>(this IEnumerable<TRecord> records, RecordRef<TRecord> recordRef) where TRecord : IRecord
 		{
 			return ByID<TRecord>(records, recordRef.ID);
 		}
@@ -200,7 +200,7 @@ namespace Kosson.KORM
 			return sb.ToString();
 		}
 
-		private static void AppendFields(StringBuilder sb, object record, IMetaRecord meta)
+		private static void AppendFields(StringBuilder sb, object? record, IMetaRecord meta)
 		{
 			foreach (var field in meta.Fields)
 			{
@@ -209,7 +209,7 @@ namespace Kosson.KORM
 				var value = field.Property.GetValue(record);
 				if (field.IsInline)
 				{
-					AppendFields(sb, value, field.InlineRecord);
+					AppendFields(sb, value, field.InlineRecord!);
 				}
 				else
 				{

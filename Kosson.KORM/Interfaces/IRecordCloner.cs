@@ -11,6 +11,6 @@
 		/// <typeparam name="T"></typeparam>
 		/// <param name="source">Source record for copying.</param>
 		/// <returns>Copied record.</returns>
-		T Clone<T>(T source) where T : class, new();
+		T? Clone<T>(T? source) where T : class, new();
 	}
 }

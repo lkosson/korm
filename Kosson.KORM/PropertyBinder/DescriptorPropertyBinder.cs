@@ -18,7 +18,7 @@ namespace Kosson.KORM.PropertyBinder
 			this.converter = converter;
 		}
 
-		private void AccessTarget(ref object target, ref string expression)
+		private void AccessTarget(ref object? target, ref string expression)
 		{
 			int dot;
 			while (target != null && (dot = expression.IndexOf('.')) != -1 && dot != 0)
@@ -42,17 +42,18 @@ namespace Kosson.KORM.PropertyBinder
 			return properties.Find(propname, true) ?? throw new ArgumentException("Property \"" + propname + "\" not found in \"" + type + "\".", "expression");
 		}
 
-		object IPropertyBinder.Get(object target, string expression)
+		object? IPropertyBinder.Get(object target, string expression)
 		{
+			var value = target;
 			expression += ".";
-			AccessTarget(ref target, ref expression);
-			return target;
+			AccessTarget(ref value, ref expression);
+			return value;
 		}
 
-		void IPropertyBinder.Set(object target, string expression, object value)
+		void IPropertyBinder.Set(object? target, string expression, object? value)
 		{
 			AccessTarget(ref target, ref expression);
-			var property = GetProperty(target, expression);
+			var property = GetProperty(target!, expression);
 			var convertedvalue = converter.Convert(value, property.PropertyType);
 			property.SetValue(target, convertedvalue);
 		}

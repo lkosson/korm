@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace Kosson.KORM.ORM
@@ -11,17 +12,17 @@ namespace Kosson.KORM.ORM
 	{
 		private readonly IDB db;
 		private readonly string sql;
-		private readonly IEnumerable<object> parameters;
+		private readonly IEnumerable<object?> parameters;
 		private readonly LoaderFromReaderByIndexDelegate<TRecord> loader;
 		private readonly IFactory factory;
 		private readonly Func<TRecord> constructor;
-		private readonly Func<TRecord> builder;
+		private readonly Func<TRecord?> builder;
 		private readonly IConverter converter;
-		private DbCommand command;
-		private DbDataReader reader;
+		private DbCommand? command;
+		private DbDataReader? reader;
 		private bool aborted;
 
-		public DBORMReader(IDB db, IFactory factory, IConverter converter, LoaderFromReaderByIndexDelegate<TRecord> loader, string sql, IEnumerable<object> parameters)
+		public DBORMReader(IDB db, IFactory factory, IConverter converter, LoaderFromReaderByIndexDelegate<TRecord> loader, string sql, IEnumerable<object?> parameters)
 		{
 			this.db = db;
 			this.sql = sql;
@@ -30,7 +31,7 @@ namespace Kosson.KORM.ORM
 			this.constructor = (Func<TRecord>)factory.GetConstructor(typeof(TRecord));
 			this.converter = converter;
 			this.loader = loader;
-			this.builder = typeof(IRecordNotifySelect).IsAssignableFrom(typeof(TRecord)) ? (Func<TRecord>)BuildRecordWithNotify : BuildRecord;
+			this.builder = typeof(IRecordNotifySelect).IsAssignableFrom(typeof(TRecord)) ? BuildRecordWithNotify : BuildRecord;
 		}
 
 		private void PrepareCommand()
@@ -42,16 +43,16 @@ namespace Kosson.KORM.ORM
 		public void PrepareReader()
 		{
 			PrepareCommand();
-			reader = db.ExecuteReader(command);
+			reader = db.ExecuteReader(command!);
 		}
 
 		public async Task PrepareReaderAsync()
 		{
 			PrepareCommand();
-			reader = await db.ExecuteReaderAsync(command);
+			reader = await db.ExecuteReaderAsync(command!);
 		}
 
-		private TRecord BuildRecord()
+		private TRecord? BuildRecord()
 		{
 			if (reader == null) ThrowDisposed();
 			var record = constructor();
@@ -59,7 +60,7 @@ namespace Kosson.KORM.ORM
 			return record;
 		}
 
-		private TRecord BuildRecordWithNotify()
+		private TRecord? BuildRecordWithNotify()
 		{
 			if (reader == null) ThrowDisposed();
 			var record = constructor();
@@ -85,6 +86,7 @@ namespace Kosson.KORM.ORM
 			return record;
 		}
 
+		[DoesNotReturn]
 		private static void ThrowDisposed()
 		{
 			throw new ObjectDisposedException("Reader already disposed.");
@@ -95,7 +97,8 @@ namespace Kosson.KORM.ORM
 			if (reader == null) ThrowDisposed();
 			while (reader.Read())
 			{
-				yield return builder();
+				var record = builder();
+				if (record != null) yield return record;
 			}
 			reader.Dispose();
 			reader = null;
@@ -103,7 +106,7 @@ namespace Kosson.KORM.ORM
 
 		public void Dispose()
 		{
-			if (reader == null) return;
+			if (reader == null || command == null) return;
 			reader.Dispose();
 			reader = null;
 			command.Dispose();
@@ -112,7 +115,7 @@ namespace Kosson.KORM.ORM
 
 		bool IORMReader<TRecord>.MoveNext()
 		{
-			if (reader == null) ThrowDisposed();
+			if (reader == null || command == null) ThrowDisposed();
 			try
 			{
 				var result = !aborted && reader.Read();
@@ -128,7 +131,7 @@ namespace Kosson.KORM.ORM
 
 		async Task<bool> IORMReader<TRecord>.MoveNextAsync()
 		{
-			if (reader == null) ThrowDisposed();
+			if (reader == null || command == null) ThrowDisposed();
 			try
 			{
 				var result = !aborted && await reader.ReadAsync();
@@ -144,7 +147,10 @@ namespace Kosson.KORM.ORM
 
 		TRecord IORMReader<TRecord>.Read()
 		{
-			return builder();
+			next:
+			var record = builder();
+			if (record == null) goto next;
+			return record;
 		}
 
 		IEnumerator<TRecord> IEnumerable<TRecord>.GetEnumerator()

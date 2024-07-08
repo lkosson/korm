@@ -9,22 +9,22 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// Foreign key constraint name.
 		/// </summary>
-		protected IDBIdentifier name;
+		protected IDBIdentifier? name;
 
 		/// <summary>
 		/// Table column identifier.
 		/// </summary>
-		protected IDBIdentifier column;
+		protected IDBIdentifier? column;
 
 		/// <summary>
 		/// Identifier of a table referenced by foreign key.
 		/// </summary>
-		protected IDBIdentifier targetTable;
+		protected IDBIdentifier? targetTable;
 
 		/// <summary>
 		/// Identifier of a column referenced by foreign key.
 		/// </summary>
-		protected IDBIdentifier targetColumn;
+		protected IDBIdentifier? targetColumn;
 
 		/// <summary>
 		/// Determines whether foreign key has ON DELETE SET NULL clause.

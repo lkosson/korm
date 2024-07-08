@@ -20,7 +20,7 @@ namespace Kosson.KORM.ORM
 		public LoaderFromReaderByIndexDelegate<T> GetLoader<T>() where T : IRecord
 		{
 			Type type = typeof(T);
-			Delegate loader;
+			Delegate? loader;
 
 			rwlock.EnterReadLock();
 			try

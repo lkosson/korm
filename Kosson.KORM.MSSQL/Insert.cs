@@ -1,5 +1,6 @@
 ﻿using Kosson.KORM;
 using Kosson.KORM.DB.CommandBuilder;
+using System;
 using System.Text;
 
 namespace Kosson.KORM.MSSQL
@@ -25,6 +26,7 @@ namespace Kosson.KORM.MSSQL
 		{
 			if (primaryKeyInsert)
 			{
+				ArgumentNullException.ThrowIfNull(table);
 				sb.Append("SET IDENTITY_INSERT ");
 				table.Append(sb);
 				sb.Append(" ON; ");
@@ -36,6 +38,7 @@ namespace Kosson.KORM.MSSQL
 		{
 			if (primaryKeyInsert)
 			{
+				ArgumentNullException.ThrowIfNull(table);
 				sb.Append("; SET IDENTITY_INSERT ");
 				table.Append(sb);
 				sb.Append(" OFF");

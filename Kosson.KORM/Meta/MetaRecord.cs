@@ -13,22 +13,22 @@ namespace Kosson.KORM.Meta
 		private readonly Dictionary<string, MetaRecordField> fieldsLookup;
 
 		public Type Type { get; private set; }
-		public Type TableType { get; private set; }
+		public Type? TableType { get; private set; }
 		public bool IsTable { get; private set; }
 		public string Name { get; private set; }
-		public string DBName { get; private set; }
-		public string DBSchema { get; private set; }
-		public string DBPrefix { get; private set; }
-		public string DBQuery { get; private set; }
+		public string? DBName { get; private set; }
+		public string? DBSchema { get; private set; }
+		public string? DBPrefix { get; private set; }
+		public string? DBQuery { get; private set; }
 		public bool IsManualID { get; private set; }
 		public bool IsConverted { get; private set; }
-		public IMetaRecordField InliningField { get; private set; }
+		public IMetaRecordField? InliningField { get; private set; }
 		public IReadOnlyCollection<IMetaRecordField> Fields => fields;
 		public IReadOnlyCollection<IMetaRecordIndex> Indices => indices;
-		public IMetaRecordField RowVersion => GetField(IRecordWithRowVersionINT.NAME);
+		public IMetaRecordField? RowVersion => GetField(IRecordWithRowVersionINT.NAME);
 		public IMetaRecordField PrimaryKey => GetField(PKNAME) ?? throw new ArgumentException("type", "Type " + Name + " does not have primary key.");
 
-		public MetaRecord(IFactory factory, Type record, IMetaRecordField inlineParent = null)
+		public MetaRecord(IFactory factory, Type record, IMetaRecordField? inlineParent = null)
 		{
 			fields = [];
 			indices = [];
@@ -50,9 +50,9 @@ namespace Kosson.KORM.Meta
 			ProcessType(record, factory);
 		}
 
-		IMetaRecordField IMetaRecord.GetField(string name)
+		IMetaRecordField? IMetaRecord.GetField(string name)
 		{
-			IMetaRecordField field = GetField(name);
+			var field = GetField(name);
 			if (field != null) return field;
 			var dot = name.IndexOf('.');
 			if (dot <= 0) return null;
@@ -64,7 +64,7 @@ namespace Kosson.KORM.Meta
 			return null;
 		}
 
-		private MetaRecordField GetField(string name)
+		private MetaRecordField? GetField(string name)
 		{
 			if (fieldsLookup.TryGetValue(name, out var field)) return field;
 			return null;
@@ -80,7 +80,7 @@ namespace Kosson.KORM.Meta
 
 		private static void GetFieldTableAlias(IMetaRecord meta, string name, List<string> path)
 		{
-			IMetaRecordField field = ((MetaRecord)meta).GetField(name);
+			IMetaRecordField? field = ((MetaRecord)meta).GetField(name);
 			if (field != null) return;
 			var dot = name.IndexOf('.');
 			if (dot <= 0) return;
@@ -117,21 +117,21 @@ namespace Kosson.KORM.Meta
 
 		private void ProcessDBNameAttribute(Type record)
 		{
-			var dbname = (DBNameAttribute)record.GetTypeInfo().GetCustomAttribute(typeof(DBNameAttribute), false);
+			var dbname = (DBNameAttribute?)record.GetTypeInfo().GetCustomAttribute(typeof(DBNameAttribute), false);
 			if (dbname == null) return;
 			DBName = dbname.Name;
 		}
 
 		private void ProcessDBSchemaAttribute(Type record)
 		{
-			var dbschema = (DBSchemaAttribute)record.GetTypeInfo().GetCustomAttribute(typeof(DBSchemaAttribute), false);
+			var dbschema = (DBSchemaAttribute?)record.GetTypeInfo().GetCustomAttribute(typeof(DBSchemaAttribute), false);
 			if (dbschema == null) return;
 			DBSchema = dbschema.Name;
 		}
 
 		private void ProcessTableAttribute(Type record)
 		{
-			var table = (TableAttribute)record.GetTypeInfo().GetCustomAttribute(typeof(TableAttribute), false);
+			var table = (TableAttribute?)record.GetTypeInfo().GetCustomAttribute(typeof(TableAttribute), false);
 			if (table == null) return;
 
 			if (TableType == null) TableType = record;

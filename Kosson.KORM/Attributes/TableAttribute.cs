@@ -11,12 +11,12 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Custom query used to retrieve data for the type. Values from columns are mapped to properties with matching names.
 		/// </summary>
-		public string Query { get; set; }
+		public string? Query { get; set; }
 
 		/// <summary>
 		/// Prefix to prepend to all automatically generated backing column names of the table.
 		/// </summary>
-		public string Prefix { get; set; }
+		public string? Prefix { get; set; }
 
 		/// <summary>
 		/// Determines whether primary key value for the backing table has to be provided manually when performing INSERT.
@@ -33,7 +33,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="tablePrefix">Prefix to prepend to all automatically generated backing column names of the table.</param>
 		/// <param name="isManualId">Determines whether primary key value for the backing table has to be provided manually when performing INSERT.</param>
-		public TableAttribute(string tablePrefix = null, bool isManualId = false)
+		public TableAttribute(string? tablePrefix = null, bool isManualId = false)
 		{
 			Prefix = tablePrefix;
 			IsManualID = isManualId;

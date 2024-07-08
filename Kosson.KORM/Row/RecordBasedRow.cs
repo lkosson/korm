@@ -34,12 +34,12 @@ namespace Kosson.KORM
 		public static IRow Create(IMetaRecord meta, IRecord record)
 		{
 			var type = record.GetType();
-			Func<IMetaRecord, IRecord, IRow> builder;
+			Func<IMetaRecord, IRecord, IRow>? builder;
 			lock (builders)
 			{
 				if (builders.TryGetValue(type, out builder)) return builder(meta, record);
 			}
-			var builderMethod = typeof(RecordBasedRow).GetMethod(nameof(RecordBasedRow.CreateImpl), BindingFlags.Static | BindingFlags.NonPublic);
+			var builderMethod = typeof(RecordBasedRow).GetMethod(nameof(RecordBasedRow.CreateImpl), BindingFlags.Static | BindingFlags.NonPublic)!;
 			builder = (Func<IMetaRecord, IRecord, IRow>)builderMethod.MakeGenericMethod(type).CreateDelegate(typeof(Func<IMetaRecord, IRecord, IRow>));
 			lock (builders)
 			{
@@ -59,10 +59,10 @@ namespace Kosson.KORM
 	class RecordBasedRow<TRecord> : IRow
 		where TRecord : IRecord
 	{
-		private static RecordBasedRowInfo info;
+		private static RecordBasedRowInfo info = default!;
 		private readonly TRecord record;
 
-		private static object GetValue<TValue>(Func<TRecord, TValue> propertyGetter, TRecord record)
+		private static object? GetValue<TValue>(Func<TRecord, TValue> propertyGetter, TRecord record)
 		{
 			return propertyGetter(record);
 		}
@@ -73,7 +73,7 @@ namespace Kosson.KORM
 			this.record = record;
 		}
 
-		object IRow.this[string name]
+		object? IRow.this[string name]
 		{
 			get
 			{
@@ -128,11 +128,11 @@ namespace Kosson.KORM
 				indices = [];
 				names = new string[fields.Count];
 				int i = 0;
-				var getValueMethod = typeof(RecordBasedRow<TRecord>).GetMethod(nameof(GetValue), BindingFlags.Static | BindingFlags.NonPublic);
+				var getValueMethod = typeof(RecordBasedRow<TRecord>).GetMethod(nameof(GetValue), BindingFlags.Static | BindingFlags.NonPublic)!;
 				foreach (var field in fields)
 				{
 					var getMethod = field.Property.GetMethod;
-					var propertyDelegateType = Expression.GetDelegateType(typeof(TRecord), getMethod.ReturnType);
+					var propertyDelegateType = Expression.GetDelegateType(typeof(TRecord), getMethod!.ReturnType);
 					var propertyGetter = getMethod.CreateDelegate(propertyDelegateType);
 					var getValueTypedMethod = getValueMethod.MakeGenericMethod(getMethod.ReturnType);
 					var getValue = (Func<TRecord, object>)getValueTypedMethod.CreateDelegate(typeof(Func<TRecord, object>), propertyGetter);

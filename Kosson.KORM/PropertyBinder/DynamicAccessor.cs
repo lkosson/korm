@@ -46,8 +46,8 @@ namespace Kosson.KORM.PropertyBinder
 					propertyExpr = null;
 				}
 
-				var property = type.GetProperty(propertyName);
-				var propertyGet = property.GetGetMethod();
+				var property = type.GetProperty(propertyName) ?? throw new ArgumentOutOfRangeException(nameof(expression), expression, "Invalid property expression.");
+				var propertyGet = property.GetMethod ?? throw new ArgumentOutOfRangeException(nameof(expression), expression, "Missing get property accessor.");
 				type = property.PropertyType;
 
 				il.EmitCall(OpCodes.Callvirt, propertyGet, null);

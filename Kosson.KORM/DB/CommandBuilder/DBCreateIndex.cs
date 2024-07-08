@@ -11,17 +11,17 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// Index identifier.
 		/// </summary>
-		protected IDBIdentifier name;
+		protected IDBIdentifier? name;
 
 		/// <summary>
 		/// List of index key column identifiers.
 		/// </summary>
-		protected List<IDBIdentifier> columns;
+		protected List<IDBIdentifier>? columns;
 
 		/// <summary>
 		/// List of columns included in leaf nodes of covering index.
 		/// </summary>
-		protected List<IDBIdentifier> included;
+		protected List<IDBIdentifier>? included;
 
 		/// <summary>
 		/// Determines whether index is unique.
@@ -96,7 +96,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="sb">StringBuilder constructing a command text.</param>
 		protected virtual void AppendColumns(StringBuilder sb)
 		{
-			if (!columns.Any()) throw new ArgumentOutOfRangeException("columns", "column list is empty");
+			if (columns == null || columns.Count == 0) throw new ArgumentOutOfRangeException("columns", "column list is empty");
 			bool first = true;
 			foreach (var column in columns)
 			{

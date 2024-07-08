@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Kosson.KORM
@@ -19,7 +20,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="obj">Record to compare this record to.</param>
 		/// <returns>True if given record is of same type and has same primary key (ID) as this record.</returns>
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 		{
 			if (obj == null) return false;
 			var otherObj = obj as RecordCore;
@@ -55,7 +56,7 @@ namespace Kosson.KORM
 		/// <param name="r1">First record to compare.</param>
 		/// <param name="r2">Second record to compare.</param>
 		/// <returns>True if both records are of the same type and have same primary key (ID) value.</returns>
-		public static bool operator ==(RecordCore r1, RecordCore r2)
+		public static bool operator ==(RecordCore ?r1, RecordCore? r2)
 		{
 			if (r1 is null) return r2 is null;
 			return r1.Equals(r2);
@@ -67,7 +68,7 @@ namespace Kosson.KORM
 		/// <param name="r1">First record to compare.</param>
 		/// <param name="r2">Second record to compare.</param>
 		/// <returns>True if records are of different types or have different primary key (ID) values.</returns>
-		public static bool operator !=(RecordCore r1, RecordCore r2)
+		public static bool operator !=(RecordCore? r1, RecordCore? r2)
 		{
 			return !(r1 == r2);
 		}
@@ -78,101 +79,109 @@ namespace Kosson.KORM
 			return TypeCode.Object;
 		}
 
-		private T ThrowInvalidCast<T>()
+		private T? ThrowInvalidCast<T>()
 		{
 			ThrowInvalidCast(typeof(T));
 			return default;
 		}
 
+		[DoesNotReturn]
 		private void ThrowInvalidCast(Type type)
 		{
 			throw new InvalidCastException("Record \"" + this + "\" cannot be converted to type " + type + ".");
 		}
 
-		bool IConvertible.ToBoolean(IFormatProvider provider)
+		bool IConvertible.ToBoolean(IFormatProvider? provider)
 		{
 			return ThrowInvalidCast<bool>();
 		}
 
-		byte IConvertible.ToByte(IFormatProvider provider)
+		byte IConvertible.ToByte(IFormatProvider? provider)
 		{
 			return ThrowInvalidCast<byte>();
 		}
 
-		char IConvertible.ToChar(IFormatProvider provider)
+		char IConvertible.ToChar(IFormatProvider? provider)
 		{
 			return ThrowInvalidCast<char>();
 		}
 
-		DateTime IConvertible.ToDateTime(IFormatProvider provider)
+		DateTime IConvertible.ToDateTime(IFormatProvider? provider)
 		{
 			return ThrowInvalidCast<DateTime>();
 		}
 
-		decimal IConvertible.ToDecimal(IFormatProvider provider)
+		decimal IConvertible.ToDecimal(IFormatProvider? provider)
 		{
 			return ThrowInvalidCast<decimal>();
 		}
 
-		double IConvertible.ToDouble(IFormatProvider provider)
+		double IConvertible.ToDouble(IFormatProvider? provider)
 		{
 			return ThrowInvalidCast<double>();
 		}
 
-		short IConvertible.ToInt16(IFormatProvider provider)
+		short IConvertible.ToInt16(IFormatProvider? provider)
 		{
 			return (short)FullRangeID;
 		}
 
-		int IConvertible.ToInt32(IFormatProvider provider)
+		int IConvertible.ToInt32(IFormatProvider? provider)
 		{
 			return (int)FullRangeID;
 		}
 
-		long IConvertible.ToInt64(IFormatProvider provider)
+		long IConvertible.ToInt64(IFormatProvider? provider)
 		{
 			return FullRangeID;
 		}
 
-		sbyte IConvertible.ToSByte(IFormatProvider provider)
+		sbyte IConvertible.ToSByte(IFormatProvider? provider)
 		{
 			return (sbyte)FullRangeID;
 		}
 
-		float IConvertible.ToSingle(IFormatProvider provider)
+		float IConvertible.ToSingle(IFormatProvider? provider)
 		{
 			return ThrowInvalidCast<float>();
 		}
 
-		string IConvertible.ToString(IFormatProvider provider)
+		string IConvertible.ToString(IFormatProvider? provider)
 		{
 			return ToString();
 		}
 
-		object IConvertible.ToType(Type type, IFormatProvider provider)
+		/// <inheritdoc/>
+		public override string ToString()
 		{
+			return GetType().Name + "@" + FullRangeID;
+		}
+
+		object IConvertible.ToType(Type? type, IFormatProvider? provider)
+		{
+			ArgumentNullException.ThrowIfNull(type);
 			if (typeof(IRecordRef).IsAssignableFrom(type))
 			{
-				var recordref = (IRecordRef)Activator.CreateInstance(type);
+				var recordref = (IRecordRef)Activator.CreateInstance(type)!;
 				// recordref is boxed struct
 				recordref.ID = FullRangeID;
 				return recordref;
 			}
 			ThrowInvalidCast(type);
-			return null;
+			return null!;
 		}
 
-		ushort IConvertible.ToUInt16(IFormatProvider provider)
+		ushort IConvertible.ToUInt16(IFormatProvider? provider)
 		{
 			return (ushort)FullRangeID;
 		}
 
-		uint IConvertible.ToUInt32(IFormatProvider provider)
+		uint IConvertible.ToUInt32(IFormatProvider? provider)
 		{
 			return (uint)FullRangeID;
 		}
 
-		ulong IConvertible.ToUInt64(IFormatProvider provider)
+		ulong IConvertible.ToUInt64(IFormatProvider? provider)
 		{
 			return (ulong)FullRangeID;
 		}

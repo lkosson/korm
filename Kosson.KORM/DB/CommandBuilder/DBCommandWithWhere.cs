@@ -13,7 +13,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <summary>
 		/// List of expressions in WHERE clause of the command. null value marks boundaries between groups joined by OR operator.
 		/// </summary>
-		protected List<IDBExpression> wheres;
+		protected List<IDBExpression?>? wheres;
 
 		/// <inheritdoc/>
 		protected DBCommandWithWhere(IDBCommandBuilder builder)
@@ -25,14 +25,14 @@ namespace Kosson.KORM.DB.CommandBuilder
 		protected DBCommandWithWhere(DBCommandWithWhere template)
 			: base(template)
 		{
-			wheres = template.wheres == null ? null : new List<IDBExpression>(template.wheres);
+			wheres = template.wheres == null ? null : new List<IDBExpression?>(template.wheres);
 		}
 
 		/// <inheritdoc/>
 		public void Where(IDBExpression expression)
 		{
 			ArgumentNullException.ThrowIfNull(expression);
-			wheres ??= new List<IDBExpression>();
+			wheres ??= new List<IDBExpression?>();
 			wheres.Add(expression);
 		}
 
@@ -63,7 +63,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// Build a database expression based on WHERE clauses added to this command.
 		/// </summary>
 		/// <returns>Database expression from WHERE clauses. null is no clauses are added.</returns>
-		protected virtual IDBExpression BuildWhereExpression()
+		protected virtual IDBExpression? BuildWhereExpression()
 		{
 			if (wheres == null) return null;
 			var groups = new List<List<IDBExpression>>();
