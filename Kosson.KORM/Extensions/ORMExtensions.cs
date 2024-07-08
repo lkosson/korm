@@ -216,7 +216,7 @@ namespace Kosson.KORM
 		/// <param name="recordref">Primary key (ID) reference to a record to retrieve.</param>
 		/// <returns>Record for a given record reference.</returns>
 		public static T? Get<T>(this IORM orm, RecordRef<T> recordref) where T : class, IRecord, new()
-			=> orm.Select<T>().ByID(recordref.ID);
+			=> orm.Select<T>().ByRef(recordref);
 
 		/// <summary>
 		/// Asynchronous version of Get.
@@ -227,7 +227,7 @@ namespace Kosson.KORM
 		/// <param name="recordref">Primary key (ID) reference to a record to retrieve.</param>
 		/// <returns>Task representing asynchronous operation returning record for a given record reference.</returns>
 		public static Task<T?> GetAsync<T>(this IORM orm, RecordRef<T> recordref) where T : class, IRecord, new()
-			=> orm.Select<T>().ByIDAsync(recordref.ID);
+			=> orm.Select<T>().ByRefAsync(recordref);
 
 		/// <summary>
 		/// Retrieves all records matching all provided conditions.
@@ -312,5 +312,26 @@ namespace Kosson.KORM
 		/// <returns>First record matching provided condition.</returns>
 		public static Task<T?> GetFirstAsync<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
 			=> orm.Select<T>().Where(where).ExecuteFirstAsync();
+
+		/// <summary>
+		/// Acquires a database lock for given record reference and retrieves associated record.
+		/// </summary>
+		/// <typeparam name="T">Type of record to lock and retrieve.</typeparam>
+		/// <param name="orm">ORM instancej.</param>
+		/// <param name="recordRef">Primary key (ID) reference to a record to lock and retrieve.</param>
+		/// <returns>Retrieved record</returns>
+		public static T? Lock<T>(this IORM orm, RecordRef<T> recordRef) where T : class, IRecord, new()
+			=> orm.Select<T>().ForUpdate().ByRef(recordRef);
+
+		/// <summary>
+		/// Asynchronous version of Lock.
+		/// Acquires a database lock for given record reference and retrieves associated record.
+		/// </summary>
+		/// <typeparam name="T">Type of record to lock and retrieve.</typeparam>
+		/// <param name="orm">ORM instancej.</param>
+		/// <param name="recordRef">Primary key (ID) reference to a record to lock and retrieve.</param>
+		/// <returns>Retrieved record</returns>
+		public static Task<T?> LockAsync<T>(this IORM orm, RecordRef<T> recordRef) where T : class, IRecord, new()
+			=> orm.Select<T>().ForUpdate().ByRefAsync(recordRef);
 	}
 }
