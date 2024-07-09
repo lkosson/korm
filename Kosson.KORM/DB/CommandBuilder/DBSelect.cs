@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -167,20 +168,19 @@ namespace Kosson.KORM.DB.CommandBuilder
 		void IDBSelect.RemoveColumns(Func<string, bool> predicate)
 		{
 			columnsRemoved = true;
-			if (columns != null)
+
+			for (int i = 0; i < columns?.Count; i++)
 			{
-				var newColumns = new List<DBCommandColumn>();
-				foreach (var column in columns)
-					newColumns.Add(new DBCommandColumn(column.Alias != null && predicate(column.Alias.RawValue) ? Builder.Const((string?)null) : column.Expression, column.Alias));
-				columns = newColumns;
+				var column = columns[i];
+				if (column.Alias == null || !predicate(column.Alias.RawValue)) continue;
+				columns[i] = new DBCommandColumn(column.Alias);
 			}
 
-			if (subqueries != null)
+			for (int i = 0; i < subqueries?.Count; i++)
 			{
-				var newSubqueries = new List<DBCommandSubquery>();
-				foreach (var subquery in subqueries)
-					newSubqueries.Add(new DBCommandSubquery(subquery.Alias != null && predicate(subquery.Alias.RawValue) ? Builder.Const((string?)null) : subquery.Expression, subquery.Alias));
-				subqueries = newSubqueries;
+				var subquery = subqueries[i];
+				if (subquery.Alias == null || !predicate(subquery.Alias.RawValue)) continue;
+				subqueries[i] = new DBCommandSubquery(subquery.Alias);
 			}
 		}
 
@@ -193,8 +193,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 				{
 					foreach (var column in columns)
 					{
-						if (column.Alias == null) continue;
-						if (column.Expression is DBStringConst && column.Expression.RawValue == null) continue;
+						if (column.IsRemoved || column.Alias == null) continue;
 						if (sb.Length > 0) sb.Append(',');
 						sb.Append(column.Alias.RawValue);
 					}
@@ -204,8 +203,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 				{
 					foreach (var subquery in subqueries)
 					{
-						if (subquery.Alias == null) continue;
-						if (subquery.Expression is DBStringConst && subquery.Expression.RawValue == null) continue;
+						if (subquery.IsRemoved || subquery.Alias == null) continue;
 						if (sb.Length > 0) sb.Append(',');
 						sb.Append(subquery.Alias.RawValue);
 					}
@@ -271,7 +269,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 				{
 					if (column.Expression is not IDBDottedIdentifier columnIdentifier)
 					{
-						if (!first) AppendCRLF(sb);
+						if (!first && !column.IsRemoved) AppendCRLF(sb);
 					}
 					else
 					{
@@ -305,7 +303,7 @@ namespace Kosson.KORM.DB.CommandBuilder
 					}
 					else
 					{
-						AppendCRLF(sb);
+						if (!subquery.IsRemoved) AppendCRLF(sb);
 						AppendColumnSeparator(sb);
 					}
 					AppendSubquery(sb, subquery);
@@ -338,6 +336,12 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="column">Column to add.</param>
 		protected virtual void AppendColumn(StringBuilder sb, DBCommandColumn column)
 		{
+			if (column.IsRemoved)
+			{
+				AppendRemovedColumn(sb, column.Alias);
+				return;
+			}
+
 			column.Expression.Append(sb);
 			if (column.Alias != null)
 			{
@@ -353,6 +357,11 @@ namespace Kosson.KORM.DB.CommandBuilder
 		/// <param name="subquery">Subquery to add.</param>
 		protected virtual void AppendSubquery(StringBuilder sb, DBCommandSubquery subquery)
 		{
+			if (subquery.IsRemoved)
+			{
+				AppendRemovedColumn(sb, subquery.Alias);
+				return;
+			}
 			sb.Append('(');
 			AppendSubqueryExpression(sb, subquery.Expression);
 			sb.Append(')');
@@ -361,6 +370,18 @@ namespace Kosson.KORM.DB.CommandBuilder
 				AppendColumnAliasKeyword(sb);
 				subquery.Alias.Append(sb);
 			}
+		}
+
+		/// <summary>
+		/// Appends an empty column expression for a removed column.
+		/// </summary>
+		/// <param name="sb">StringBuilder constructing a command text.</param>
+		/// <param name="alias">Column alias in the resultset</param>
+		protected virtual void AppendRemovedColumn(StringBuilder sb, IDBIdentifier alias)
+		{
+			sb.Append(Builder.Null());
+			AppendColumnAliasKeyword(sb);
+			alias.Append(sb);
 		}
 
 		/// <summary>
@@ -596,17 +617,24 @@ namespace Kosson.KORM.DB.CommandBuilder
 	/// <summary>
 	/// SELECT column definition.
 	/// </summary>
-	public struct DBCommandColumn
+	public readonly struct DBCommandColumn
 	{
 		/// <summary>
 		/// Column value expression.
 		/// </summary>
-		public IDBExpression Expression { get; private set; }
+		public readonly IDBExpression? Expression { get; }
 
 		/// <summary>
 		/// Column alias.
 		/// </summary>
-		public IDBIdentifier? Alias { get; private set; }
+		public readonly IDBIdentifier? Alias { get; }
+
+		/// <summary>
+		/// Determines whether the column has been removed using RemoveColumns.
+		/// </summary>
+		[MemberNotNullWhen(false, nameof(Expression))]
+		[MemberNotNullWhen(true, nameof(Alias))]
+		public readonly bool IsRemoved => Expression == null;
 
 		/// <summary>
 		/// Creates new SELECT column definition.
@@ -619,22 +647,40 @@ namespace Kosson.KORM.DB.CommandBuilder
 			Expression = expression;
 			Alias = alias;
 		}
+
+		/// <summary>
+		/// Creates new SELECT column definition for a removed column.
+		/// </summary>
+		/// <param name="alias">Column alias.</param>
+		public DBCommandColumn(IDBIdentifier alias)
+			: this()
+		{
+			Expression = default;
+			Alias = alias;
+		}
 	}
 
 	/// <summary>
 	/// SELECT subquery column definition.
 	/// </summary>
-	public struct DBCommandSubquery
+	public readonly struct DBCommandSubquery
 	{
 		/// <summary>
 		/// Column subquery expression.
 		/// </summary>
-		public IDBExpression Expression { get; private set; }
+		public readonly IDBExpression? Expression { get; }
 
 		/// <summary>
 		/// Column alias.
 		/// </summary>
-		public IDBIdentifier? Alias { get; private set; }
+		public readonly IDBIdentifier? Alias { get; }
+
+		/// <summary>
+		/// Determines whether the subquery has been removed using RemoveColumns.
+		/// </summary>
+		[MemberNotNullWhen(false, nameof(Expression))]
+		[MemberNotNullWhen(true, nameof(Alias))]
+		public readonly bool IsRemoved => Expression == null;
 
 		/// <summary>
 		/// Creates new SELECT subquery column definition.
@@ -645,6 +691,17 @@ namespace Kosson.KORM.DB.CommandBuilder
 			: this()
 		{
 			Expression = expression;
+			Alias = alias;
+		}
+
+		/// <summary>
+		/// Creates new SELECT subquery column definition for a removed subquery.
+		/// </summary>
+		/// <param name="alias">Column alias.</param>
+		public DBCommandSubquery(IDBIdentifier alias)
+			: this()
+		{
+			Expression = default;
 			Alias = alias;
 		}
 	}
