@@ -93,7 +93,7 @@ namespace Kosson.KORM.ORM
 					// localIsNull:
 					il.MarkLabel(localIsNull);
 
-					BuildLoader(il, field.InlineRecord!, inlinelocal);
+					BuildLoader(il, field.InlineRecord, inlinelocal);
 				}
 				else
 				{

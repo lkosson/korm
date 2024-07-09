@@ -223,7 +223,7 @@ namespace Kosson.KORM
 				var field = partialIdentifier.Meta.GetField(partialIdentifier.CurrentPath);
 				if (field == null) throw new ArgumentOutOfRangeException(partialIdentifier.ToString(), "Invalid field.");
 				if (field.IsInline) return partialIdentifier;
-				if (field.IsEagerLookup && recursive) return new PartialIdentifier(field.ForeignMeta!, partialIdentifier);
+				if (field.IsEagerLookup && recursive) return new PartialIdentifier(field.ForeignMeta, partialIdentifier);
 				if (!field.IsFromDB) throw new ArgumentOutOfRangeException(partialIdentifier.ToString(), "Record property is not accessible from database.");
 				var fieldExpression = query.Field(partialIdentifier.FullPath);
 				if (field.Type == typeof(bool)) return query.DB.CommandBuilder.Comparison(fieldExpression, DBExpressionComparison.Equal, query.Parameter(true));

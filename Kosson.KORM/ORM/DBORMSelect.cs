@@ -59,7 +59,7 @@ namespace Kosson.KORM.ORM
 					descentPath.Push(field.ID);
 					// Inlined columns are referencing inlining table alias - inlined column name contains inlining descent path and is unique even if same inline in included multiple times.
 					// Joins from inlined columns should use table alias based on inlining descent path; using just inlining table alias leads to ambiguity when same inline is included more than once.
-					PrepareTemplate(cb, template, field.InlineRecord!, tableAliasForColumns, inlineAlias, fieldNameWithPrefix, descentPath);
+					PrepareTemplate(cb, template, field.InlineRecord, tableAliasForColumns, inlineAlias, fieldNameWithPrefix, descentPath);
 					descentPath.Pop();
 				}
 				else
@@ -84,7 +84,7 @@ namespace Kosson.KORM.ORM
 				if (!field.IsFromDB) continue;
 				if (!field.IsEagerLookup) continue;
 
-				var eagerMeta = field.ForeignMeta!;
+				var eagerMeta = field.ForeignMeta;
 				var localName = cb.Identifier(tableAliasForColumns, field.DBName);
 				var remoteAlias = tableAliasForJoins + "." + field.Name;
 				var remoteKey = eagerMeta.PrimaryKey;

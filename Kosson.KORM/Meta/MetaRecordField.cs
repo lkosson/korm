@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Kosson.KORM.Meta
@@ -8,17 +9,17 @@ namespace Kosson.KORM.Meta
 	{
 		private readonly IFactory factory;
 		public IMetaRecord Record { get; private set; }
-		public PropertyInfo Property { get; private set; } = default!;
+		public PropertyInfo Property { get; private set; }
 
-		public string Name { get; private set; } = default!;
-		public Type Type { get; private set; } = default!;
+		public string Name { get; private set; }
+		public Type Type { get; private set; }
 		public bool IsEagerLookup { get; private set; }
 		public bool IsRecordRef { get; private set; }
 		public bool IsPrimaryKey { get; private set; }
 
 		public bool IsColumn { get; private set; }
 		public bool IsFromDB { get; private set; }
-		public string DBName { get; private set; } = default!;
+		public string DBName { get; private set; }
 		public DbType DBType { get; private set; }
 		public string? ColumnDefinition { get; private set; }
 		public bool IsReadOnly { get; private set; }
@@ -50,6 +51,7 @@ namespace Kosson.KORM.Meta
 			Update(property, factory);
 		}
 
+		[MemberNotNull(nameof(Name), nameof(Type), nameof(Property), nameof(DBName))]
 		internal void Update(PropertyInfo property, IFactory factory)
 		{
 			ProcessProperty(property);
@@ -61,6 +63,7 @@ namespace Kosson.KORM.Meta
 			ProcessInlineAttribute(property, factory);
 		}
 
+		[MemberNotNull(nameof(Name), nameof(Type), nameof(Property))]
 		private void ProcessProperty(PropertyInfo property)
 		{
 			Property = property;
@@ -77,6 +80,7 @@ namespace Kosson.KORM.Meta
 			else ForeignType = null;
 		}
 
+		[MemberNotNull(nameof(DBName))]
 		private void ProcessDBNameAttribute(PropertyInfo property)
 		{
 			var dbname = (DBNameAttribute?)property.GetCustomAttribute(typeof(DBNameAttribute), false);

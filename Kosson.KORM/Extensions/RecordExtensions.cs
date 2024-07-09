@@ -209,7 +209,7 @@ namespace Kosson.KORM
 				var value = field.Property.GetValue(record);
 				if (field.IsInline)
 				{
-					AppendFields(sb, value, field.InlineRecord!);
+					AppendFields(sb, value, field.InlineRecord);
 				}
 				else
 				{

@@ -84,7 +84,7 @@ namespace Kosson.KORM.Backup
 				if (field.IsRecordRef) fieldType = fieldType.GetGenericArguments()[0];
 				if (field.IsInline)
 				{
-					AddForeignRecords(field.InlineRecord!, leftoverForeigns);
+					AddForeignRecords(field.InlineRecord, leftoverForeigns);
 					continue;
 				}
 				if (!field.IsForeignKey) continue;

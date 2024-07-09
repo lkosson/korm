@@ -36,7 +36,7 @@ namespace Kosson.KORM.Backup
 			else
 			{
 				tablesInProgress.Add(table);
-				ClearReferencingForeignKeys(types, meta.TableType!);
+				ClearReferencingForeignKeys(types, meta.TableType);
 				ClearTable(type);
 				tablesInProgress.Remove(table);
 				tablesCleared.Add(table);
@@ -104,7 +104,7 @@ namespace Kosson.KORM.Backup
 				if (field.IsNotNull) continue; // this can cause whole process to fail, but no way to work around this at the moment
 				if (field.IsInline)
 				{
-					BuildNullCommand<T>(update, field.InlineRecord!);
+					BuildNullCommand<T>(update, field.InlineRecord);
 				}
 				else if (field.IsForeignKey)
 				{

@@ -86,7 +86,7 @@ namespace Kosson.KORM.ORM
 				if (field.IsPrimaryKey) continue;
 				if (field.IsInline)
 				{
-					CreateColumns(field.InlineRecord!);
+					CreateColumns(field.InlineRecord);
 					continue;
 				}
 				CreateColumn(meta, field);

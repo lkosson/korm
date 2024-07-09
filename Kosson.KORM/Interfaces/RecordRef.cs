@@ -235,7 +235,7 @@ namespace Kosson.KORM
 			//	return recordref;
 			//}
 			ThrowInvalidCast(type);
-			return null!;
+			return default!;
 		}
 
 		readonly ushort IConvertible.ToUInt16(IFormatProvider? provider) { checked { return (ushort)ID; } }

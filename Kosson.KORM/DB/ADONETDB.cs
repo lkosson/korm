@@ -49,6 +49,7 @@ namespace Kosson.KORM.DB
 		public virtual IDBCommandBuilder CommandBuilder => commandBuilder;
 
 		/// <inheritdoc/>
+		[MemberNotNullWhen(true, nameof(dbtran))]
 		public virtual bool IsTransactionOpen => dbtran != null;
 
 		/// <inheritdoc/>
@@ -170,6 +171,7 @@ namespace Kosson.KORM.DB
 		/// Creates a new DbConnection and DbTransaction if they are not created already.
 		/// </summary>
 		/// <param name="isImplicit">Determines whether the method is called from CreateCommand to start implicit transaction if no transaction is active at the moment.</param>
+		[MemberNotNull(nameof(dbconn), nameof(dbtran))]
 		protected void Open(bool isImplicit)
 		{
 			using (AcquireLock())
@@ -194,7 +196,7 @@ namespace Kosson.KORM.DB
 			{
 				if (!IsTransactionOpen) throw new KORMInvalidOperationException("Transaction not started.");
 				if (IsImplicitTransaction) throw new KORMInvalidOperationException("Implicit transaction cannot be committed.");
-				dbtran!.Commit();
+				dbtran.Commit();
 				dbtran.Dispose();
 				dbtran = null;
 				transactionEndStackTrace = CaptureStackTrace();
@@ -207,7 +209,7 @@ namespace Kosson.KORM.DB
 			{
 				if (!IsTransactionOpen) throw new KORMInvalidOperationException("Transaction not started.");
 				if (IsImplicitTransaction) throw new KORMInvalidOperationException("Implicit transaction cannot be rolled back.");
-				dbtran!.Rollback();
+				dbtran.Rollback();
 				dbtran.Dispose();
 				dbtran = null;
 				transactionEndStackTrace = CaptureStackTrace();
@@ -354,7 +356,7 @@ namespace Kosson.KORM.DB
 			try
 			{
 				Open(true);
-				cmd = dbconn!.CreateCommand();
+				cmd = dbconn.CreateCommand();
 				if (CommandTimeout.HasValue)
 				{
 					if (CommandTimeoutSeconds)
@@ -382,7 +384,7 @@ namespace Kosson.KORM.DB
 			try
 			{
 				Open(true);
-				var batch = dbconn!.CreateBatch();
+				var batch = dbconn.CreateBatch();
 				if (CommandTimeout.HasValue) batch.Timeout = CommandTimeout.Value / 1000;
 				batch.Transaction = dbtran;
 				return batch;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Kosson.KORM
@@ -36,6 +37,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Determines whether type is marked as a table.
 		/// </summary>
+		[MemberNotNullWhen(true, nameof(TableType))]
 		bool IsTable { get; }
 
 		/// <summary>
@@ -136,11 +138,15 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Determines whether a record referenced by this property should be retrieved from database when record containing this property is retrieved.
 		/// </summary>
+		[MemberNotNullWhen(true, nameof(ForeignMeta))]
+		[MemberNotNullWhen(true, nameof(ForeignType))]
 		bool IsEagerLookup { get; }
 
 		/// <summary>
 		/// Determines whether this property describes a foreign key reference to other record.
 		/// </summary>
+		[MemberNotNullWhen(true, nameof(ForeignMeta))]
+		[MemberNotNullWhen(true, nameof(ForeignType))]
 		bool IsRecordRef { get; }
 
 		/// <summary>
@@ -241,6 +247,7 @@ namespace Kosson.KORM
 		/// <summary>
 		/// Determines whether properties declared in a type of this property should be treated as though they were declared in this type.
 		/// </summary>
+		[MemberNotNullWhen(true, nameof(InlineRecord))]
 		bool IsInline { get; }
 
 		/// <summary>

@@ -56,7 +56,7 @@ namespace Kosson.KORM.ORM
 				if (field.IsReadOnly) continue;
 				if (field.IsInline)
 				{
-					PrepareTemplate(cb, template, field.InlineRecord!);
+					PrepareTemplate(cb, template, field.InlineRecord);
 				}
 				else
 				{

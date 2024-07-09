@@ -34,6 +34,7 @@ namespace Kosson.KORM.ORM
 			this.builder = typeof(IRecordNotifySelect).IsAssignableFrom(typeof(TRecord)) ? BuildRecordWithNotify : BuildRecord;
 		}
 
+		[MemberNotNull(nameof(command))]
 		private void PrepareCommand()
 		{
 			command = db.CreateCommand(sql);
@@ -43,13 +44,13 @@ namespace Kosson.KORM.ORM
 		public void PrepareReader()
 		{
 			PrepareCommand();
-			reader = db.ExecuteReader(command!);
+			reader = db.ExecuteReader(command);
 		}
 
 		public async Task PrepareReaderAsync()
 		{
 			PrepareCommand();
-			reader = await db.ExecuteReaderAsync(command!);
+			reader = await db.ExecuteReaderAsync(command);
 		}
 
 		private TRecord? BuildRecord()
