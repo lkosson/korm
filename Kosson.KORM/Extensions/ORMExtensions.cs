@@ -317,7 +317,7 @@ namespace Kosson.KORM
 		/// Acquires a database lock for given record reference and retrieves associated record.
 		/// </summary>
 		/// <typeparam name="T">Type of record to lock and retrieve.</typeparam>
-		/// <param name="orm">ORM instancej.</param>
+		/// <param name="orm">ORM instance.</param>
 		/// <param name="recordRef">Primary key (ID) reference to a record to lock and retrieve.</param>
 		/// <returns>Retrieved record</returns>
 		public static T? Lock<T>(this IORM orm, RecordRef<T> recordRef) where T : class, IRecord, new()
@@ -328,10 +328,52 @@ namespace Kosson.KORM
 		/// Acquires a database lock for given record reference and retrieves associated record.
 		/// </summary>
 		/// <typeparam name="T">Type of record to lock and retrieve.</typeparam>
-		/// <param name="orm">ORM instancej.</param>
+		/// <param name="orm">ORM instance.</param>
 		/// <param name="recordRef">Primary key (ID) reference to a record to lock and retrieve.</param>
 		/// <returns>Retrieved record</returns>
 		public static Task<T?> LockAsync<T>(this IORM orm, RecordRef<T> recordRef) where T : class, IRecord, new()
 			=> orm.Select<T>().ForUpdate().ByRefAsync(recordRef);
+
+		/// <summary>
+		/// Counts database records matching specified predicates.
+		/// </summary>
+		/// <typeparam name="T">Type of record to count.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="predicates">Set of predicates determining which record to count.</param>
+		/// <returns>Number of matching records</returns>
+		public static int Count<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
+			=> orm.Select<T>().WhereAll(predicates).ExecuteCount();
+
+		/// <summary>
+		/// Asynchronous version of Count.
+		/// Counts database records matching specified predicates.
+		/// </summary>
+		/// <typeparam name="T">Type of record to count.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="predicates">Set of predicates determining which record to count.</param>
+		/// <returns>Number of matching records</returns>
+		public static Task<int> CountAsync<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
+			=> orm.Select<T>().WhereAll(predicates).ExecuteCountAsync();
+
+		/// <summary>
+		/// Counts database records matching specified SQL condition.
+		/// </summary>
+		/// <typeparam name="T">Type of record to count.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="where">Expression to use as WHERE clause in SQL SELECT command.</param>
+		/// <returns>Number of matching records</returns>
+		public static int Count<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
+			=> orm.Select<T>().Where(where).ExecuteCount();
+
+		/// <summary>
+		/// Asynchronous version of Count.
+		/// Counts database records matching specified SQL condition.
+		/// </summary>
+		/// <typeparam name="T">Type of record to count.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="where">Expression to use as WHERE clause in SQL SELECT command.</param>
+		/// <returns>Number of matching records</returns>
+		public static Task<int> CountAsync<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
+			=> orm.Select<T>().Where(where).ExecuteCountAsync();
 	}
 }
