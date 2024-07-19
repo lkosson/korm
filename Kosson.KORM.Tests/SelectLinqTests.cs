@@ -294,6 +294,17 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void SelectLinqByRecord()
+		{
+			var inserted = PrepareTestTables();
+			var record = inserted[2];
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t == record).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(1, retrieved.Count);
+			Assert.AreEqual(record, retrieved.Single());
+		}
+
+		[TestMethod]
 		public void SelectLinqByInlinedValue()
 		{
 			var inserted = PrepareTestTables();

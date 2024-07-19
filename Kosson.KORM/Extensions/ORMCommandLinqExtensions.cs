@@ -238,6 +238,7 @@ namespace Kosson.KORM
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord => value switch
 			{
+				PartialIdentifier partialIdentifier => String.IsNullOrEmpty(partialIdentifier.FullPath) ? query.Field("ID") : query.Field(partialIdentifier.FullPath),
 				IDBExpression expression => expression,
 				_ => query.Parameter(value)
 			};
