@@ -30,7 +30,8 @@ namespace Kosson.KORM.SQLite
 			base.AppendCommandText(sb);
 			if (limit > 0)
 			{
-				sb.Append(" LIMIT ");
+				AppendCRLF(sb);
+				sb.Append("LIMIT ");
 				sb.Append(limit);
 			}
 			// PRAGMA returns a resultset - it has to be after the SELECT command.
