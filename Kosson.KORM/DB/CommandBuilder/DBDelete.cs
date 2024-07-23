@@ -34,7 +34,6 @@ namespace Kosson.KORM.DB.CommandBuilder
 		{
 			sb.Append("DELETE FROM ");
 			AppendTable(sb);
-			AppendCRLF(sb);
 			AppendWheres(sb);
 		}
 	}
