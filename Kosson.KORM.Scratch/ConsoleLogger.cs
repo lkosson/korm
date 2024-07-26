@@ -7,7 +7,7 @@ namespace Kosson.KORM.Scratch
 {
 	class ConsoleLogger : ILogger
 	{
-		LogLevel MinLevel => LogLevel.Warning;
+		LogLevel MinLevel => LogLevel.Trace;
 		IDisposable ILogger.BeginScope<TState>(TState state) => null;
 		bool ILogger.IsEnabled(LogLevel logLevel) => logLevel >= MinLevel;
 
@@ -15,6 +15,11 @@ namespace Kosson.KORM.Scratch
 		{
 			if (logLevel < MinLevel) return;
 			var c = Console.ForegroundColor;
+			if (eventId.Id > 0)
+			{
+				Console.ForegroundColor = ConsoleColor.DarkGreen;
+				Console.Write($"[{eventId.Id:000000}]\t");
+			}
 			if (logLevel == LogLevel.Critical) Console.ForegroundColor = ConsoleColor.Red;
 			else if (logLevel == LogLevel.Error) Console.ForegroundColor = ConsoleColor.Red;
 			else if (logLevel == LogLevel.Warning) Console.ForegroundColor = ConsoleColor.Yellow;
