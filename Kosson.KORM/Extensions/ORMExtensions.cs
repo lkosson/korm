@@ -272,6 +272,26 @@ namespace Kosson.KORM
 			=> orm.Select<T>().Where(where).ExecuteAsync();
 
 		/// <summary>
+		/// Retrieves records for a given record references.
+		/// </summary>
+		/// <typeparam name="T">Type of record to retrieve.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="recordRefs">Primary key (ID) references to records to retrieve.</param>
+		/// <returns>Records for a given record references.</returns>
+		public static IReadOnlyCollection<T> Get<T>(this IORM orm, IEnumerable<RecordRef<T>> recordRefs) where T : class, IRecord, new()
+			=> orm.Select<T>().ByRefs(recordRefs);
+
+		/// <summary>
+		/// Asynchronous version of Get.
+		/// </summary>
+		/// <typeparam name="T">Type of record to retrieve.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="recordRefs">Primary key (ID) references to records to retrieve.</param>
+		/// <returns>Task representing records for a given record references.</returns>
+		public static Task<IReadOnlyCollection<T>> GetAsync<T>(this IORM orm, IEnumerable<RecordRef<T>> recordRefs) where T : class, IRecord, new()
+			=> orm.Select<T>().ByRefsAsync(recordRefs);
+
+		/// <summary>
 		/// Retrieves first record matching all provided conditions.
 		/// </summary>
 		/// <typeparam name="T">Type of record to retrieve.</typeparam>
