@@ -6,7 +6,7 @@
     <Authors>Łukasz Kosson</Authors>
     <Company />
     <Product>Kosson KORM</Product>
-    <Version>1.6.1</Version>
+    <Version>1.6.2</Version>
     <Description>Microsoft SQL Server database provider for KORM</Description>
   </PropertyGroup>
 
