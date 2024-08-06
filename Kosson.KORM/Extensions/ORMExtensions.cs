@@ -283,6 +283,7 @@ namespace Kosson.KORM
 
 		/// <summary>
 		/// Asynchronous version of Get.
+		/// Retrieves records for a given record references.
 		/// </summary>
 		/// <typeparam name="T">Type of record to retrieve.</typeparam>
 		/// <param name="orm">ORM instance.</param>
