@@ -57,6 +57,7 @@ namespace Kosson.KORM.SQLite
 			if (exc is SqliteException se)
 			{
 				if (se.SqliteExtendedErrorCode == 787) return new KORMForeignKeyException(se, commandText, commandParameters, null);
+				if (se.SqliteExtendedErrorCode == 2067) return new KORMDuplicateValueException(se, commandText, commandParameters);
 				if (se.Message.Contains("duplicate column name")) return new KORMObjectExistsException(se, commandText, commandParameters);
 				if (se.Message.Contains("already exists")) return new KORMObjectExistsException(se, commandText, commandParameters);
 			}
