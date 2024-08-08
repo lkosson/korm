@@ -106,7 +106,7 @@ namespace Kosson.KORM
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
 		public KORMDuplicateValueException(Exception inner, string? commandText, DbParameterCollection? commandParameters)
-			: base("Duplicate value in unique field.", inner, commandText, commandParameters)
+			: base("Duplicate value in unique field: " + inner.Message, inner, commandText, commandParameters)
 		{
 		}
 	}
@@ -124,7 +124,7 @@ namespace Kosson.KORM
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
 		public KORMLockException(Exception inner, string? commandText, DbParameterCollection? commandParameters)
-			: base("Row is locked in another transaction.", inner, commandText, commandParameters)
+			: base("Row is locked in another transaction: " + inner.Message, inner, commandText, commandParameters)
 		{
 		}
 	}
@@ -159,7 +159,7 @@ namespace Kosson.KORM
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
 		public KORMInvalidStructureException(Exception inner, string? commandText, DbParameterCollection? commandParameters)
-			: base("Database structure creation error.", inner, commandText, commandParameters)
+			: base("Database structure creation error: " + inner.Message, inner, commandText, commandParameters)
 		{
 		}
 
@@ -189,7 +189,7 @@ namespace Kosson.KORM
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
 		public KORMObjectExistsException(Exception inner, string? commandText, DbParameterCollection? commandParameters)
-			: base("Database object already exists.", inner, commandText, commandParameters)
+			: base("Database object already exists: " + inner.Message, inner, commandText, commandParameters)
 		{
 		}
 	}
@@ -232,7 +232,7 @@ namespace Kosson.KORM
 		/// <param name="commandText">Text of the command that caused the exception.</param>
 		/// <param name="commandParameters">Parameters of the command causing the exception.</param>
 		public KORMDataLengthException(Exception inner, string? commandText, DbParameterCollection? commandParameters)
-			: base("Data too long.", inner, commandText, commandParameters)
+			: base("Data too long: " + inner.Message, inner, commandText, commandParameters)
 		{
 		}
 
