@@ -38,6 +38,15 @@ namespace Kosson.KORM.Tests
             Assert.AreEqual(INTMARKER + 1, retrieved.MaxConstructed);
 			Assert.AreEqual(INTMARKER - 1, retrieved.FirstConstructed);
 			Assert.AreEqual(INTMARKER + 1, retrieved.LastConstructed);
+
+			Assert.AreEqual(retrieved.CountConstructed, retrieved.CountConstructedTyped);
+			Assert.AreEqual(retrieved.CountDistinctConstructed, retrieved.CountDistinctConstructedTyped);
+			Assert.AreEqual(retrieved.SumConstructed, retrieved.SumConstructedTyped);
+			Assert.AreEqual(retrieved.AvgConstructed, retrieved.AvgConstructedTyped);
+			Assert.AreEqual(retrieved.MinConstructed, retrieved.MinConstructedTyped);
+			Assert.AreEqual(retrieved.MaxConstructed, retrieved.MaxConstructedTyped);
+			Assert.AreEqual(retrieved.FirstConstructed, retrieved.FirstConstructedTyped);
+			Assert.AreEqual(retrieved.LastConstructed, retrieved.LastConstructedTyped);
 		}
 
 		[TestMethod]
@@ -100,6 +109,30 @@ namespace Kosson.KORM.Tests
 
 			[Subquery.First("MainTestTable", "mtt_Value", "mtt_DefaultValue", "stt_DefaultValue", "mtt_ID DESC")]
 			public int LastConstructed { get; set; }
+
+			[Subquery.Count(typeof(MainTestTable), nameof(MainTestTable.Value), nameof(Value))]
+			public int CountConstructedTyped { get; set; }
+
+			[Subquery.CountDistinct(typeof(MainTestTable), nameof(MainTestTable.DefaultValue), nameof(MainTestTable.Value), nameof(Value))]
+			public int CountDistinctConstructedTyped { get; set; }
+
+			[Subquery.Sum(typeof(MainTestTable), nameof(MainTestTable.DefaultValue), nameof(MainTestTable.Value), nameof(Value))]
+			public int SumConstructedTyped { get; set; }
+
+			[Subquery.Avg(typeof(MainTestTable), nameof(MainTestTable.Value), nameof(MainTestTable.DefaultValue), nameof(DefaultValue))]
+			public int AvgConstructedTyped { get; set; }
+
+			[Subquery.Min(typeof(MainTestTable), nameof(MainTestTable.Value), nameof(MainTestTable.DefaultValue), nameof(DefaultValue))]
+			public int MinConstructedTyped { get; set; }
+
+			[Subquery.Max(typeof(MainTestTable), nameof(MainTestTable.Value), nameof(MainTestTable.DefaultValue), nameof(DefaultValue))]
+			public int MaxConstructedTyped { get; set; }
+
+			[Subquery.First(typeof(MainTestTable), nameof(MainTestTable.Value), nameof(MainTestTable.DefaultValue), nameof(DefaultValue), "mtt_ID")]
+			public int FirstConstructedTyped { get; set; }
+
+			[Subquery.First(typeof(MainTestTable), nameof(MainTestTable.Value), nameof(MainTestTable.DefaultValue), nameof(DefaultValue), "mtt_ID DESC")]
+			public int LastConstructedTyped { get; set; }
 
 			[Column]
 			public int Value { get; set; }

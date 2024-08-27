@@ -22,6 +22,7 @@ namespace Kosson.KORM.ORM
 		protected IEnumerable<object?> Parameters { get { return parameters ?? Enumerable.Empty<object?>(); } }
 		private readonly ILogger operationLogger;
 		private readonly ILogger recordLogger;
+		protected readonly IMetaBuilder metaBuilder;
 
 		public IDB DB { get; }
 
@@ -32,6 +33,7 @@ namespace Kosson.KORM.ORM
 			this.DB = db;
 			this.operationLogger = operationLogger;
 			this.recordLogger = recordLogger;
+			this.metaBuilder = metaBuilder;
 			meta ??= metaBuilder.Get(typeof(TRecord));
 			opStopwatch ??= Stopwatch.StartNew();
 		}
@@ -41,6 +43,7 @@ namespace Kosson.KORM.ORM
 			DB = template.DB;
 			operationLogger = template.operationLogger;
 			recordLogger = template.recordLogger;
+			metaBuilder = template.metaBuilder;
 			if (template.parameters != null) parameters = new List<object?>(template.parameters);
 		}
 

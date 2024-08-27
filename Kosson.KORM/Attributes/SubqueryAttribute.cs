@@ -23,7 +23,7 @@ namespace Kosson.KORM
 		}
 
 		/// <inheritdoc/>
-		public override IDBExpression Build(string tableAlias, IMetaRecordField field, IDBCommandBuilder builder)
+		public override IDBExpression Build(string tableAlias, IMetaRecordField field, IDBCommandBuilder builder, IMetaBuilder metaBuilder)
 		{
 			return builder.Expression(String.Format(Subquery, builder.Identifier(tableAlias).ToString()));
 		}

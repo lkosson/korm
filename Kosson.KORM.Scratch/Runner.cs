@@ -188,7 +188,7 @@ namespace Kosson.KORM.Scratch
 		[Subquery("SELECT COUNT(*) FROM \"Membership\" WHERE \"mem_User\" = {0}.\"usr_ID\"")]
 		public int RolesCount { get; set; }
 
-		[Subquery.Count("Membership", "mem_User", "usr_ID")]
+		[Subquery.Count(typeof(Membership), nameof(Membership.User))]
 		public int RolesCount2 { get; set; }
 	}
 

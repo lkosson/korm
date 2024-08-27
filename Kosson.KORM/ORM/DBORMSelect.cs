@@ -39,11 +39,11 @@ namespace Kosson.KORM.ORM
 				template.From(cb.Identifier(meta.DBSchema, meta.DBName), cb.Identifier(meta.Name));
 			else
 				template.FromSubquery(cb.Expression(meta.DBQuery), cb.Identifier(meta.Name));
-			PrepareTemplate(cb, template, meta, meta.Name, meta.Name, null, new Stack<long>());
+			PrepareTemplate(cb, metaBuilder, template, meta, meta.Name, meta.Name, null, new Stack<long>());
 			return template;
 		}
 
-		private static void PrepareTemplate(IDBCommandBuilder cb, IDBSelect template, IMetaRecord meta, string tableAliasForColumns, string tableAliasForJoins, string? fieldPrefix, Stack<long> descentPath)
+		private static void PrepareTemplate(IDBCommandBuilder cb, IMetaBuilder metaBuilder, IDBSelect template, IMetaRecord meta, string tableAliasForColumns, string tableAliasForJoins, string? fieldPrefix, Stack<long> descentPath)
 		{
 			// keep order in sync with ReaderRecordLoaderBuilder
 			foreach (var field in meta.Fields)
@@ -59,7 +59,7 @@ namespace Kosson.KORM.ORM
 					descentPath.Push(field.ID);
 					// Inlined columns are referencing inlining table alias - inlined column name contains inlining descent path and is unique even if same inline in included multiple times.
 					// Joins from inlined columns should use table alias based on inlining descent path; using just inlining table alias leads to ambiguity when same inline is included more than once.
-					PrepareTemplate(cb, template, field.InlineRecord, tableAliasForColumns, inlineAlias, fieldNameWithPrefix, descentPath);
+					PrepareTemplate(cb, metaBuilder, template, field.InlineRecord, tableAliasForColumns, inlineAlias, fieldNameWithPrefix, descentPath);
 					descentPath.Pop();
 				}
 				else
@@ -73,7 +73,7 @@ namespace Kosson.KORM.ORM
 					}
 					else
 					{
-						var subqueryExpr = field.SubqueryBuilder(tableAliasForColumns, field, cb);
+						var subqueryExpr = field.SubqueryBuilder(tableAliasForColumns, field, cb, metaBuilder);
 						template.Subquery(subqueryExpr, fieldAlias);
 					}
 				}
@@ -94,7 +94,7 @@ namespace Kosson.KORM.ORM
 				if (descentPath.Contains(field.ID)) throw new KORMInvalidOperationException("Cyclic eager lookups detected on " + meta.Name + "." + field.Name + ".");
 				descentPath.Push(field.ID);
 				template.Join(cb.Identifier(eagerMeta.DBSchema, eagerMeta.DBName), cb.Equal(localName, remoteName), cb.Identifier(remoteAlias));
-				PrepareTemplate(cb, template, eagerMeta, remoteAlias, remoteAlias, remotePrefix, descentPath);
+				PrepareTemplate(cb, metaBuilder, template, eagerMeta, remoteAlias, remoteAlias, remotePrefix, descentPath);
 				descentPath.Pop();
 			}
 		}

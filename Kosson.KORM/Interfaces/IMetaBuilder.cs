@@ -298,6 +298,7 @@ namespace Kosson.KORM
 	/// <param name="tableAlias">Database alias of a table for record in which the subquery is defined.</param>
 	/// <param name="field">Field for which the subquery is defined.</param>
 	/// <param name="builder">Command builder to use for subquery building.</param>
+	/// <param name="metaBuilder">Metadata builder for resolving database object names.</param>
 	/// <returns>Expression to use as a subquery for a given field.</returns>
-	public delegate IDBExpression SubqueryBuilder(string tableAlias, IMetaRecordField field, IDBCommandBuilder builder);
+	public delegate IDBExpression SubqueryBuilder(string tableAlias, IMetaRecordField field, IDBCommandBuilder builder, IMetaBuilder metaBuilder);
 }
