@@ -60,6 +60,8 @@ namespace Kosson.KORM
 				_ => throw new ArgumentOutOfRangeException(nameof(expression), expression, "Unsupported expression: " + expression)
 			};
 
+		private static bool IsFinal(object? expression) => expression is not IDBExpression && expression is not PartialIdentifier;
+
 		private static object? ProcessBinaryExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, BinaryExpression binaryExpression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord
@@ -67,8 +69,8 @@ namespace Kosson.KORM
 			var left = ProcessExpression(query, binaryExpression.Left);
 			var right = ProcessExpression(query, binaryExpression.Right);
 
-			var leftFinal = left is not IDBExpression && left is not PartialIdentifier;
-			var rightFinal = right is not IDBExpression && right is not PartialIdentifier;
+			var leftFinal = IsFinal(left);
+			var rightFinal = IsFinal(right);
 
 			if (leftFinal && rightFinal)
 			{
@@ -175,9 +177,23 @@ namespace Kosson.KORM
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord => constantExpression.Value;
 
-		private static object ProcessConditionalExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, ConditionalExpression conditionalExpression)
+		private static object? ProcessConditionalExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, ConditionalExpression conditionalExpression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
-			where TRecord : IRecord => throw new NotImplementedException();
+			where TRecord : IRecord
+		{
+			var condition = ProcessExpression(query, conditionalExpression.Test);
+
+			if (!IsFinal(condition)) throw new NotSupportedException("Unsupported database-dependent conditional expression: " + conditionalExpression.Test);
+			if (condition is not bool conditionValue) throw new NotSupportedException("Unsupported conditional expression evaluation result: " + condition);
+
+			var selectedExpression = conditionValue ? conditionalExpression.IfTrue : conditionalExpression.IfFalse;
+			var selectedResult = ProcessExpression(query, selectedExpression);
+
+			if (IsFinal(selectedResult)) return selectedResult;
+
+			var resultExpression = ConvertConstToParameter(query, selectedResult);
+			return resultExpression;
+		}
 
 		private static object? ProcessUnaryExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, UnaryExpression unaryExpression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>

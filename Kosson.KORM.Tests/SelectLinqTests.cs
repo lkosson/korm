@@ -378,6 +378,45 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void SelectLinqByConditionalBool()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => DateTime.Now.Year < 2000 ? t.Value == INTMARKER + 1 : t.Value == INTMARKER + 2).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(1, retrieved.Count);
+			Assert.AreEqual(INTMARKER + 2, retrieved.First().Value);
+		}
+
+		[TestMethod]
+		public void SelectLinqByConditionalConstBool()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => DateTime.Now.Year < 9999 ? DateTime.Now.Day > 35 : DateTime.Now.Day > 0).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(0, retrieved.Count);
+		}
+
+		[TestMethod]
+		public void SelectLinqByConditionalField()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => (DateTime.Now.Year < 2000 ? t.Value : t.Referenced.Value) == INTMARKER - 1).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(2, retrieved.Count);
+			Assert.AreEqual(INTMARKER - 1, retrieved.First().Referenced.Value);
+		}
+
+		[TestMethod]
+		public void SelectLinqByConditionalNull()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.NullableEnum == (DateTime.Now.Year < 2000 ? DayOfWeek.Monday : null)).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreEqual(2, retrieved.Count);
+			Assert.IsNull(retrieved.First().NullableEnum);
+		}
+
+		[TestMethod]
 		public void SelectLinqByNegation()
 		{
 			var inserted = PrepareTestTables();

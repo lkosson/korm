@@ -50,6 +50,9 @@ namespace Kosson.KORM.Scratch
 			orm.InsertAll(roles);
 			orm.InsertAll(us.Select(u => new Membership { Role = roles[u.ID % 2], User = u }));
 
+			var condsel0 = orm.Get<User>(u => DateTime.Now.DayOfWeek == DayOfWeek.Thursday ? 1 == 1 : 2 == 2);
+			var condsel1 = orm.Get<User>(u => u.Name == (DateTime.Now.DayOfWeek == DayOfWeek.Thursday ? null : "group1"));
+			var condsel2 = orm.Get<User>(u => DateTime.Now.DayOfWeek == DayOfWeek.Thursday ? u.Name == "user1" : u.Name == "group1");
 			var selected = orm.Select<Membership>().Select(m => new { m.ID, m.User.UserDetails.Group }).Execute();
 			var selectedid = orm.Select<Membership>().Select(m => m.ID).ExecuteFirst();
 
