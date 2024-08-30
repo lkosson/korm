@@ -139,6 +139,7 @@ namespace Kosson.KORM
 			{
 				var parameter = parameters[i];
 				var argument = ProcessExpression(query, methodCallExpression.Arguments[i]);
+				if (target == null && argument is IDBExpression argumentDbExpression) return ProcessDatabaseCallExpression(argumentDbExpression, query, methodCallExpression);
 				if (argument != null && !parameter.ParameterType.IsAssignableFrom(argument.GetType())) throw new ArgumentOutOfRangeException(parameter.Name, argument, "Invalid argument in call to " + methodCallExpression.Method.Name + ", expected: " + parameter.ParameterType.Name);
 				arguments[i] = argument;
 			}
@@ -168,6 +169,12 @@ namespace Kosson.KORM
 					var argument = ProcessExpression(query, methodCallExpression.Arguments[0]);
 					if (argument is string stringArgument) return query.DB.CommandBuilder.Comparison(targetDBExpression, DBExpressionComparison.Like, query.Parameter("%" + stringArgument + "%"));
 					else throw new NotSupportedException("Unsupported argument type: " + argument);
+				}
+				else if (methodCallExpression.Method.Name == nameof(String.IsNullOrEmpty))
+				{
+					return query.DB.CommandBuilder.Or(
+						query.DB.CommandBuilder.Comparison(targetDBExpression, DBExpressionComparison.Equal, null),
+						query.DB.CommandBuilder.Comparison(targetDBExpression, DBExpressionComparison.Equal, query.DB.CommandBuilder.Const("")));
 				}
 			}
 			throw new NotSupportedException("Unsupported method call on database value: " + methodCallExpression);
