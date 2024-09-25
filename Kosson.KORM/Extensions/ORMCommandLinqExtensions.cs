@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -53,6 +55,7 @@ namespace Kosson.KORM
 				BinaryExpression binaryExpression => ProcessBinaryExpression(query, binaryExpression),
 				MethodCallExpression methodCallExpression => ProcessMethodCallExpression(query, methodCallExpression),
 				ConstantExpression constantExpression => ProcessConstantExpression(query, constantExpression),
+				NewArrayExpression newArrayExpression => ProcessNewArrayExpression(query, newArrayExpression),
 				ConditionalExpression conditionalExpression => ProcessConditionalExpression(query, conditionalExpression),
 				UnaryExpression unaryExpression => ProcessUnaryExpression(query, unaryExpression),
 				MemberExpression memberExpression => ProcessMemberExpression(query, memberExpression),
@@ -139,7 +142,7 @@ namespace Kosson.KORM
 			{
 				var parameter = parameters[i];
 				var argument = ProcessExpression(query, methodCallExpression.Arguments[i]);
-				if (target == null && argument is IDBExpression argumentDbExpression) return ProcessDatabaseCallExpression(argumentDbExpression, query, methodCallExpression);
+				if (argument is IDBExpression argumentDbExpression) return ProcessDatabaseCallExpression(argumentDbExpression , query, methodCallExpression);
 				if (argument != null && !parameter.ParameterType.IsAssignableFrom(argument.GetType())) throw new ArgumentOutOfRangeException(parameter.Name, argument, "Invalid argument in call to " + methodCallExpression.Method.Name + ", expected: " + parameter.ParameterType.Name);
 				arguments[i] = argument;
 			}
@@ -177,12 +180,43 @@ namespace Kosson.KORM
 						query.DB.CommandBuilder.Comparison(targetDBExpression, DBExpressionComparison.Equal, query.DB.CommandBuilder.Const("")));
 				}
 			}
+			else if (methodCallExpression.Method.Name == nameof(Enumerable.Contains))
+			{
+				var argument = ProcessExpression(query, methodCallExpression.Object == null ? methodCallExpression.Arguments[0] : methodCallExpression.Object);
+				if (argument is IEnumerable enumerable)
+				{
+					if (!enumerable.OfType<object>().Any()) return false;
+					return query.DB.CommandBuilder.Comparison(targetDBExpression, DBExpressionComparison.In, query.Array(enumerable));
+				}
+				else throw new NotSupportedException("Unsupported argument type: " + argument);
+			}
+			else if (methodCallExpression.Method.DeclaringType == typeof(ObjectExtensions) && methodCallExpression.Method.Name == nameof(ObjectExtensions.In))
+			{
+				var target = ProcessExpression(query, methodCallExpression.Arguments[0]);
+				var argument = ProcessExpression(query, methodCallExpression.Arguments[1]);
+				if (target is IDBExpression targetExpression && argument is IEnumerable enumerable)
+				{
+					if (!enumerable.OfType<object>().Any()) return false;
+					return query.DB.CommandBuilder.Comparison(targetExpression, DBExpressionComparison.In, query.Array(enumerable));
+				}
+				else throw new NotSupportedException("Unsupported argument type: " + argument);
+			}
 			throw new NotSupportedException("Unsupported method call on database value: " + methodCallExpression);
 		}
 
 		private static object? ProcessConstantExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, ConstantExpression constantExpression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord => constantExpression.Value;
+
+		private static object? ProcessNewArrayExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, NewArrayExpression newArrayExpression)
+			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
+			where TRecord : IRecord
+		{
+			var array = new object?[newArrayExpression.Expressions.Count];
+			for (int i = 0; i < array.Length; i++)
+				array[i] = ProcessExpression(query, newArrayExpression.Expressions[i]);
+			return array;
+		}
 
 		private static object? ProcessConditionalExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, ConditionalExpression conditionalExpression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>

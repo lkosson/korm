@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -72,7 +73,7 @@ namespace Kosson.KORM
 		/// </summary>
 		/// <param name="values">Elements of array to create.</param>
 		/// <returns>Expression represeting array of provided values.</returns>
-		IDBExpression Array<T>(T[] values);
+		IDBExpression Array(IEnumerable values);
 
 		/// <summary>
 		/// Creates a new expression referencing specified database column name or property.

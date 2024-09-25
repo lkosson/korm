@@ -1,4 +1,7 @@
-﻿namespace System
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace System
 {
 	/// <summary>
 	/// Extension methods for System.Object.
@@ -22,5 +25,14 @@
 			var changedDelegate = changedMethod.CreateDelegate(target.GetType(), originalDelegate.Target);
 			return (TDelegate)(object)changedDelegate;
 		}
+	}
+}
+
+namespace Kosson.KORM
+{
+	public static class ObjectExtensions
+	{
+		public static bool In<T>(this T value, params T[] values) => values.Contains(value);
+		public static bool In<T>(this T value, IEnumerable<T> values) => values.Contains(value);
 	}
 }

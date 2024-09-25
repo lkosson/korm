@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -56,14 +57,12 @@ namespace Kosson.KORM.ORM
 			return DB.CommandBuilder.Parameter(pname);
 		}
 
-		public IDBExpression Array<T>(T[] values)
+		public IDBExpression Array(IEnumerable values)
 		{
-			var pvalues = new IDBExpression[values.Length];
-			for (int i = 0; i < values.Length; i++)
-			{
-				pvalues[i] = Parameter(values[i]);
-			}
-			return DB.CommandBuilder.Array(pvalues);
+			var pvalues = new List<IDBExpression>();
+			foreach (var value in values)
+				pvalues.Add(Parameter(value));
+			return DB.CommandBuilder.Array(pvalues.ToArray());
 		}
 
 		public IDBIdentifier Field(string name)

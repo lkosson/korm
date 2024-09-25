@@ -436,6 +436,49 @@ namespace Kosson.KORM.Tests
 			Assert.IsTrue(retrieved.All(t => t.InlinedDirectly.DoubleInline.Value.StartsWith("AA")));
 		}
 
+		[TestMethod]
+		public void SelectLinqByContainsEnumerable()
+		{
+			var inserted = PrepareTestTables();
+			int[] values = [INTMARKER, INTMARKER + 1];
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => values.Contains(t.Value)).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreNotEqual(0, retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => values.Contains(t.Value)));
+		}
+
+		[TestMethod]
+		public void SelectLinqByContainsDirect()
+		{
+			var inserted = PrepareTestTables();
+			var values = new HashSet<int> { INTMARKER, INTMARKER + 1 };
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => values.Contains(t.Value)).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreNotEqual(0, retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => values.Contains(t.Value)));
+		}
+
+		[TestMethod]
+		public void SelectLinqByInArray()
+		{
+			var inserted = PrepareTestTables();
+			var values = new List<int> { INTMARKER, INTMARKER + 1 };
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.Value.In(values)).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreNotEqual(0, retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => t.Value.In(values)));
+		}
+
+		[TestMethod]
+		public void SelectLinqByInParams()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.Value.In(INTMARKER, INTMARKER + 1)).Execute();
+			Assert.IsNotNull(retrieved);
+			Assert.AreNotEqual(0, retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => t.Value == INTMARKER || t.Value == INTMARKER + 1));
+		}
+
 		[Table]
 		class LinqTestTable : Record
 		{
