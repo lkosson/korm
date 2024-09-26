@@ -1,6 +1,7 @@
 ﻿using Kosson.KORM;
 using Kosson.KORM.Backup;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
@@ -50,16 +51,25 @@ namespace Kosson.KORM.Scratch
 			orm.InsertAll(roles);
 			orm.InsertAll(us.Select(u => new Membership { Role = roles[u.ID % 2], User = u }));
 
+			orm.Get<User>(u => !String.IsNullOrEmpty(u.Name) && u.ID > 100);
+
 			var condsel0 = orm.Get<User>(u => DateTime.Now.DayOfWeek == DayOfWeek.Thursday ? 1 == 1 : 2 == 2);
 			var condsel1 = orm.Get<User>(u => u.Name == (DateTime.Now.DayOfWeek == DayOfWeek.Thursday ? null : "group1"));
 			var condsel2 = orm.Get<User>(u => DateTime.Now.DayOfWeek == DayOfWeek.Thursday ? u.Name == "user1" : u.Name == "group1");
 			var selected = orm.Select<Membership>().Select(m => new { m.ID, m.User.UserDetails.Group }).Execute();
 			var selectedid = orm.Select<Membership>().Select(m => m.ID).ExecuteFirst();
 
-			var y = new[] { 1, 2 };
-			var linqd = orm.Select<Membership>().Where(m => m.User.Name.StartsWith("user1")).Execute();
-			//var linqd = orm.Select<Membership>().Where(m => m.User.UserDetails.PasswordHash.StartsWith("123")).Execute();
-			//var linqd = orm.Select<Membership>().Where(m => 4m != y[1] + 3L || m.User.ID == DateTime.Now.AddDays(1).Ticks || m.CreationTime == null || (m.ID > 10 && m.User.UserDetails.Group.ID == x));
+			var x = 7;
+			var set = new HashSet<int> { 5, 3, 1 };
+			var arr = new long[]{ 5, 3, 1 };
+			var emparr = new long[0];
+			var setcond = orm.Select<Membership>().Where(m => set.Contains((int)m.ID) || m.ID == 5).Execute();
+			var arrcond = orm.Select<Membership>().Where(m => arr.Contains(m.ID) || m.ID == 5).Execute();
+			var incond = orm.Select<Membership>().Where(m => m.ID.In(1, 3, 5) || m.ID == 5).Execute();
+			var inempcond = orm.Select<Membership>().Where(m => m.ID.In(emparr) || m.ID == 5).Execute();
+			var startcond = orm.Select<Membership>().Where(m => m.User.Name.StartsWith("user1")).Execute();
+			var startcompcond = orm.Select<Membership>().Where(m => m.User.UserDetails.PasswordHash.StartsWith("123")).Execute();
+			var linqd = orm.Select<Membership>().Where(m => 4m != arr[1] + 3L || m.User.ID == DateTime.Now.AddDays(1).Ticks || m.CreationTime == null || (m.ID > 10 && m.User.UserDetails.Group.ID == x));
 
 			var joined = orm.Select<User>().Execute().Join(orm.Select<User>(), user => user.UserDetails.Group);
 
