@@ -396,5 +396,47 @@ namespace Kosson.KORM
 		/// <returns>Number of matching records</returns>
 		public static Task<int> CountAsync<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
 			=> orm.Select<T>().Where(where).ExecuteCountAsync();
+
+		/// <summary>
+		/// Checks whether there exist a record matching specified predicates.
+		/// </summary>
+		/// <typeparam name="T">Type of record to look for.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="predicates">Set of predicates determining which record to count.</param>
+		/// <returns>True if at least one record matches the condition.</returns>
+		public static bool Exists<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
+			=> orm.Select<T>().WhereAll(predicates).Select(e => e.ID).ExecuteFirst() > 0;
+
+		/// <summary>
+		/// Asynchronous version of Exists.
+		/// Checks whether there exist a record matching specified predicates.
+		/// </summary>
+		/// <typeparam name="T">Type of record to look for.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="predicates">Set of predicates determining which record to count.</param>
+		/// <returns>True if at least one record matches the condition.</returns>
+		public async static Task<bool> ExistsAsync<T>(this IORM orm, params Expression<Func<T, bool>>[] predicates) where T : class, IRecord, new()
+			=> (await orm.Select<T>().WhereAll(predicates).Select(e => e.ID).ExecuteFirstAsync()) > 0;
+
+		/// <summary>
+		/// Checks whether there exist a record matching specified SQL condition.
+		/// </summary>
+		/// <typeparam name="T">Type of record to look for.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="where">Expression to use as WHERE clause in SQL SELECT command.</param>
+		/// <returns>True if at least one record matches the condition.</returns>
+		public static bool Exists<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
+			=> orm.Select<T>().Where(where).Select(e => e.ID).ExecuteFirst() > 0;
+
+		/// <summary>
+		/// Asynchronous version of Exists.
+		/// Checks whether there exist a record matching specified SQL condition.
+		/// </summary>
+		/// <typeparam name="T">Type of record to look for.</typeparam>
+		/// <param name="orm">ORM instance.</param>
+		/// <param name="where">Expression to use as WHERE clause in SQL SELECT command.</param>
+		/// <returns>True if at least one record matches the condition.</returns>
+		public async static Task<bool> ExistsAsync<T>(this IORM orm, FormattableString where) where T : class, IRecord, new()
+			=> (await orm.Select<T>().Where(where).Select(e => e.ID).ExecuteFirstAsync()) > 0;
 	}
 }
