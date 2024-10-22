@@ -63,7 +63,9 @@ namespace Kosson.KORM.Scratch
 			var set = new HashSet<int> { 5, 3, 1 };
 			var arr = new long[]{ 5, 3, 1 };
 			var emparr = new long[0];
+			long[] nullarr = null;
 			var e = orm.Exists<Membership>(m => m.User.ID == 100);
+			var nullcond = orm.Select<Membership>().Where(m => nullarr == null || nullarr.Contains(m.ID)).Execute();
 			var setcond = orm.Select<Membership>().Where(m => set.Contains((int)m.ID) || m.ID == 5).Execute();
 			var arrcond = orm.Select<Membership>().Where(m => arr.Contains(m.ID) || m.ID == 5).Execute();
 			var incond = orm.Select<Membership>().Where(m => m.ID.In(1, 3, 5) || m.ID == 5).Execute();
