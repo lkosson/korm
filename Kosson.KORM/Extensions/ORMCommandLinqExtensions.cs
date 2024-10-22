@@ -173,14 +173,17 @@ namespace Kosson.KORM
 			{
 				if (method.Name == nameof(String.StartsWith) && arguments.Count == 1)
 				{
+					if (arguments[0] == null) return false;
 					if (arguments[0] is string stringArgument) return query.DB.CommandBuilder.Comparison(targetExpression, DBExpressionComparison.Like, query.Parameter(stringArgument + "%"));
 				}
 				else if (method.Name == nameof(String.EndsWith) && arguments.Count == 1)
 				{
+					if (arguments[0] == null) return false;
 					if (arguments[0] is string stringArgument) return query.DB.CommandBuilder.Comparison(targetExpression, DBExpressionComparison.Like, query.Parameter("%" + stringArgument));
 				}
 				else if (method.Name == nameof(String.Contains) && arguments.Count == 1)
 				{
+					if (arguments[0] == null) return false;
 					if (arguments[0] is string stringArgument) return query.DB.CommandBuilder.Comparison(targetExpression, DBExpressionComparison.Like, query.Parameter("%" + stringArgument + "%"));
 				}
 				else if (method.Name == nameof(String.IsNullOrEmpty))
@@ -192,6 +195,7 @@ namespace Kosson.KORM
 			}
 			else if (method.Name == nameof(Enumerable.Contains))
 			{
+				if (arguments[0] == null) return false;
 				if (arguments[0] is IEnumerable enumerable)
 				{
 					if (!enumerable.OfType<object>().Any()) return false;
@@ -200,6 +204,7 @@ namespace Kosson.KORM
 			}
 			else if (method.DeclaringType == typeof(ObjectExtensions) && method.Name == nameof(ObjectExtensions.In))
 			{
+				if (arguments[0] == null) return false;
 				if (arguments[0] is IEnumerable enumerable)
 				{
 					if (!enumerable.OfType<object>().Any()) return false;
