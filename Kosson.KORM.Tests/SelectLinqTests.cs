@@ -369,12 +369,26 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void SelectLinqByAlternativeShortCircuits()
+		{
+			var sql = ORM.Select<LinqTestTable>().Where(t => DateTime.Now.Year > 2000 || t.Value == INTMARKER).ToString();
+			Assert.IsFalse(sql.Contains("WHERE", StringComparison.InvariantCultureIgnoreCase));
+		}
+
+		[TestMethod]
 		public void SelectLinqByConjunction()
 		{
 			var inserted = PrepareTestTables();
 			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.Value == INTMARKER && t.Value == INTMARKER + 2).Execute();
 			Assert.IsNotNull(retrieved);
 			Assert.AreEqual(0, retrieved.Count);
+		}
+
+		[TestMethod]
+		public void SelectLinqByConjunctionShortCircuits()
+		{
+			var sql = ORM.Select<LinqTestTable>().Where(t => DateTime.Now.Year < 2000 && t.NullableValue == INTMARKER).ToString();
+			Assert.IsTrue(sql.Contains(DB.CommandBuilder.Const(false).ToString(), StringComparison.InvariantCultureIgnoreCase));
 		}
 
 		[TestMethod]
