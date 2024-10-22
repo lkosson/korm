@@ -84,7 +84,7 @@ namespace Kosson.KORM
 				else if (binaryExpression.NodeType == ExpressionType.LessThan && left is IComparable leftComparableLT) return leftComparableLT.CompareTo(right) < 0;
 				else if (binaryExpression.NodeType == ExpressionType.LessThanOrEqual && left is IComparable leftComparableLTE) return leftComparableLTE.CompareTo(right) <= 0;
 				else if (binaryExpression.NodeType == ExpressionType.AndAlso && left is bool leftBoolAnd && right is bool rightBoolAnd) return leftBoolAnd && rightBoolAnd;
-				else if (binaryExpression.NodeType == ExpressionType.OrElse && left is bool leftBoolOr && right is bool rightBoolOr) return leftBoolOr && rightBoolOr;
+				else if (binaryExpression.NodeType == ExpressionType.OrElse && left is bool leftBoolOr && right is bool rightBoolOr) return leftBoolOr || rightBoolOr;
 				else if (binaryExpression.NodeType == ExpressionType.Add && left is int leftIntAdd && right is int rightIntAdd) return leftIntAdd + rightIntAdd;
 				else if (binaryExpression.NodeType == ExpressionType.Add && left is long leftLongAdd && right is long rightLongAdd) return leftLongAdd + rightLongAdd;
 				else if (binaryExpression.NodeType == ExpressionType.Add && left is decimal leftDecAdd && right is decimal rightDecAdd) return leftDecAdd + rightDecAdd;
