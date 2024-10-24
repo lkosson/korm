@@ -376,6 +376,13 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void SelectLinqByAlternativeShortCircuitsEarly()
+		{
+			object match = null;
+			ORM.Select<LinqTestTable>().Where(t => match == null || match.ToString() == "").Execute();
+		}
+
+		[TestMethod]
 		public void SelectLinqByConjunction()
 		{
 			var inserted = PrepareTestTables();
@@ -389,6 +396,13 @@ namespace Kosson.KORM.Tests
 		{
 			var sql = ORM.Select<LinqTestTable>().Where(t => DateTime.Now.Year < 2000 && t.NullableValue == INTMARKER).ToString();
 			Assert.IsTrue(sql.Contains(DB.CommandBuilder.Const(false).ToString(), StringComparison.InvariantCultureIgnoreCase));
+		}
+
+		[TestMethod]
+		public void SelectLinqByConjunctionShortCircuitsEarly()
+		{
+			object match = null;
+			ORM.Select<LinqTestTable>().Where(t => match != null && match.ToString() != "").Execute();
 		}
 
 		[TestMethod]

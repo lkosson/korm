@@ -70,9 +70,12 @@ namespace Kosson.KORM
 			where TRecord : IRecord
 		{
 			var left = ProcessExpression(query, binaryExpression.Left);
-			var right = ProcessExpression(query, binaryExpression.Right);
-
 			var leftFinal = IsFinal(left);
+
+			if (leftFinal && binaryExpression.NodeType == ExpressionType.AndAlso && left is bool leftBoolAndShortCircuit && !leftBoolAndShortCircuit) return false;
+			if (leftFinal && binaryExpression.NodeType == ExpressionType.OrElse && left is bool leftBoolOrShortCircuit && leftBoolOrShortCircuit) return true;
+
+			var right = ProcessExpression(query, binaryExpression.Right);
 			var rightFinal = IsFinal(right);
 
 			if (leftFinal && rightFinal)
