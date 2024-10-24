@@ -110,12 +110,14 @@ namespace Kosson.KORM
 			{
 				if (binaryExpression.NodeType == ExpressionType.OrElse && left is bool leftBoolOr) return leftBoolOr ? true : rightDbExpr;
 				if (binaryExpression.NodeType == ExpressionType.AndAlso && left is bool leftBoolAnd) return leftBoolAnd ? rightDbExpr : false;
+				if (binaryExpression.NodeType == ExpressionType.Equal && left is bool leftBoolEqual) return leftBoolEqual ? rightDbExpr : query.DB.CommandBuilder.UnaryExpression(rightDbExpr, DBUnaryOperator.Not);
 			}
 
 			if (rightFinal)
 			{
 				if (binaryExpression.NodeType == ExpressionType.OrElse && right is bool rightBoolOr) return rightBoolOr ? true : leftDbExpr;
 				if (binaryExpression.NodeType == ExpressionType.AndAlso && right is bool rightBoolAnd) return rightBoolAnd ? leftDbExpr : false;
+				if (binaryExpression.NodeType == ExpressionType.Equal && right is bool rightBoolEqual) return rightBoolEqual ? leftDbExpr : query.DB.CommandBuilder.UnaryExpression(leftDbExpr, DBUnaryOperator.Not);
 			}
 
 			if (binaryExpression.NodeType == ExpressionType.Equal) return query.DB.CommandBuilder.Comparison(leftDbExpr, DBExpressionComparison.Equal, right == null ? null : rightDbExpr);

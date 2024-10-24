@@ -121,6 +121,25 @@ namespace Kosson.KORM.Tests
 		}
 
 		[TestMethod]
+		public void SelectLinqByComparedBoolean()
+		{
+			var inserted = PrepareTestTables();
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.DirectBoolean == true).Execute();
+			Assert.AreEqual(inserted.Count(t => t.DirectBoolean), retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => t.DirectBoolean));
+		}
+
+		[TestMethod]
+		public void SelectLinqByComparedNegativeBoolean()
+		{
+			var inserted = PrepareTestTables();
+			var value = (bool?)false;
+			var retrieved = ORM.Select<LinqTestTable>().Where(t => t.DirectBoolean == value).Execute();
+			Assert.AreEqual(inserted.Count(t => !t.DirectBoolean), retrieved.Count);
+			Assert.IsTrue(retrieved.All(t => !t.DirectBoolean));
+		}
+
+		[TestMethod]
 		public void SelectLinqByNull()
 		{
 			var inserted = PrepareTestTables();
