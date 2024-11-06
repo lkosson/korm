@@ -169,6 +169,7 @@ namespace Kosson.KORM.Meta
 			IsForeignKey = false;
 			IsColumn = false;
 			IsFromDB = true;
+			DBType = ResolveDBType(Type);
 			SubqueryBuilder = subquery.Build;
 		}
 

@@ -14,6 +14,7 @@ namespace Kosson.KORM.Tests
 			yield return typeof(Record16Table);
 			yield return typeof(Record16ReferencingTable);
 			yield return typeof(Record16RefReferencingTable);
+			yield return typeof(Record16SubqueryRefTable);
 		}
 
 		[TestMethod]
@@ -86,6 +87,18 @@ namespace Kosson.KORM.Tests
 			var record = new Record16Table();
 			((IRecord)record).ID = (long)Int16.MaxValue + 1;
 		}
+
+		[TestMethod]
+		public void Record16SubqueryRecordRefResolvesType()
+		{
+			var record1 = new Record16Table { Value = INTMARKER };
+			ORM.Store(record1);
+			var record2 = new Record16RefReferencingTable { Record16 = record1 };
+			ORM.Store(record2);
+			var record3 = new Record16SubqueryRefTable { RefForSubquery = record2 };
+			ORM.Store(record3);
+			ORM.Get(record3.Ref());
+		}
 	}
 
 	[Table]
@@ -109,5 +122,16 @@ namespace Kosson.KORM.Tests
 		[ForeignKey.Cascade]
 		[Column]
 		public Record16Table Record16 { get; set; }
+	}
+
+	[Table]
+	class Record16SubqueryRefTable : Record
+	{
+		[ForeignKey.Cascade]
+		[Column]
+		public RecordRef<Record16RefReferencingTable> RefForSubquery { get; set; }
+
+		[Subquery.First(typeof(Record16RefReferencingTable), nameof(Record16RefReferencingTable.Record16), nameof(Record16RefReferencingTable.ID), nameof(RefForSubquery))]
+		public RecordRef<Record16Table> Record16 { get; set; }
 	}
 }

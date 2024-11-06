@@ -14,6 +14,7 @@ namespace Kosson.KORM.Tests
 			yield return typeof(Record32Table);
 			yield return typeof(Record32ReferencingTable);
 			yield return typeof(Record32RefReferencingTable);
+			yield return typeof(Record32SubqueryRefTable);
 		}
 
 		[TestMethod]
@@ -86,6 +87,18 @@ namespace Kosson.KORM.Tests
 			var record = new Record32Table();
 			((IRecord)record).ID = (long)Int32.MaxValue + 1;
 		}
+
+		[TestMethod]
+		public void Record32SubqueryRecordRefResolvesType()
+		{
+			var record1 = new Record32Table { Value = INTMARKER };
+			ORM.Store(record1);
+			var record2 = new Record32RefReferencingTable { Record32 = record1 };
+			ORM.Store(record2);
+			var record3 = new Record32SubqueryRefTable { RefForSubquery = record2 };
+			ORM.Store(record3);
+			ORM.Get(record3.Ref());
+		}
 	}
 
 	[Table]
@@ -109,5 +122,16 @@ namespace Kosson.KORM.Tests
 		[ForeignKey.Cascade]
 		[Column]
 		public Record32Table Record32 { get; set; }
+	}
+
+	[Table]
+	class Record32SubqueryRefTable : Record
+	{
+		[ForeignKey.Cascade]
+		[Column]
+		public RecordRef<Record32RefReferencingTable> RefForSubquery { get; set; }
+
+		[Subquery.First(typeof(Record32RefReferencingTable), nameof(Record32RefReferencingTable.Record32), nameof(Record32RefReferencingTable.ID), nameof(RefForSubquery))]
+		public RecordRef<Record32Table> Record32 { get; set; }
 	}
 }

@@ -14,6 +14,7 @@ namespace Kosson.KORM.Tests
 			yield return typeof(Record8Table);
 			yield return typeof(Record8ReferencingTable);
 			yield return typeof(Record8RefReferencingTable);
+			yield return typeof(Record8SubqueryRefTable);
 		}
 
 		[TestMethod]
@@ -86,6 +87,18 @@ namespace Kosson.KORM.Tests
 			var record = new Record8Table();
 			((IRecord)record).ID = (long)Byte.MaxValue + 1;
 		}
+
+		[TestMethod]
+		public void Record8SubqueryRecordRefResolvesType()
+		{
+			var record1 = new Record8Table { Value = INTMARKER };
+			ORM.Store(record1);
+			var record2 = new Record8RefReferencingTable { Record8 = record1 };
+			ORM.Store(record2);
+			var record3 = new Record8SubqueryRefTable { RefForSubquery = record2 };
+			ORM.Store(record3);
+			ORM.Get(record3.Ref());
+		}
 	}
 
 	[Table]
@@ -109,5 +122,16 @@ namespace Kosson.KORM.Tests
 		[ForeignKey.Cascade]
 		[Column]
 		public Record8Table Record8 { get; set; }
+	}
+
+	[Table]
+	class Record8SubqueryRefTable : Record
+	{
+		[ForeignKey.Cascade]
+		[Column]
+		public RecordRef<Record8RefReferencingTable> RefForSubquery { get; set; }
+
+		[Subquery.First(typeof(Record8RefReferencingTable), nameof(Record8RefReferencingTable.Record8), nameof(Record8RefReferencingTable.ID), nameof(RefForSubquery))]
+		public RecordRef<Record8Table> Record8 { get; set; }
 	}
 }
