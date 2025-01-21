@@ -21,7 +21,7 @@ namespace Kosson.KORM
 		/// <param name="condition">SQL WHERE condition.</param>
 		/// <param name="values">Query parameter values.</param>
 		/// <returns>Original command with comparison added to it.</returns>
-		public static TCommand WhereRaw<TCommand>(this TCommand query, string condition, params object[] values)
+		public static TCommand WhereRaw<TCommand>(this TCommand query, string condition, params object?[] values)
 			where TCommand : IORMNarrowableCommand<TCommand>
 		{
 			var cb = query.DB.CommandBuilder;
@@ -67,7 +67,7 @@ namespace Kosson.KORM
 		/// <param name="condition">SQL WHERE condition.</param>
 		/// <param name="values">Query parameter values.</param>
 		/// <returns>Original command with comparison added to it.</returns>
-		public static TCommand WhereField<TCommand>(this TCommand query, string field, string condition, params object[] values)
+		public static TCommand WhereField<TCommand>(this TCommand query, string field, string condition, params object?[] values)
 			where TCommand : IORMNarrowableCommand<TCommand>
 		{
 			var cb = query.DB.CommandBuilder;
@@ -91,7 +91,7 @@ namespace Kosson.KORM
 		/// <param name="comparison">Comparison type.</param>
 		/// <param name="value">Constant value for right side of the comparison.</param>
 		/// <returns>Original command with comparison added to it.</returns>
-		public static TCommand WhereField<TCommand>(this TCommand query, string field, DBExpressionComparison comparison, object value)
+		public static TCommand WhereField<TCommand>(this TCommand query, string field, DBExpressionComparison comparison, object? value)
 			where TCommand : IORMNarrowableCommand<TCommand>
 		{
 			var cb = query.DB.CommandBuilder;
@@ -108,7 +108,7 @@ namespace Kosson.KORM
 		/// <param name="field">Column or property name for left side of the comparison.</param>
 		/// <param name="value">Constant value for right side of the comparison.</param>
 		/// <returns>Original command with comparison added to it.</returns>
-		public static TCommand WhereFieldEquals<TCommand>(this TCommand query, string field, object value)
+		public static TCommand WhereFieldEquals<TCommand>(this TCommand query, string field, object? value)
 			where TCommand : IORMNarrowableCommand<TCommand>
 			=> WhereField(query, field, DBExpressionComparison.Equal, value);
 
