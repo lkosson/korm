@@ -113,6 +113,18 @@ namespace Kosson.KORM
 			=> WhereField(query, field, DBExpressionComparison.Equal, value);
 
 		/// <summary>
+		/// Adds to the command a WHERE condition testing whether given column/property matches provided constant pattern. Condition is joined with existing conditions by AND.
+		/// </summary>
+		/// <typeparam name="TCommand">Type of command to add condition to.</typeparam>
+		/// <param name="query">Command or query to add comparison to.</param>
+		/// <param name="field">Column or property name for left side of the comparison.</param>
+		/// <param name="value">Constant pattern to check for. Use '_' for matching one character, '%' for matching any number of characters and '[abc]' for matching one of provided characters.</param>
+		/// <returns>Original command with comparison added to it.</returns>
+		public static TCommand WhereFieldLike<TCommand>(this TCommand query, string field, string value)
+			where TCommand : IORMNarrowableCommand<TCommand>
+			=> WhereField(query, field, DBExpressionComparison.Like, value);
+
+		/// <summary>
 		/// Adds WHERE condition testing if given set contains value of column/property. Condition is joined with existing conditions by AND.
 		/// </summary>
 		/// <typeparam name="TCommand">Type of command to add condition to.</typeparam>
