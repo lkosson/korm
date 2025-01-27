@@ -47,6 +47,50 @@ namespace Kosson.KORM
 			return query;
 		}
 
+		/// <summary>
+		/// Appends ORDER BY clause to the command based on provided LINQ expression.
+		/// </summary>
+		/// <typeparam name="TCommand">Type of command.</typeparam>
+		/// <typeparam name="TRecord">Type of record returned by the command.</typeparam>
+		/// <param name="query">Query to append ORDER BY clause to.</param>
+		/// <param name="expression">Expression selecting a single property or anonymous type containing properties to use as columns in ORDER BY clause.</param>
+		/// <returns>Original command with ORDER BY clause added to it.</returns>
+		public static IORMSelect<TRecord> OrderBy<TRecord>(this IORMSelect<TRecord> query, Expression<Func<TRecord, object>> expression)
+			where TRecord : IRecord
+			=> ProcessExpression(query, expression.Body) switch
+			{
+				IDBExpression dbExpression => query.OrderBy(dbExpression),
+				object[] expressions => ApplyOrderBy(query, expressions, false),
+				var other => throw new NotSupportedException("Unsupported expression result \"" + other + "\".")
+			};
+
+		/// <summary>
+		/// Appends ORDER BY clause with DESC suffix to the command based on provided LINQ expression.
+		/// </summary>
+		/// <typeparam name="TCommand">Type of command.</typeparam>
+		/// <typeparam name="TRecord">Type of record returned by the command.</typeparam>
+		/// <param name="query">Query to append ORDER BY clause to.</param>
+		/// <param name="expression">Expression selecting a single property or anonymous type containing properties to use as columns in ORDER BY clause.</param>
+		/// <returns>Original command with ORDER BY clause added to it.</returns>
+		public static IORMSelect<TRecord> OrderByDescending<TRecord>(this IORMSelect<TRecord> query, Expression<Func<TRecord, object>> expression)
+			where TRecord : IRecord
+			=> ProcessExpression(query, expression.Body) switch
+			{
+				IDBExpression dbExpression => query.OrderBy(dbExpression, descending: true),
+				object[] expressions => ApplyOrderBy(query, expressions, true),
+				var other => throw new NotSupportedException("Unsupported expression result \"" + other + "\".")
+			};
+
+		private static IORMSelect<TRecord> ApplyOrderBy<TRecord>(IORMSelect<TRecord> query, object[] expressions, bool descending)
+			where TRecord : IRecord
+		{
+			var result = query;
+			foreach (var expression in expressions)
+				if (expression is IDBExpression dbExpression) result = result.OrderBy(dbExpression, descending);
+				else throw new NotSupportedException("Unsupported expression \"" + expression + "\".");
+			return result;
+		}
+
 		private static object? ProcessExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, Expression expression)
 			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
 			where TRecord : IRecord
@@ -60,6 +104,7 @@ namespace Kosson.KORM
 				UnaryExpression unaryExpression => ProcessUnaryExpression(query, unaryExpression),
 				MemberExpression memberExpression => ProcessMemberExpression(query, memberExpression),
 				ParameterExpression parameterExpression => ProcessParameterExpression(query, parameterExpression),
+				NewExpression newExpression => ProcessNewExpression(query, newExpression),
 				_ => throw new ArgumentOutOfRangeException(nameof(expression), expression, "Unsupported expression: " + expression)
 			};
 
@@ -230,6 +275,16 @@ namespace Kosson.KORM
 			var array = new object?[newArrayExpression.Expressions.Count];
 			for (int i = 0; i < array.Length; i++)
 				array[i] = ProcessExpression(query, newArrayExpression.Expressions[i]);
+			return array;
+		}
+
+		private static object? ProcessNewExpression<TCommand, TRecord>(IORMNarrowableCommand<TCommand, TRecord> query, NewExpression newExpression)
+			where TCommand : IORMNarrowableCommand<TCommand, TRecord>
+			where TRecord : IRecord
+		{
+			var array = new object?[newExpression.Arguments.Count];
+			for (int i = 0; i < array.Length; i++)
+				array[i] = ProcessExpression(query, newExpression.Arguments[i]);
 			return array;
 		}
 

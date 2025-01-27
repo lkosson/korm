@@ -58,6 +58,7 @@ namespace Kosson.KORM.Scratch
 			var condsel2 = orm.Get<User>(u => DateTime.Now.DayOfWeek == DayOfWeek.Thursday ? u.Name == "user1" : u.Name == "group1");
 			var selected = orm.Select<Membership>().Select(m => new { m.ID, m.User.UserDetails.Group }).Execute();
 			var selectedid = orm.Select<Membership>().Select(m => m.ID).ExecuteFirst();
+			var selectord = orm.Select<User>().OrderByDescending(u => new { u.UserDetails.Group.ID, u.Name}).Execute();
 
 			var x = 7;
 			var set = new HashSet<int> { 5, 3, 1 };
